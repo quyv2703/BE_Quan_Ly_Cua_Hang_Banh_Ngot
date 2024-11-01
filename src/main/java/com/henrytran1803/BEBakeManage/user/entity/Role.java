@@ -1,4 +1,4 @@
-package com.henrytran1803.BEBakeManage.user.model;
+package com.henrytran1803.BEBakeManage.user.entity;
 
 import jakarta.persistence.*;
 
@@ -36,7 +36,6 @@ public class Role {
     public String getName() {
         return name;
     }
-
     public Set<User> getUsers() {
         return users;
     }

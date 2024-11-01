@@ -1,23 +1,21 @@
 package com.henrytran1803.BEBakeManage.user.controller;
-import com.henrytran1803.BEBakeManage.common.error.ErrorCode;
+import com.henrytran1803.BEBakeManage.common.exception.error.ErrorCode;
 import com.henrytran1803.BEBakeManage.common.response.ApiResponse;
 import com.henrytran1803.BEBakeManage.common.response.LoginResponse;
 import com.henrytran1803.BEBakeManage.user.dto.LoginRequest;
 import com.henrytran1803.BEBakeManage.user.dto.RegisterRequest;
 import com.henrytran1803.BEBakeManage.user.service.AuthService;
+import com.henrytran1803.BEBakeManage.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Collections;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-
     @Autowired
     private AuthService authService;
-
+    @Autowired
+    private UserService userService;
     @PostMapping("/login")
     public ApiResponse<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
         try {
@@ -25,7 +23,7 @@ public class AuthController {
             LoginResponse data = new LoginResponse(token);
             return ApiResponse.success(data);
         } catch (Exception e) {
-            return new ApiResponse<>(false, ErrorCode.USER_NOT_FOUND.getMessage(),ErrorCode.USER_NOT_FOUND.getCode(),null);
+            return new ApiResponse<>(false, e.getMessage(),ErrorCode.USER_NOT_FOUND.getCode(),null);
         }
     }
     @PostMapping("/register")
@@ -38,4 +36,5 @@ public class AuthController {
                 registerRequest.getPassword()
         );
     }
+
 }

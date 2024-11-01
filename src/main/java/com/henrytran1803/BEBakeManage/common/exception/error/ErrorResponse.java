@@ -1,4 +1,4 @@
-package com.henrytran1803.BEBakeManage.common.error;
+package com.henrytran1803.BEBakeManage.common.exception.error;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ErrorResponse {
-    private int code;
+    private String code;
     private String message;
 }

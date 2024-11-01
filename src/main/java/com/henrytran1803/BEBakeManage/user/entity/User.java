@@ -1,4 +1,4 @@
-package com.henrytran1803.BEBakeManage.user.model;
+package com.henrytran1803.BEBakeManage.user.entity;
 
 import jakarta.persistence.*;
 import java.util.Date;
@@ -63,11 +63,12 @@ public class User {
     @Column(name = "isactive")
     private Boolean isActive;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER) // Đảm bảo rằng vai trò được tải sẵn
     @JoinTable(name = "role_user",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
+
     public Set<Role> getRoles() {
         return roles;
     }
