@@ -1,10 +1,10 @@
 mysql:
-	docker run --name mysql-socialhealth -e MYSQL_ROOT_PASSWORD=18032002 -p 3306:3306 -d mysql:8.0
+	docker run --name mysql-bemanagebake -e MYSQL_ROOT_PASSWORD=18032002 -p 3306:3306 -d mysql:8.0
 dropmysql:
-	docker stop mysql-socialhealth && docker rm mysql-socialhealth
+	docker stop mysql-bemanagebake && docker rm mysql-bemanagebake
 createdb:
-	docker exec -it mysql-socialhealth mysql -u root -p'18032002' -e "CREATE DATABASE socialhealth;"
+	docker exec -it mysql-bemanagebake mysql -u root -p'18032002' -e "CREATE DATABASE bemanagebake;"
 dropdb:
-	docker exec -it mysql-socialhealth mysql -u root -p'18032002' -e "DROP DATABASE socialhealth;"
+	docker exec -it mysql-bemanagebake mysql -u root -p'18032002' -e "DROP DATABASE bemanagebake;"
 
 .PHONY: mysql dropmysql  createdb dropdb
