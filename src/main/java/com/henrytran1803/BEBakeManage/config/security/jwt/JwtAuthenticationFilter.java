@@ -1,4 +1,4 @@
-package com.henrytran1803.BEBakeManage.security.jwt;
+package com.henrytran1803.BEBakeManage.config.security.jwt;
 import com.henrytran1803.BEBakeManage.common.util.JwtUtils;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;

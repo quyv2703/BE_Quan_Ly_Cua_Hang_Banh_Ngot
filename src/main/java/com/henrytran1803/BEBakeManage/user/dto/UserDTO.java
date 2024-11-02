@@ -9,13 +9,11 @@ public class UserDTO {
     private int id;
     private String email;
     private Set<String> roles;
-
-    public UserDTO(int id, String email, Set<Role> roles) {
+    public UserDTO(int id, String email, Set<String> roles) {
         this.id = id;
         this.email = email;
-        this.roles = roles.stream()
-                .map(Role::getName) // Lấy tên vai trò
-                .collect(Collectors.toSet());
+        this.roles = roles;
+
     }
 
     public void setId(int id) {
@@ -41,6 +39,4 @@ public class UserDTO {
     public Set<String> getRoles() {
         return roles;
     }
-// Getters and Setters
-    // ...
 }

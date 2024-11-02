@@ -8,10 +8,8 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-
 import javax.sql.DataSource;
 import java.util.HashMap;
-
 @Configuration
 @EnableTransactionManagement
 public class JpaConfig {
@@ -21,11 +19,10 @@ public class JpaConfig {
         return new EntityManagerFactoryBuilder(
                 new HibernateJpaVendorAdapter(), new HashMap<>(), null)
                 .dataSource(dataSource)
-                .packages("com.henrytran1803.BEBakeManage.user.entity","com.henrytran1803.BEBakeManage.category.entity","com.henrytran1803.BEBakeManage.recipe.entity")
+                .packages("com.henrytran1803.BEBakeManage.user.entity","com.henrytran1803.BEBakeManage.category.entity","com.henrytran1803.BEBakeManage.recipe.entity","com.henrytran1803.BEBakeManage.product.entity","com.henrytran1803.BEBakeManage.promotion.entity")
                 .persistenceUnit("roleBasedPU")
                 .build();
     }
-
     @Bean
     public PlatformTransactionManager transactionManager(
             @Qualifier("entityManagerFactory") LocalContainerEntityManagerFactoryBean entityManagerFactory) {

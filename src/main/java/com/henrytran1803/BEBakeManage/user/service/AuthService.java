@@ -1,9 +1,12 @@
 package com.henrytran1803.BEBakeManage.user.service;
 
 import com.henrytran1803.BEBakeManage.common.util.JwtUtils;
+import com.henrytran1803.BEBakeManage.user.dto.LoginResponse;
+import com.henrytran1803.BEBakeManage.user.dto.UserDTO;
 import com.henrytran1803.BEBakeManage.user.entity.User;
 import com.henrytran1803.BEBakeManage.user.entity.Role;
 import com.henrytran1803.BEBakeManage.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,7 +15,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,24 +33,25 @@ private  UserRepository userRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
-    public String login(String email, String password) {
+    @Transactional
+    public LoginResponse login(String email, String password) {
         try {
-            Optional<User> user = userRepository.findByEmail(email);
-            System.out.println(user);
-            System.out.println("Email: " + email);
-            System.out.println("Password: " + password);
+            Optional<User> userOptional = userRepository.findByEmail(email);
+            if (userOptional.isPresent()) {
+                User user = userOptional.get();
 
-            if (user.isPresent()) {
                 Authentication authentication = authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(email, password));
-
-                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
-                String roles = String.join(",", user.get().getRoles().stream()
+                        new UsernamePasswordAuthenticationToken(email, password)
+                );
+                Set<String> roles = user.getRoles().stream()
                         .map(Role::getName)
-                        .collect(Collectors.toList()));
-                return jwtUtils.generateJwtToken(user.get().getId(), roles);
+                        .collect(Collectors.toSet());
+
+                String token = jwtUtils.generateJwtToken(user.getId(), String.join(",", roles));
+
+                UserDTO userDTO = new UserDTO(user.getId(), user.getEmail(), roles);
+
+                return new LoginResponse(userDTO, token);
             } else {
                 throw new RuntimeException("User not found");
             }
