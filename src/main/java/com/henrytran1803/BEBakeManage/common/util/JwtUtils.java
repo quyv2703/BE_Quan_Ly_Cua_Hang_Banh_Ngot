@@ -1,5 +1,6 @@
 package com.henrytran1803.BEBakeManage.common.util;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.stereotype.Component;
@@ -25,4 +26,20 @@ public class JwtUtils {
                 .signWith(SignatureAlgorithm.HS256, jwtSecret)
                 .compact();
     }
+    public boolean validateJwtToken(String authToken) {
+        try {
+            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public Claims parseJwtToken(String token) {
+        return Jwts.parser()
+                .setSigningKey(jwtSecret)
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
 }

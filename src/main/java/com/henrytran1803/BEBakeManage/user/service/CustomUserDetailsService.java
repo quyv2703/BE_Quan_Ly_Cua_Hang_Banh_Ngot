@@ -1,6 +1,6 @@
 package com.henrytran1803.BEBakeManage.user.service;
 
-import com.henrytran1803.BEBakeManage.user.model.User;
+import com.henrytran1803.BEBakeManage.user.entity.User;
 import com.henrytran1803.BEBakeManage.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
