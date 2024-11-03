@@ -4,6 +4,8 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 public class CreateProductDTO {
@@ -20,6 +22,11 @@ public class CreateProductDTO {
     @NotBlank(message = "Description is required")
     @Size(max = 250, message = "Description must not exceed 250 characters")
     private String description;
+
+
+    @NotNull(message = "shelfLifeDays is required")
+    @Min(value = 0, message = "shelfLifeDays must be greater than 0")
+    private int shelfLifeDays;
 
     @NotNull(message = "Weight is required")
     @Min(value = 0, message = "Weight must be greater than 0")
@@ -43,4 +50,7 @@ public class CreateProductDTO {
 
     @NotNull(message = "Recipe ID is required")
     private Integer recipeId;
+
+    @NotNull(message = "Image URLs are required")
+    private List<String> imageUrls; // Danh sách URL cho ảnh
 }

@@ -33,5 +33,5 @@ public class CreatePromotionDTO {
     private LocalDateTime endDate;
 
     @NotEmpty(message = "Product IDs list cannot be empty")
-    private List<@NotNull(message = "Product ID cannot be null") Integer> productIds;
+    private List<@NotNull(message = "Product ID cannot be null") Integer> productBatchIds;
 }

@@ -2,11 +2,13 @@ package com.henrytran1803.BEBakeManage.promotion.service;
 
 import com.henrytran1803.BEBakeManage.common.exception.error.ErrorCode;
 import com.henrytran1803.BEBakeManage.product.entity.Product;
+import com.henrytran1803.BEBakeManage.product.entity.ProductBatch;
 import com.henrytran1803.BEBakeManage.promotion.dto.CreatePromotionDTO;
 import com.henrytran1803.BEBakeManage.promotion.dto.UpdatePromotionDTO;
 import com.henrytran1803.BEBakeManage.promotion.entity.Promotion;
 import com.henrytran1803.BEBakeManage.promotion.entity.PromotionDetail;
 import com.henrytran1803.BEBakeManage.promotion.entity.PromotionDetailId;
+import com.henrytran1803.BEBakeManage.promotion.repository.ProductBatchRepository;
 import com.henrytran1803.BEBakeManage.promotion.repository.PromotionDetailRepository;
 import com.henrytran1803.BEBakeManage.promotion.repository.PromotionRepository;
 import com.henrytran1803.BEBakeManage.product.repository.ProductRepository;
@@ -34,7 +36,8 @@ public class PromotionServiceImpl implements PromotionService {
 
     @Autowired
     private ProductRepository productRepository;
-
+    @Autowired
+    private ProductBatchRepository productBatchRepository;
     @Override
     @Transactional
     public Promotion createPromotion(CreatePromotionDTO createPromotionDTO) throws Exception {
@@ -50,15 +53,15 @@ public class PromotionServiceImpl implements PromotionService {
         promotion.setEndDate(createPromotionDTO.getEndDate());
         promotion.setCreatedAt(LocalDateTime.now());
         promotionRepository.save(promotion);
-        for (Integer productId : createPromotionDTO.getProductIds()) {
-            productRepository.findById(productId).ifPresentOrElse(product -> {
+        for (Integer productBatchId : createPromotionDTO.getProductBatchIds()) {
+            productBatchRepository.findById(productBatchId).ifPresentOrElse(productBatch -> {
                 PromotionDetail detail = new PromotionDetail();
-                detail.setId(new PromotionDetailId(promotion.getId(), productId));
+                detail.setId(new PromotionDetailId(promotion.getId(), productBatchId));
                 detail.setPromotion(promotion);
-                detail.setProduct(product);
+                detail.setProductBatch(productBatch);
                 promotionDetailRepository.save(detail);
             }, () -> {
-                throw new RuntimeException("Product with ID " + productId + " not found");
+                throw new RuntimeException("Product with ID " + productBatchId + " not found");
             });
         }
         return promotion;
@@ -73,7 +76,6 @@ public class PromotionServiceImpl implements PromotionService {
             return promotion;
         }).orElseThrow(() -> new Exception("Promotion not found with ID: " + promotionId)));
     }
-
     @Override
     @Transactional
     public void deletePromotionDetail(Integer promotionId, Integer productId) throws Exception {
@@ -105,12 +107,10 @@ public class PromotionServiceImpl implements PromotionService {
     public Page<Promotion> searchPromotions(String keyword, Pageable pageable) {
         return promotionRepository.findByNameContainingIgnoreCase(keyword, pageable);
     }
-
     @Override
     public boolean isProductInPromotion(Integer productId) {
-        return promotionDetailRepository.existsByProductId(productId);
+        return promotionDetailRepository.existsByProductBatchId(productId);
     }
-
     @Override
     @Transactional
     public Promotion updatePromotion(Integer id, UpdatePromotionDTO updatePromotionDTO) throws Exception {
@@ -154,18 +154,18 @@ public class PromotionServiceImpl implements PromotionService {
 
     @Override
     @Transactional
-    public PromotionDetail addProductToPromotion(Integer promotionId, Integer productId) throws Exception {
+    public PromotionDetail addProductToPromotion(Integer promotionId, Integer productBatchId) throws Exception {
         Promotion promotion = getPromotionById(promotionId);
-        Product product = productRepository.findById(productId)
+        ProductBatch productBatch = productBatchRepository.findById(productBatchId)
                 .orElseThrow(() -> new RuntimeException(ErrorCode.PRODUCT_NOT_FOUND.getMessage()));
 
-        if (promotionDetailRepository.findByPromotionIdAndProductId(promotionId, productId).isPresent()) {
+        if (promotionDetailRepository.findByPromotionIdAndProductBatchId(promotionId, productBatchId).isPresent()) {
             throw new RuntimeException(ErrorCode.PROMOTION_PRODUCT_ALREADY_EXISTS.getMessage());
         }
 
         PromotionDetail detail = new PromotionDetail();
         detail.setPromotion(promotion);
-        detail.setProduct(product);
+        detail.setProductBatch(productBatch);
 
 
         return promotionDetailRepository.save(detail);

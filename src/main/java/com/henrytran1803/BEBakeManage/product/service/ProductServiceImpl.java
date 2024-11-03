@@ -1,8 +1,11 @@
 package com.henrytran1803.BEBakeManage.product.service;
 
+import com.henrytran1803.BEBakeManage.Image.entity.Image;
+import com.henrytran1803.BEBakeManage.Image.repository.ImageRepository;
 import com.henrytran1803.BEBakeManage.category.repository.CategoryRepository;
 import com.henrytran1803.BEBakeManage.common.exception.error.ErrorCode;
 import com.henrytran1803.BEBakeManage.product.dto.CreateProductDTO;
+import com.henrytran1803.BEBakeManage.product.dto.ProductDTO;
 import com.henrytran1803.BEBakeManage.product.dto.UpdateProductDTO;
 import com.henrytran1803.BEBakeManage.product.entity.Product;
 import com.henrytran1803.BEBakeManage.product.entity.ProductHistory;
@@ -20,6 +23,8 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
@@ -27,6 +32,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductHistoryRepository productHistoryRepository;
     private final CategoryRepository categoryRepository;
     private final RecipeRepository recipeRepository;
+    private final ImageRepository imageRepository;
 
     @Override
     @Transactional
@@ -47,7 +53,7 @@ public class ProductServiceImpl implements ProductService {
             product.setCategoryId(createProductDTO.getCategoryId());
             product.setName(createProductDTO.getName());
             product.setDescription(createProductDTO.getDescription());
-            product.setStatus(true); // Set default status to true
+            product.setStatus(true);
             product.setWeight(createProductDTO.getWeight());
             product.setLength(createProductDTO.getLength());
             product.setWidth(createProductDTO.getWidth());
@@ -55,14 +61,21 @@ public class ProductServiceImpl implements ProductService {
             product.setDiscountLimit(createProductDTO.getDiscountLimit());
             product.setRecipeId(createProductDTO.getRecipeId());
             product.setCurrentPrice(createProductDTO.getPrice());
-
+            product.setShelfLifeDays(createProductDTO.getShelfLifeDays());
             Product savedProduct = productRepository.save(product);
-
             ProductHistory initialHistory = new ProductHistory();
             initialHistory.setProduct(savedProduct);
             initialHistory.setPrice(createProductDTO.getPrice());
             initialHistory.setEffectiveDate(LocalDateTime.now());
             productHistoryRepository.save(initialHistory);
+            if (createProductDTO.getImageUrls() != null) {
+                for (String url : createProductDTO.getImageUrls()) {
+                    Image image = new Image();
+                    image.setProductId(savedProduct.getId());
+                    image.setUrl(url);
+                    imageRepository.save(image);
+                }
+            }
 
             createProductDTO.setCategoryId(savedProduct.getCategoryId());
             return Optional.of(createProductDTO);
@@ -72,29 +85,25 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+
     @Override
     @Transactional
     public Optional<UpdateProductDTO> updateProduct(UpdateProductDTO updateProductDTO) {
         try {
             return productRepository.findById(updateProductDTO.getId())
                     .map(existingProduct -> {
-                        // Kiểm tra và cập nhật thông tin sản phẩm
                         if (!existingProduct.getName().equals(updateProductDTO.getName()) &&
                                 productRepository.existsByName(updateProductDTO.getName())) {
                             throw new RuntimeException(ErrorCode.DUPLICATE_PRODUCT_NAME.getMessage());
                         }
-
                         if (updateProductDTO.getCategoryId() != null &&
                                 !categoryRepository.existsById(updateProductDTO.getCategoryId())) {
                             throw new RuntimeException(ErrorCode.INVALID_CATEGORY.getMessage());
                         }
-
                         if (updateProductDTO.getRecipeId() == null ||
                                 !recipeRepository.existsById(updateProductDTO.getRecipeId())) {
                             throw new RuntimeException(ErrorCode.INVALID_RECIPE.getMessage());
                         }
-
-                        // Cập nhật các thuộc tính của sản phẩm
                         existingProduct.setCategoryId(updateProductDTO.getCategoryId());
                         existingProduct.setName(updateProductDTO.getName());
                         existingProduct.setDescription(updateProductDTO.getDescription());
@@ -104,20 +113,14 @@ public class ProductServiceImpl implements ProductService {
                         existingProduct.setHeight(updateProductDTO.getHeight());
                         existingProduct.setDiscountLimit(updateProductDTO.getDiscountLimit());
                         existingProduct.setRecipeId(updateProductDTO.getRecipeId());
-
-                        // Kiểm tra nếu giá thay đổi
                         if (!existingProduct.getCurrentPrice().equals(updateProductDTO.getPrice())) {
-                            // Tạo bản ghi lịch sử giá mới
                             ProductHistory priceHistory = new ProductHistory();
                             priceHistory.setProduct(existingProduct);
                             priceHistory.setPrice(updateProductDTO.getPrice());
                             priceHistory.setEffectiveDate(LocalDateTime.now());
                             productHistoryRepository.save(priceHistory);
-
-                            // Cập nhật giá hiện tại cho sản phẩm
                             existingProduct.setCurrentPrice(updateProductDTO.getPrice());
                         }
-
                         productRepository.save(existingProduct);
                         return updateProductDTO;
                     });
@@ -143,14 +146,60 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<Product> getAllProducts(Pageable pageable) {
-        return productRepository.findAll(pageable);
+    public Page<ProductDTO> getAllProducts(Pageable pageable) {
+        Page<Product> products = productRepository.findAll(pageable);
 
+        // Ánh xạ Page<Product> sang Page<ProductDTO>
+        return products.map(product -> {
+            ProductDTO dto = new ProductDTO();
+            dto.setId(product.getId());
+            dto.setName(product.getName());
+            dto.setCurrentPrice(product.getCurrentPrice());
+            dto.setStatus(product.getStatus());
+
+            // Lấy tên danh mục nếu có
+            if (product.getCategory() != null) {
+                dto.setCategoryName(product.getCategory().getName());
+            }
+
+            // Lấy danh sách URL của ảnh cho sản phẩm
+            List<Image> images = imageRepository.findByProductId(product.getId());
+            List<String> imageUrls = images.stream()
+                    .map(Image::getUrl)
+                    .collect(Collectors.toList());
+            dto.setImageUrls(imageUrls); // Thêm danh sách URL ảnh vào DTO
+
+            return dto;
+        });
     }
 
 
     @Override
-    public List<Product> getAllActiveProducts() {
-        return productRepository.findByStatusTrue();
+    public List<ProductDTO> getAllActiveProducts() {
+        List<Product> activeProducts = productRepository.findByStatusTrue();
+
+        // Ánh xạ List<Product> sang List<ProductDTO>
+        return activeProducts.stream().map(product -> {
+            ProductDTO dto = new ProductDTO();
+            dto.setId(product.getId());
+            dto.setName(product.getName());
+            dto.setCurrentPrice(product.getCurrentPrice());
+            dto.setStatus(product.getStatus());
+
+            // Lấy tên danh mục nếu có
+            if (product.getCategory() != null) {
+                dto.setCategoryName(product.getCategory().getName());
+            }
+
+            // Lấy danh sách URL của ảnh cho sản phẩm
+            List<Image> images = imageRepository.findByProductId(product.getId());
+            List<String> imageUrls = images.stream()
+                    .map(Image::getUrl)
+                    .collect(Collectors.toList());
+            dto.setImageUrls(imageUrls); // Thêm danh sách URL ảnh vào DTO
+
+            return dto;
+        }).collect(Collectors.toList());
     }
+
 }

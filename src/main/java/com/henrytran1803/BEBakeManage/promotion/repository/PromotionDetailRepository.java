@@ -10,9 +10,9 @@ import java.util.Optional;
 public interface PromotionDetailRepository extends JpaRepository<PromotionDetail, PromotionDetailId> {
     List<PromotionDetail> findByPromotionId(Integer promotionId);
 
-    boolean existsByProductId(Integer productId);
+    boolean existsByProductBatchId(Integer productId);
 
-    Optional<Object> findByPromotionIdAndProductId(Integer promotionId, Integer productId);
+    Optional<Object> findByPromotionIdAndProductBatchId(Integer promotionId, Integer productId);
 
     void deleteByPromotionId(Integer id);
 }

@@ -1,0 +1,42 @@
+
+-- Trigger to update product batch discounts after promotion insert
+CREATE TRIGGER after_promotion_insert
+AFTER INSERT ON promotions
+FOR EACH ROW
+BEGIN
+    UPDATE product_batches pb
+    JOIN promotion_details pd ON pb.id = pd.product_batch_id
+    SET pb.current_discount = calculate_batch_discount(
+        pb.id,
+        get_remaining_hours(pb.expiration_date)
+    )
+    WHERE pd.promotion_id = NEW.id;
+END //
+
+-- Trigger to update product batch discounts after promotion update
+CREATE TRIGGER after_promotion_update
+AFTER UPDATE ON promotions
+FOR EACH ROW
+BEGIN
+    UPDATE product_batches pb
+    JOIN promotion_details pd ON pb.id = pd.product_batch_id
+    SET pb.current_discount = calculate_batch_discount(
+        pb.id,
+        get_remaining_hours(pb.expiration_date)
+    )
+    WHERE pd.promotion_id = NEW.id;
+END //
+
+-- Trigger to update product batch discounts after promotion delete
+CREATE TRIGGER after_promotion_delete
+AFTER DELETE ON promotions
+FOR EACH ROW
+BEGIN
+    UPDATE product_batches pb
+    JOIN promotion_details pd ON pb.id = pd.product_batch_id
+    SET pb.current_discount = calculate_batch_discount(
+        pb.id,
+        get_remaining_hours(pb.expiration_date)
+    )
+    WHERE pd.promotion_id = OLD.id;
+END //

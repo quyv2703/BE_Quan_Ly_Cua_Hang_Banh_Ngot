@@ -9,14 +9,14 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class PromotionDetailId implements java.io.Serializable {
-    @Column(name = "product_id")
-    private int productId;
+    @Column(name = "product_batch_id")
+    private int productBatchId;
 
     @Column(name = "promotion_id")
     private int promotionId;
 
-    public PromotionDetailId(int productId, int promotionId) {
-        this.productId = productId;
+    public PromotionDetailId(int productBatchId, int promotionId) {
+        this.productBatchId = productBatchId;
         this.promotionId = promotionId;
     }
 }

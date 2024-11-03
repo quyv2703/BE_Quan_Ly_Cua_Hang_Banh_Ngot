@@ -1,0 +1,59 @@
+DELIMITER //
+CREATE FUNCTION get_highest_valid_promotion_discount(batch_id INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE highest_discount INT;
+
+    SELECT MAX(p.discount) INTO highest_discount
+    FROM promotions p
+    JOIN promotion_details pd ON p.id = pd.promotion_id
+    WHERE pd.product_batch_id = batch_id
+    AND p.isactive = true
+    AND p.start_date <= NOW()
+    AND p.end_date > NOW()
+    AND (p.end_date - INTERVAL 5 HOUR) > NOW();
+
+    RETURN IFNULL(highest_discount, 0);
+END //
+
+CREATE FUNCTION get_remaining_hours(expiration_timestamp DATETIME)
+RETURNS FLOAT
+DETERMINISTIC
+BEGIN
+    RETURN TIMESTAMPDIFF(SECOND, NOW(), expiration_timestamp) / 3600.0;
+END //
+
+-- Function to calculate batch discount based on remaining hours and product's discount limit
+CREATE FUNCTION calculate_batch_discount(
+    batch_id INT,
+    remaining_hours FLOAT
+)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE product_discount_limit DOUBLE;
+    DECLARE current_promotion_discount INT;
+    DECLARE final_discount INT;
+
+    -- Get product's discount limit
+    SELECT p.discount_limit INTO product_discount_limit
+    FROM product_batches pb
+    JOIN products p ON pb.product_id = p.id
+    WHERE pb.id = batch_id;
+
+    -- Get current highest valid promotion discount
+    SET current_promotion_discount = get_highest_valid_promotion_discount(batch_id);
+
+    -- If remaining hours <= 5, calculate additional discount
+    IF remaining_hours <= 5.0 THEN
+        -- Calculate progressive discount based on remaining hours
+        SET final_discount = current_promotion_discount +
+            FLOOR((5.0 - remaining_hours) * (product_discount_limit - current_promotion_discount) / 5.0);
+
+        -- Ensure we don't exceed the product's discount limit
+        RETURN LEAST(final_discount, CAST(product_discount_limit AS SIGNED));
+    ELSE
+        RETURN current_promotion_discount;
+    END IF;
+END //
