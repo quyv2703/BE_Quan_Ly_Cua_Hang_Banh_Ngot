@@ -36,40 +36,16 @@ public class ProductController {
             @RequestParam(defaultValue = "10") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<Product> products = productService.getAllProducts(pageable);
-
-        Page<ProductDTO> productDTOs = products.map(product -> {
-            ProductDTO dto = new ProductDTO();
-            dto.setId(product.getId());
-            dto.setName(product.getName());
-            dto.setCurrentPrice(product.getCurrentPrice());
-            dto.setStatus(product.getStatus());
-            // Nếu cần thông tin danh mục, bạn có thể lấy từ product.getCategory().getName()
-            if (product.getCategory() != null) {
-                dto.setCategoryName(product.getCategory().getName());
-            }
-            return dto;
-        });
+        Page<ProductDTO> productDTOs = productService.getAllProducts(pageable);
 
         return ResponseEntity.ok(ApiResponse.success(productDTOs));
     }
     @GetMapping("/active")
     public ResponseEntity<ApiResponse<List<ProductDTO>>> getActiveProducts() {
-        List<Product> activeProducts = productService.getAllActiveProducts();
-        List<ProductDTO> activeProductDTOs = activeProducts.stream().map(product -> {
-            ProductDTO dto = new ProductDTO();
-            dto.setId(product.getId());
-            dto.setName(product.getName());
-            dto.setCurrentPrice(product.getCurrentPrice());
-            dto.setStatus(product.getStatus());
-            if (product.getCategory() != null) {
-                dto.setCategoryName(product.getCategory().getName());
-            }
-            return dto;
-        }).collect(Collectors.toList());
-
+        List<ProductDTO> activeProductDTOs = productService.getAllActiveProducts();
         return ResponseEntity.ok(ApiResponse.success(activeProductDTOs));
     }
+
     @PostMapping
     public ResponseEntity<ApiResponse<?>> createProduct(@Valid @RequestBody CreateProductDTO createProductDTO,
                                                         BindingResult bindingResult) {

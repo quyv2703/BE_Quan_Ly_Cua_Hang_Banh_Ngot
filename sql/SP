@@ -1,0 +1,69 @@
+-- Tự động thêm sản phẩm còn dư vào sau 12h mỗi ngày thống kê lại sản phẩm tồn kho
+
+DELIMITER //
+
+CREATE PROCEDURE insert_daily_inventory_for_today()
+BEGIN
+    INSERT INTO daily_product_inventories (product_batch_id, inventory_date, quantity)
+    SELECT id, CURDATE(), quantity
+    FROM product_batches
+    WHERE quantity > 0;
+END //
+
+DELIMITER //
+
+CREATE EVENT insert_daily_inventory_at_midnight
+ON SCHEDULE EVERY 1 DAY
+STARTS '2024-11-04 00:00:00'
+DO
+BEGIN
+    CALL insert_daily_inventory_for_today();
+END //
+
+DELIMITER ;
+
+
+DELIMITER //
+
+CREATE PROCEDURE update_all_batch_discounts()
+BEGIN
+    UPDATE product_batches pb
+    SET current_discount = calculate_batch_discount(
+        pb.id,
+        get_remaining_hours(pb.expiration_date)
+    )
+    WHERE pb.expiration_date > NOW() -- Only update non-expired batches
+    AND (
+        -- Has active promotions
+        EXISTS (
+            SELECT 1
+            FROM promotion_details pd
+            JOIN promotions p ON pd.promotion_id = p.id
+            WHERE pd.product_batch_id = pb.id
+            AND p.isactive = true
+            AND p.start_date <= NOW()
+            AND p.end_date > NOW()
+        )
+        OR
+        -- Within 5 hours of expiration
+        get_remaining_hours(pb.expiration_date) <= 5.0
+    );
+END//
+
+CREATE PROCEDURE cleanup_expired_batch_discounts()
+BEGIN
+    UPDATE product_batches
+    SET current_discount = 0
+    WHERE expiration_date <= NOW();
+END //
+
+DELIMITER //
+
+-- Event to automatically update discounts every hour
+CREATE EVENT update_discounts_hourly
+ON SCHEDULE EVERY 1 HOUR
+STARTS CURRENT_TIMESTAMP
+DO
+BEGIN
+    CALL update_all_batch_discounts();
+END //

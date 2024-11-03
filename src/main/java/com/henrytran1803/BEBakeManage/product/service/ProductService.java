@@ -1,6 +1,7 @@
 package com.henrytran1803.BEBakeManage.product.service;
 
 import com.henrytran1803.BEBakeManage.product.dto.CreateProductDTO;
+import com.henrytran1803.BEBakeManage.product.dto.ProductDTO;
 import com.henrytran1803.BEBakeManage.product.dto.UpdateProductDTO;
 import com.henrytran1803.BEBakeManage.product.entity.Product;
 import org.springframework.data.domain.Page;
@@ -13,7 +14,7 @@ public interface ProductService {
     Optional<CreateProductDTO> createProduct(CreateProductDTO createProductDTO);
     Optional<UpdateProductDTO> updateProduct(UpdateProductDTO product);
     Void deleteProduct(int idProduct);
-    Page<Product> getAllProducts(Pageable pageable);
-    List<Product> getAllActiveProducts();
+    Page<ProductDTO> getAllProducts(Pageable pageable);
+    List<ProductDTO> getAllActiveProducts();
 
 }

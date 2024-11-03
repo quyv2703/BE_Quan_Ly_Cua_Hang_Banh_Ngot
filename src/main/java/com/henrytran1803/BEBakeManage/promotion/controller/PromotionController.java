@@ -33,7 +33,7 @@ public class PromotionController {
         try {
             PromotionDetail detail = promotionService.addProductToPromotion(
                     promotionId,
-                    detailDTO.getProductId());
+                    detailDTO.getProductBatchId());
                     return ResponseEntity.ok(ApiResponse.success(detail));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)

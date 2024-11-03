@@ -1,5 +1,7 @@
+
+
 CREATE TABLE `users` (
-  `id` int PRIMARY KEY NOT NULL,
+  `id` int PRIMARY KEY NOT NULL AUTO_INCREMENT,
   `first_name` varchar(50) NOT NULL,
   `last_name` varchar(50) NOT NULL,
   `email` varchar(50) NOT NULL,
@@ -9,7 +11,7 @@ CREATE TABLE `users` (
 );
 
 CREATE TABLE `roles` (
-  `id` int PRIMARY KEY,
+  `id` int PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(50) NOT NULL
 );
 
@@ -19,65 +21,88 @@ CREATE TABLE `role_user` (
 );
 
 CREATE TABLE `categories` (
-  `id` int PRIMARY KEY,
+  `id` int PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
   `image_url` varchar(250) NOT NULL,
   `isactive` bool
 );
 
 CREATE TABLE `products` (
-  `id` int PRIMARY KEY,
+  `id` int PRIMARY KEY AUTO_INCREMENT,
   `category_id` int,
-  `current_price` double,
   `name` varchar(250) NOT NULL,
+  `current_price` double,
   `description` varchar(250) NOT NULL,
-  `image_url` varchar(250) NOT NULL,
-  `status` enum(active,inactive),
+  `status` bool,
   `weight` double,
   `length` double,
   `width` double,
   `height` double,
-  `recipe_id` int NOT NULL,
-  `isactive` bool
+  `discount_limit` double,
+  `shelf_life_days` int,
+  `recipe_id` int NOT NULL
+);
+
+create table disposed_products
+(
+    id                int auto_increment
+        primary key,
+    disposed_quantity int                                                   not null,
+    product_batch_id  int                                                   null,
+    reason            enum ('EXPIRED', 'DAMAGED', 'QUALITY_ISSUE', 'OTHER') not null,
+    note              text                                                  null,
+    staff_id          int                                                   null,
+    date_disposed     datetime default CURRENT_TIMESTAMP                    null,
+    constraint disposed_products_ibfk_1
+        foreign key (product_batch_id) references product_batches (id),
+    constraint disposed_products_ibfk_2
+        foreign key (staff_id) references users (id)
+);
+
+CREATE TABLE `images` (
+  `id` int PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  `product_id` int,
+  `url` varchar(250)
 );
 
 CREATE TABLE `product_histories` (
-  `id` int PRIMARY KEY,
+  `id` int PRIMARY KEY AUTO_INCREMENT,
   `product_id` int NOT NULL,
   `price` double NOT NULL,
   `effective_date` timestamp DEFAULT (now())
 );
 
 CREATE TABLE `promotions` (
-  `id` int PRIMARY KEY,
+  `id` int PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `description` varchar(250) NOT NULL,
   `start_date` datetime NOT NULL,
   `end_date` datetime NOT NULL,
   `isactive` bool,
+  `discount` int,
   `created_at` datetime,
   `updated_at` datetime
 );
 
 CREATE TABLE `promotion_details` (
   `promotion_id` int,
-  `product_id` int
+  `product_batch_id` int
 );
 
 CREATE TABLE `units` (
-  `id` int PRIMARY KEY,
+  `id` int PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(50) NOT NULL
 );
 
 CREATE TABLE `ingredients` (
-  `id` int PRIMARY KEY,
+  `id` int PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `unit_id` int,
   `warning_limits` double NOT NULL
 );
 
 CREATE TABLE `recipes` (
-  `id` int PRIMARY KEY,
+  `id` int PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(100) NOT NULL
 );
 
@@ -88,7 +113,7 @@ CREATE TABLE `recipe_details` (
 );
 
 CREATE TABLE `import_ingredients` (
-  `id` int PRIMARY KEY,
+  `id` int PRIMARY KEY AUTO_INCREMENT,
   `user_id` int,
   `import_date` datetime,
   `total_amount` double,
@@ -104,33 +129,34 @@ CREATE TABLE `import_ingredient_details` (
 );
 
 CREATE TABLE `daily_productions` (
-  `id` int PRIMARY KEY,
+  `id` int PRIMARY KEY AUTO_INCREMENT,
   `production_date` datetime NOT NULL
 );
 
 CREATE TABLE `product_batches` (
-  `id` int PRIMARY KEY,
+  `id` int PRIMARY KEY AUTO_INCREMENT,
   `product_id` int,
   `daily_production_id` int,
   `expiration_date` datetime NOT NULL,
+  `current_discount` int,
   `quantity` int
 );
 
 CREATE TABLE `daily_product_inventories` (
-  `id` int PRIMARY KEY,
+  `id` int PRIMARY KEY AUTO_INCREMENT,
   `product_batch_id` int,
   `inventory_date` datetime NOT NULL,
   `quantity` int
 );
 
 CREATE TABLE `payment_methods` (
-  `id` int PRIMARY KEY,
+  `id` int PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(100),
   `description` varchar(250)
 );
 
 CREATE TABLE `bills` (
-  `id` int PRIMARY KEY,
+  `id` int PRIMARY KEY AUTO_INCREMENT,
   `user_id` int,
   `total_amount` double,
   `payment_method_id` int,
@@ -147,21 +173,21 @@ CREATE TABLE `bill_detail` (
 );
 
 CREATE TABLE `areas` (
-  `id` int PRIMARY KEY,
+  `id` int PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(50)
 );
 
 CREATE TABLE `tables` (
-  `id` int PRIMARY KEY,
+  `id` int PRIMARY KEY AUTO_INCREMENT,
   `area_id` int,
   `seat` int,
   `name` varchar(50),
-  `status` ENUM ('available', 'busy', 'fixing'),
+  `status` int,
   `isactive` bool
 );
 
 CREATE TABLE `export_ingredients` (
-  `id` int PRIMARY KEY,
+  `id` int PRIMARY KEY AUTO_INCREMENT,
   `sender_id` int,
   `recieve_id` int,
   `daily_production_id` int,
@@ -184,11 +210,15 @@ ALTER TABLE `products` ADD FOREIGN KEY (`category_id`) REFERENCES `categories` (
 
 ALTER TABLE `products` ADD FOREIGN KEY (`recipe_id`) REFERENCES `recipes` (`id`);
 
+
+
+ALTER TABLE `images` ADD FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
+
 ALTER TABLE `product_histories` ADD FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
 
 ALTER TABLE `promotion_details` ADD FOREIGN KEY (`promotion_id`) REFERENCES `promotions` (`id`);
 
-ALTER TABLE `promotion_details` ADD FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
+ALTER TABLE `promotion_details` ADD FOREIGN KEY (`product_batch_id`) REFERENCES `product_batches` (`id`);
 
 ALTER TABLE `ingredients` ADD FOREIGN KEY (`unit_id`) REFERENCES `units` (`id`);
 

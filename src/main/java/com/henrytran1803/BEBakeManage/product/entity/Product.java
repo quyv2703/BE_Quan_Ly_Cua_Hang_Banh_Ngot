@@ -2,6 +2,7 @@ package com.henrytran1803.BEBakeManage.product.entity;
 
 import com.henrytran1803.BEBakeManage.category.entity.Category;
 import com.henrytran1803.BEBakeManage.recipe.entity.Recipe;
+import com.henrytran1803.BEBakeManage.Image.entity.Image; // Import Image entity
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,7 +29,8 @@ public class Product {
 
     @Column(name = "description", nullable = false, length = 250)
     private String description;
-
+    @Column(name = "shelf_life_days")
+    private int shelfLifeDays;
     @Column(name = "status")
     private Boolean status;
 
@@ -49,6 +51,7 @@ public class Product {
 
     @Column(name = "recipe_id", nullable = false)
     private Integer recipeId;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id", insertable = false, updatable = false)
     private Category category;
@@ -57,14 +60,29 @@ public class Product {
     @JoinColumn(name = "recipe_id", insertable = false, updatable = false)
     private Recipe recipe;
 
+    @OneToMany(mappedBy = "productId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Image> images = new ArrayList<>(); // Thêm mối quan hệ với Image
+
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductHistory> productHistories = new ArrayList<>();
+
     public void addProductHistory(ProductHistory history) {
         productHistories.add(history);
         history.setProduct(this);
     }
+
     public void removeProductHistory(ProductHistory history) {
         productHistories.remove(history);
         history.setProduct(null);
+    }
+
+    public void addImage(Image image) {
+        images.add(image);
+        image.setProductId(this.id);
+    }
+
+    public void removeImage(Image image) {
+        images.remove(image);
+        image.setProductId(null);
     }
 }
