@@ -2,10 +2,7 @@ package com.henrytran1803.BEBakeManage.product.controller;
 
 import com.henrytran1803.BEBakeManage.common.exception.error.ErrorCode;
 import com.henrytran1803.BEBakeManage.common.response.ApiResponse;
-import com.henrytran1803.BEBakeManage.product.dto.CreateProductDTO;
-import com.henrytran1803.BEBakeManage.product.dto.ProductDTO;
-import com.henrytran1803.BEBakeManage.product.dto.ProductHistoryDTO;
-import com.henrytran1803.BEBakeManage.product.dto.UpdateProductDTO;
+import com.henrytran1803.BEBakeManage.product.dto.*;
 import com.henrytran1803.BEBakeManage.product.entity.Product;
 import com.henrytran1803.BEBakeManage.product.service.ProductPriceService;
 import com.henrytran1803.BEBakeManage.product.service.ProductService;
@@ -21,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/products")
@@ -29,7 +25,31 @@ import java.util.stream.Collectors;
 public class ProductController {
     private final ProductService productService;
     private final ProductPriceService productPriceService;
+    @GetMapping("/search")
+    public ApiResponse<Page<ProductDTO>> searchProducts(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) Boolean status,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        ProductSearchCriteria criteria = new ProductSearchCriteria();
+        criteria.setName(name);
+        criteria.setCategoryId(categoryId);
+        criteria.setStatus(status);
+        criteria.setMinPrice(minPrice);
+        criteria.setMaxPrice(maxPrice);
+        criteria.setSortBy(sortBy);
+        criteria.setSortDir(sortDir);
+        criteria.setPage(page);
+        criteria.setSize(size);
 
+        return productService.searchProducts(criteria);
+    }
     @GetMapping
     public ResponseEntity<ApiResponse<Page<ProductDTO>>> getProducts(
             @RequestParam(defaultValue = "0") int page,
@@ -41,9 +61,9 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.success(productDTOs));
     }
     @GetMapping("/active")
-    public ResponseEntity<ApiResponse<List<ProductDTO>>> getActiveProducts() {
-        List<ProductDTO> activeProductDTOs = productService.getAllActiveProducts();
-        return ResponseEntity.ok(ApiResponse.success(activeProductDTOs));
+    public ResponseEntity<ApiResponse<List<ProductActiveDTO>>> getActiveProducts() {
+        return ResponseEntity.ok(ApiResponse.success(productService.getAllActiveProducts()));
+
     }
 
     @PostMapping
@@ -105,5 +125,10 @@ public class ProductController {
     public ResponseEntity<ApiResponse<List<ProductHistoryDTO>>> getPriceHistory(@PathVariable("id") Integer productId) {
         List<ProductHistoryDTO> history = productPriceService.getAllProductHistoryByIdProduct(productId);
         return ResponseEntity.ok(ApiResponse.success(history));
+    }
+
+    @GetMapping("/{id}/detail")
+    public ApiResponse<ProductDetailDTO> getProductDetail(@PathVariable Integer id) {
+        return productService.getProductDetail(id);
     }
 }

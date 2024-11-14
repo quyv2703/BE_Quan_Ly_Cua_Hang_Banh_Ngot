@@ -50,6 +50,7 @@ public class CreateProductDTO {
 
     @NotNull(message = "Recipe ID is required")
     private Integer recipeId;
+    @NotNull(message = "Height is required")
 
     @NotNull(message = "Image URLs are required")
     private List<String> imageUrls; // Danh sách URL cho ảnh

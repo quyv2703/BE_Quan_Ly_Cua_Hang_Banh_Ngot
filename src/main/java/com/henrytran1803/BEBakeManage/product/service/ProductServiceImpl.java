@@ -2,38 +2,48 @@ package com.henrytran1803.BEBakeManage.product.service;
 
 import com.henrytran1803.BEBakeManage.Image.entity.Image;
 import com.henrytran1803.BEBakeManage.Image.repository.ImageRepository;
+import com.henrytran1803.BEBakeManage.category.entity.Category;
 import com.henrytran1803.BEBakeManage.category.repository.CategoryRepository;
 import com.henrytran1803.BEBakeManage.common.exception.error.ErrorCode;
-import com.henrytran1803.BEBakeManage.product.dto.CreateProductDTO;
-import com.henrytran1803.BEBakeManage.product.dto.ProductDTO;
-import com.henrytran1803.BEBakeManage.product.dto.UpdateProductDTO;
+import com.henrytran1803.BEBakeManage.common.response.ApiResponse;
+import com.henrytran1803.BEBakeManage.product.dto.*;
 import com.henrytran1803.BEBakeManage.product.entity.Product;
+import com.henrytran1803.BEBakeManage.product.entity.ProductBatch;
 import com.henrytran1803.BEBakeManage.product.entity.ProductHistory;
+import com.henrytran1803.BEBakeManage.product.mapper.ProductMapper;
+import com.henrytran1803.BEBakeManage.product.repository.ProductDetailsRepository;
 import com.henrytran1803.BEBakeManage.product.repository.ProductHistoryRepository;
 import com.henrytran1803.BEBakeManage.product.repository.ProductRepository;
-import com.henrytran1803.BEBakeManage.product.service.ProductService;
+import com.henrytran1803.BEBakeManage.product.specification.ProductSpecification;
+import com.henrytran1803.BEBakeManage.recipe.entity.Recipe;
 import com.henrytran1803.BEBakeManage.recipe.repository.RecipeRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+import org.hibernate.Hibernate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.time.ZoneId;
+import java.sql.Timestamp;
+import org.springframework.data.domain.Page;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
+    private final EntityManager entityManager;
     private final ProductRepository productRepository;
     private final ProductHistoryRepository productHistoryRepository;
     private final CategoryRepository categoryRepository;
     private final RecipeRepository recipeRepository;
     private final ImageRepository imageRepository;
-
+    private final ProductMapper productMapper;
+    private final ProductDetailsRepository productDetailsRepository;
     @Override
     @Transactional
     public Optional<CreateProductDTO> createProduct(CreateProductDTO createProductDTO) {
@@ -50,7 +60,9 @@ public class ProductServiceImpl implements ProductService {
                 throw new RuntimeException(ErrorCode.INVALID_RECIPE.getMessage());
             }
             Product product = new Product();
-            product.setCategoryId(createProductDTO.getCategoryId());
+            Category category = categoryRepository.findById(createProductDTO.getCategoryId())
+                    .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + createProductDTO.getCategoryId()));
+            product.setCategory(category);
             product.setName(createProductDTO.getName());
             product.setDescription(createProductDTO.getDescription());
             product.setStatus(true);
@@ -59,7 +71,10 @@ public class ProductServiceImpl implements ProductService {
             product.setWidth(createProductDTO.getWidth());
             product.setHeight(createProductDTO.getHeight());
             product.setDiscountLimit(createProductDTO.getDiscountLimit());
-            product.setRecipeId(createProductDTO.getRecipeId());
+            Recipe recipe = recipeRepository.findById(createProductDTO.getRecipeId())
+                    .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + createProductDTO.getRecipeId()));
+
+            product.setRecipe(recipe);
             product.setCurrentPrice(createProductDTO.getPrice());
             product.setShelfLifeDays(createProductDTO.getShelfLifeDays());
             Product savedProduct = productRepository.save(product);
@@ -71,13 +86,13 @@ public class ProductServiceImpl implements ProductService {
             if (createProductDTO.getImageUrls() != null) {
                 for (String url : createProductDTO.getImageUrls()) {
                     Image image = new Image();
-                    image.setProductId(savedProduct.getId());
+                    image.setProduct(savedProduct);
                     image.setUrl(url);
                     imageRepository.save(image);
                 }
             }
 
-            createProductDTO.setCategoryId(savedProduct.getCategoryId());
+            createProductDTO.setCategoryId(savedProduct.getCategory().getId());
             return Optional.of(createProductDTO);
 
         } catch (Exception e) {
@@ -104,7 +119,10 @@ public class ProductServiceImpl implements ProductService {
                                 !recipeRepository.existsById(updateProductDTO.getRecipeId())) {
                             throw new RuntimeException(ErrorCode.INVALID_RECIPE.getMessage());
                         }
-                        existingProduct.setCategoryId(updateProductDTO.getCategoryId());
+
+                        Category category = categoryRepository.findById(updateProductDTO.getCategoryId())
+                                .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + updateProductDTO.getCategoryId()));
+                        existingProduct.setCategory(category);
                         existingProduct.setName(updateProductDTO.getName());
                         existingProduct.setDescription(updateProductDTO.getDescription());
                         existingProduct.setWeight(updateProductDTO.getWeight());
@@ -112,7 +130,11 @@ public class ProductServiceImpl implements ProductService {
                         existingProduct.setWidth(updateProductDTO.getWidth());
                         existingProduct.setHeight(updateProductDTO.getHeight());
                         existingProduct.setDiscountLimit(updateProductDTO.getDiscountLimit());
-                        existingProduct.setRecipeId(updateProductDTO.getRecipeId());
+                        Recipe recipe = recipeRepository.findById(updateProductDTO.getRecipeId())
+                                .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + updateProductDTO.getRecipeId()));
+                        existingProduct.setRecipe(recipe);
+                        existingProduct.setShelfLifeDays(updateProductDTO.getShelfLifeDays());
+
                         if (!existingProduct.getCurrentPrice().equals(updateProductDTO.getPrice())) {
                             ProductHistory priceHistory = new ProductHistory();
                             priceHistory.setProduct(existingProduct);
@@ -167,39 +189,142 @@ public class ProductServiceImpl implements ProductService {
             List<String> imageUrls = images.stream()
                     .map(Image::getUrl)
                     .collect(Collectors.toList());
-            dto.setImageUrls(imageUrls); // Thêm danh sách URL ảnh vào DTO
+            dto.setImages(imageUrls); // Thêm danh sách URL ảnh vào DTO
 
             return dto;
         });
     }
-
-
     @Override
-    public List<ProductDTO> getAllActiveProducts() {
-        List<Product> activeProducts = productRepository.findByStatusTrue();
+    public List<ProductActiveDTO> getAllActiveProducts() {
+        List<ProductDetailProjection> projections = productRepository.findAllProductDetails();
+        Map<Long, Product> productMap = new HashMap<>();
 
-        // Ánh xạ List<Product> sang List<ProductDTO>
-        return activeProducts.stream().map(product -> {
-            ProductDTO dto = new ProductDTO();
-            dto.setId(product.getId());
-            dto.setName(product.getName());
-            dto.setCurrentPrice(product.getCurrentPrice());
-            dto.setStatus(product.getStatus());
+        for (ProductDetailProjection projection : projections) {
+            Product product = productMap.computeIfAbsent(projection.getProductId(), id -> {
+                Product p = new Product();
+                p.setId(Math.toIntExact(id));
+                p.setName(projection.getProductName());
+                p.setDescription(projection.getProductDescription());
+                p.setCurrentPrice(projection.getCurrentPrice());
+                p.setWeight(projection.getWeight());
+                p.setLength(projection.getLength());
+                p.setWidth(projection.getWidth());
+                p.setHeight(projection.getHeight());
+                p.setDiscountLimit(projection.getDiscountLimit());
+                p.setShelfLifeDays(projection.getShelfLifeDays());
+                return p;
+            });
 
-            // Lấy tên danh mục nếu có
-            if (product.getCategory() != null) {
-                dto.setCategoryName(product.getCategory().getName());
+            if (projection.getImageId() != null) {
+                Image image = new Image();
+                image.setId(projection.getImageId());
+                image.setUrl(projection.getImageUrl());
+                product.getImages().add(image);
             }
 
-            // Lấy danh sách URL của ảnh cho sản phẩm
-            List<Image> images = imageRepository.findByProductId(product.getId());
-            List<String> imageUrls = images.stream()
-                    .map(Image::getUrl)
-                    .collect(Collectors.toList());
-            dto.setImageUrls(imageUrls); // Thêm danh sách URL ảnh vào DTO
-
-            return dto;
-        }).collect(Collectors.toList());
+            if (projection.getBatchId() != null) {
+                ProductBatch batch = new ProductBatch();
+                batch.setId(projection.getBatchId());
+                batch.setExpirationDate(projection.getBatchExpirationDate());
+                batch.setCurrentDiscount(projection.getBatchCurrentDiscount());
+                batch.setQuantity(projection.getBatchQuantity());
+                batch.setStatus(projection.getBatchStatus());
+                product.getProductBatches().add(batch);
+            }
+        }
+        return new ArrayList<>(productMap.values().stream()
+                .map(this::convertToProductDTO)
+                .collect(Collectors.toList()));
     }
+
+    public ApiResponse<Page<ProductDTO>> searchProducts(ProductSearchCriteria criteria) {
+        try {
+            Sort sort = Sort.by(
+                    criteria.getSortDir().equalsIgnoreCase("asc")
+                            ? Sort.Direction.ASC
+                            : Sort.Direction.DESC,
+                    criteria.getSortBy()
+            );
+
+            PageRequest pageRequest = PageRequest.of(
+                    criteria.getPage(),
+                    criteria.getSize(),
+                    sort
+            );
+
+            Page<ProductDTO> productDTOs = productRepository
+                    .findAll(ProductSpecification.getSpecification(criteria), pageRequest)
+                    .map(productMapper::toDTO);
+
+            return ApiResponse.success(productDTOs);
+        } catch (Exception e) {
+            return ApiResponse.error("SEARCH_ERROR", "Lỗi khi tìm kiếm sản phẩm: " + e.getMessage());
+        }
+    }
+    @Transactional(readOnly = true)
+    public ApiResponse<ProductDetailDTO> getProductDetail(Integer id) {
+        try {
+            return productRepository.findById(id)
+                    .map(product -> {
+                        // Force initialization of the collections
+                        Hibernate.initialize(product.getImages());
+                        if (product.getCategory() != null) {
+                            Hibernate.initialize(product.getCategory());
+                        }
+                        if (product.getRecipe() != null) {
+                            Hibernate.initialize(product.getRecipe());
+                        }
+                        return ApiResponse.success(productMapper.toDetailDTO(product));
+                    })
+                    .orElse(ApiResponse.error("PRODUCT_NOT_FOUND",
+                            "Không tìm thấy sản phẩm với ID: " + id));
+        } catch (Exception e) {
+            return ApiResponse.error("ERROR",
+                    "Lỗi khi lấy thông tin chi tiết sản phẩm: " + e.getMessage());
+        }
+    }
+
+    public ProductActiveDTO convertToProductDTO(Product product) {
+        ProductActiveDTO dto = new ProductActiveDTO();
+        dto.setId(product.getId());
+        dto.setName(product.getName());
+        dto.setCurrentPrice(product.getCurrentPrice());
+        dto.setDescription(product.getDescription());
+        dto.setShelfLifeDays(product.getShelfLifeDays());
+        dto.setWeight(product.getWeight());
+        dto.setLength(product.getLength());
+        dto.setWidth(product.getWidth());
+        dto.setHeight(product.getHeight());
+
+        // Map Category
+        if (product.getCategory() != null) {
+            CategoryDTO categoryDTO = new CategoryDTO();
+            categoryDTO.setId(product.getCategory().getId());
+            categoryDTO.setName(product.getCategory().getName());
+            dto.setCategory(categoryDTO);
+        }
+
+        List<ImageDTO> imageDTOs = product.getImages().stream().map(image -> {
+            ImageDTO imageDTO = new ImageDTO();
+            imageDTO.setId(image.getId());
+            imageDTO.setUrl(image.getUrl());
+            return imageDTO;
+        }).collect(Collectors.toList());
+        dto.setImages(imageDTOs);
+
+        List<ProductBatchDTO> batchDTOs = product.getProductBatches().stream().map(batch -> {
+            ProductBatchDTO batchDTO = new ProductBatchDTO();
+            batchDTO.setId(batch.getId());
+            batchDTO.setExpirationDate(batch.getExpirationDate().toString());
+            batchDTO.setCurrentDiscount(Double.valueOf(batch.getCurrentDiscount()));
+            batchDTO.setStatus(batch.getStatus());
+            batchDTO.setQuantity(batch.getQuantity());
+            return batchDTO;
+        }).collect(Collectors.toList());
+        dto.setProductBatches(batchDTOs);
+
+        return dto;
+    }
+
 
 }

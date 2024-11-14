@@ -28,8 +28,9 @@ public class ProductBatch {
     @Column(name = "current_discount")
     private Integer currentDiscount;
 
+    @Column(name = "status")
+    private String status;
+
     @Column(name = "quantity")
     private Integer quantity;
-
-    // Getters and Setters
 }

@@ -1,5 +1,3 @@
-
--- Trigger to update product batch discounts after promotion insert
 CREATE TRIGGER after_promotion_insert
 AFTER INSERT ON promotions
 FOR EACH ROW
@@ -12,8 +10,6 @@ BEGIN
     )
     WHERE pd.promotion_id = NEW.id;
 END //
-
--- Trigger to update product batch discounts after promotion update
 CREATE TRIGGER after_promotion_update
 AFTER UPDATE ON promotions
 FOR EACH ROW
@@ -26,8 +22,6 @@ BEGIN
     )
     WHERE pd.promotion_id = NEW.id;
 END //
-
--- Trigger to update product batch discounts after promotion delete
 CREATE TRIGGER after_promotion_delete
 AFTER DELETE ON promotions
 FOR EACH ROW
@@ -40,3 +34,26 @@ BEGIN
     )
     WHERE pd.promotion_id = OLD.id;
 END //
+
+DELIMITER //
+
+CREATE TRIGGER before_insert_product_batches
+BEFORE INSERT ON product_batches
+FOR EACH ROW
+BEGIN
+    DECLARE shelf_life INT;
+    DECLARE prod_date DATETIME;
+
+    SELECT shelf_life_days INTO shelf_life
+    FROM products
+    WHERE id = NEW.product_id;
+
+    SELECT production_date INTO prod_date
+    FROM daily_productions
+    WHERE id = NEW.daily_production_id;
+
+    SET NEW.expiration_date = DATE_ADD(prod_date, INTERVAL shelf_life DAY);
+END;
+//
+
+DELIMITER ;

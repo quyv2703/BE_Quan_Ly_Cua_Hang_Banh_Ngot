@@ -1,0 +1,25 @@
+CREATE VIEW v_product_details AS
+SELECT
+    p.id as product_id,
+    p.name as product_name,
+    p.description as product_description,
+    p.current_price,
+    p.weight,
+    p.length,
+    p.width,
+    p.height,
+    p.discount_limit,
+    p.shelf_life_days,
+    i.id as image_id,
+    i.url as image_url,
+    pb.id as batch_id,
+    pb.expiration_date as batch_expiration_date,
+    pb.current_discount as batch_current_discount,
+    pb.quantity as batch_quantity,
+    pb.status as batch_status
+FROM products p
+LEFT JOIN images i ON p.id = i.product_id
+LEFT JOIN product_batches pb ON p.id = pb.product_id
+    AND pb.status IN ('ACTIVE', 'NEAR_EXPIRY')
+WHERE p.status = 1
+ORDER BY p.id, i.id, pb.id;

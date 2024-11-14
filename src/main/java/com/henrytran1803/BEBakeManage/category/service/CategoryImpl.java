@@ -1,13 +1,16 @@
 package com.henrytran1803.BEBakeManage.category.service;
 
+import com.henrytran1803.BEBakeManage.category.dto.CategorySearchCriteria;
 import com.henrytran1803.BEBakeManage.category.dto.CreateCategoryDTO;
 import com.henrytran1803.BEBakeManage.category.entity.Category;
 import com.henrytran1803.BEBakeManage.category.repository.CategoryRepository;
+import com.henrytran1803.BEBakeManage.category.specification.CategorySpecification;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable; // Sửa dòng này
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,8 +32,14 @@ public class CategoryImpl implements CategoryService {
         Optional<Category> category = categoryRepository.findById(id);
         if (category.isPresent()) {
             Category existingCategory = category.get();
-            existingCategory.setActive(false);
-            categoryRepository.save(existingCategory);
+            if (existingCategory.getActive()){
+                existingCategory.setActive(false);
+                categoryRepository.save(existingCategory);
+            }else {
+                existingCategory.setActive(true);
+                categoryRepository.save(existingCategory);
+            }
+
         }
         return category;
     }
@@ -70,7 +79,25 @@ public class CategoryImpl implements CategoryService {
     }
 
 
+    public Page<Category> searchCategories(CategorySearchCriteria criteria) {
+        Sort sort = Sort.by(
+                criteria.getSortDir() == null || criteria.getSortDir().equalsIgnoreCase("asc")
+                        ? Sort.Direction.ASC
+                        : Sort.Direction.DESC,
+                criteria.getSortBy() == null ? "id" : criteria.getSortBy()
+        );
 
+        PageRequest pageRequest = PageRequest.of(
+                criteria.getPage(),
+                criteria.getSize(),
+                sort
+        );
+
+        return categoryRepository.findAll(
+                CategorySpecification.getSpecification(criteria),
+                pageRequest
+        );
+    }
 
     @Override
     public Page<Category> getCategories(int page, int size) {
@@ -81,5 +108,10 @@ public class CategoryImpl implements CategoryService {
     @Override
     public List<Category> getCategoriesActive() {
         return categoryRepository.findAllByIsActiveTrue();
+    }
+
+    @Override
+    public List<Category> getAllCateories() {
+        return categoryRepository.findAll();
     }
 }
