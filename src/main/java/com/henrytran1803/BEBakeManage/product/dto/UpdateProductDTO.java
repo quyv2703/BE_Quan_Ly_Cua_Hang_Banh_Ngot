@@ -38,7 +38,8 @@ public class UpdateProductDTO {
     @NotNull(message = "Height is required")
     @Min(value = 0, message = "Height must be greater than 0")
     private Double height;
-
+    @Min(value = 0, message = "shelfDaysLife must be greater than 0")
+    private int shelfLifeDays;
     @Min(value = 0, message = "Discount limit must be greater than or equal to 0")
     @Max(value = 100, message = "Discount limit must be less than or equal to 100")
     private Double discountLimit;

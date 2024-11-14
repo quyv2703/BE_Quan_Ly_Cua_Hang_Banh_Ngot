@@ -25,8 +25,6 @@ public class JpaConfig {
                         "com.henrytran1803.BEBakeManage.product.entity",
                         "com.henrytran1803.BEBakeManage.promotion.entity",
                         "com.henrytran1803.BEBakeManage.image.entity"
-
-
                 )
                 .persistenceUnit("roleBasedPU")
                 .build();

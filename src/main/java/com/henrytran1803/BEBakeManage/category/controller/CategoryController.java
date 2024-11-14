@@ -1,5 +1,6 @@
 package com.henrytran1803.BEBakeManage.category.controller;
 
+import com.henrytran1803.BEBakeManage.category.dto.CategorySearchCriteria;
 import com.henrytran1803.BEBakeManage.category.dto.CreateCategoryDTO;
 import com.henrytran1803.BEBakeManage.category.entity.Category;
 import com.henrytran1803.BEBakeManage.category.service.CategoryService;
@@ -20,6 +21,25 @@ import java.util.Optional;
 public class CategoryController {
     @Autowired
     private CategoryService categoryService;
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<Page<Category>>> searchCategories(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Boolean isActive,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        CategorySearchCriteria criteria = new CategorySearchCriteria();
+        criteria.setName(name);
+        criteria.setIsActive(isActive);
+        criteria.setSortBy(sortBy);
+        criteria.setSortDir(sortDir);
+        criteria.setPage(page);
+        criteria.setSize(size);
+
+        return ResponseEntity.ok(ApiResponse.success(categoryService.searchCategories(criteria)));
+    }
     @PostMapping("")
     public ResponseEntity<ApiResponse<Category>> createCategory(@Valid @RequestBody CreateCategoryDTO createCategoryDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -74,6 +94,11 @@ public class CategoryController {
     @GetMapping("")
     public ResponseEntity<ApiResponse<List<Category>>> getCategoriesActive() {
         List<Category> categories = categoryService.getCategoriesActive();
+        return ResponseEntity.ok(ApiResponse.success(categories));
+    }
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<List<Category>>> getAllCategories() {
+        List<Category> categories = categoryService.getAllCateories();
         return ResponseEntity.ok(ApiResponse.success(categories));
     }
 }

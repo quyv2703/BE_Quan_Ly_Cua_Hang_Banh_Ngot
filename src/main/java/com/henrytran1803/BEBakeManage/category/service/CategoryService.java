@@ -1,5 +1,6 @@
 package com.henrytran1803.BEBakeManage.category.service;
 
+import com.henrytran1803.BEBakeManage.category.dto.CategorySearchCriteria;
 import com.henrytran1803.BEBakeManage.category.dto.CreateCategoryDTO;
 import com.henrytran1803.BEBakeManage.category.entity.Category;
 import org.springframework.data.domain.Page;
@@ -14,4 +15,6 @@ public interface CategoryService {
     Optional<Category> updateById(Category category);
     Page<Category> getCategories(int page, int size);
     List<Category> getCategoriesActive();
+    List<Category> getAllCateories();
+    Page<Category> searchCategories(CategorySearchCriteria criteria);
 }

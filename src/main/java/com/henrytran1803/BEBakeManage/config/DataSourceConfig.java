@@ -48,7 +48,7 @@ public class DataSourceConfig {
             @Qualifier("userDataSource") DataSource userDataSource) {
         RoleBasedRoutingDataSource routingDataSource = new RoleBasedRoutingDataSource();
         Map<Object, Object> dataSourceMap = new HashMap<>();
-        dataSourceMap.put("ROLE_ADMIN", adminDataSource);
+        dataSourceMap.put("ROLE_MANAGE", adminDataSource);
         dataSourceMap.put("ROLE_USER", userDataSource);
         routingDataSource.setTargetDataSources(dataSourceMap);
         routingDataSource.setDefaultTargetDataSource(userDataSource);

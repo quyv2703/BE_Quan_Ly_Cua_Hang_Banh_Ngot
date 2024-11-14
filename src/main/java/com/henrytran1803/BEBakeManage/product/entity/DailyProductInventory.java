@@ -22,6 +22,4 @@ public class DailyProductInventory {
 
     @Column(name = "quantity")
     private Integer quantity;
-
-    // Getters and Setters
 }

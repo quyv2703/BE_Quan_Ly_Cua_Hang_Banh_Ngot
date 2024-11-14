@@ -11,6 +11,5 @@ public class ProductDTO {
     private Double currentPrice;
     private String categoryName;
     private  Boolean status;
-    private List<String> imageUrls; // Danh sách URL của ảnh
-
+    private List<String> images;
 }
