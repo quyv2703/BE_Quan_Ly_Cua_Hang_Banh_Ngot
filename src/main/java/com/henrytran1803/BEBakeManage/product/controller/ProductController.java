@@ -115,11 +115,12 @@ public class ProductController {
             {
         try {
             productService.deleteProduct(productId);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok(ApiResponse.success("sucess"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.RECIPE_UPDATE_FAILED.getCode(), e.getMessage()));
         }
     }
+
     @Transactional
     @GetMapping("/{id}/price/history")
     public ResponseEntity<ApiResponse<List<ProductHistoryDTO>>> getPriceHistory(@PathVariable("id") Integer productId) {
@@ -130,5 +131,13 @@ public class ProductController {
     @GetMapping("/{id}/detail")
     public ApiResponse<ProductDetailDTO> getProductDetail(@PathVariable Integer id) {
         return productService.getProductDetail(id);
+    }
+    @GetMapping("/productbatches")
+    public ApiResponse<List<ProductSummaryDTO>> getListProductBatch() {
+        return productService.getListProductBatch();
+    }
+    @GetMapping("/productbatches/statuses")
+    public ApiResponse<List<ProductBatchDetailDTO>> getListProductBatchByStatus(@RequestParam List<String> statuses) {
+        return productService.getListProductBatchByStatues(statuses);
     }
 }

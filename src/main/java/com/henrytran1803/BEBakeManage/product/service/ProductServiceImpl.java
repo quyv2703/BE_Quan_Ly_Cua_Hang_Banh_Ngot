@@ -11,6 +11,7 @@ import com.henrytran1803.BEBakeManage.product.entity.Product;
 import com.henrytran1803.BEBakeManage.product.entity.ProductBatch;
 import com.henrytran1803.BEBakeManage.product.entity.ProductHistory;
 import com.henrytran1803.BEBakeManage.product.mapper.ProductMapper;
+import com.henrytran1803.BEBakeManage.product.repository.ProductBatchRepository;
 import com.henrytran1803.BEBakeManage.product.repository.ProductDetailsRepository;
 import com.henrytran1803.BEBakeManage.product.repository.ProductHistoryRepository;
 import com.henrytran1803.BEBakeManage.product.repository.ProductRepository;
@@ -25,11 +26,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.sql.Timestamp;
 import org.springframework.data.domain.Page;
 
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -42,6 +46,8 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final RecipeRepository recipeRepository;
     private final ImageRepository imageRepository;
+    private final ProductBatchRepository productBatchRepository;
+
     private final ProductMapper productMapper;
     private final ProductDetailsRepository productDetailsRepository;
     @Override
@@ -77,6 +83,8 @@ public class ProductServiceImpl implements ProductService {
             product.setRecipe(recipe);
             product.setCurrentPrice(createProductDTO.getPrice());
             product.setShelfLifeDays(createProductDTO.getShelfLifeDays());
+            product.setShelfLifeDaysWarning(createProductDTO.getShelfLifeDaysWarning());
+
             Product savedProduct = productRepository.save(product);
             ProductHistory initialHistory = new ProductHistory();
             initialHistory.setProduct(savedProduct);
@@ -134,6 +142,7 @@ public class ProductServiceImpl implements ProductService {
                                 .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + updateProductDTO.getRecipeId()));
                         existingProduct.setRecipe(recipe);
                         existingProduct.setShelfLifeDays(updateProductDTO.getShelfLifeDays());
+                        existingProduct.setShelfLifeDaysWarning(updateProductDTO.getShelfLifeDaysWarning());
 
                         if (!existingProduct.getCurrentPrice().equals(updateProductDTO.getPrice())) {
                             ProductHistory priceHistory = new ProductHistory();
@@ -158,7 +167,13 @@ public class ProductServiceImpl implements ProductService {
         try {
             Product product = productRepository.findById(idProduct)
                     .orElseThrow(() -> new RuntimeException(ErrorCode.PRODUCT_NOT_FOUND.getMessage()));
-            product.setStatus(false);
+            if (product.getStatus()) {
+                product.setStatus(false);
+
+            }else {
+                product.setStatus(true);
+
+            }
             productRepository.save(product);
 
             return null;
@@ -266,7 +281,6 @@ public class ProductServiceImpl implements ProductService {
         try {
             return productRepository.findById(id)
                     .map(product -> {
-                        // Force initialization of the collections
                         Hibernate.initialize(product.getImages());
                         if (product.getCategory() != null) {
                             Hibernate.initialize(product.getCategory());
@@ -284,6 +298,69 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+    @Override
+    public ApiResponse<List<ProductSummaryDTO>> getListProductBatch() {
+        List<Product> products = productRepository.findAll();
+        List<String> statuses = Arrays.asList("active", "near_expiry", "expired");
+        List<ProductSummaryDTO> productSummaryDTOList = new ArrayList<>();
+        for (Product product : products) {
+            List<ProductBatch> productBatches = productBatchRepository.findByProductIdAndStatusIn(product.getId(), statuses);
+            List<ProductBatchSumaryDTO> productBatchDTOs = productBatches.stream().map(batch -> {
+                ProductBatchSumaryDTO dto = new ProductBatchSumaryDTO();
+                dto.setId((long) batch.getId());
+                dto.setStatus(batch.getStatus());
+                dto.setQuantity(batch.getQuantity());
+                dto.setDateExpiry(batch.getExpirationDate().toLocalDate());
+                dto.setCountDown((int) ChronoUnit.DAYS.between(LocalDate.now(), batch.getExpirationDate().toLocalDate()));
+                return dto;
+            }).collect(Collectors.toList());
+            ProductSummaryDTO summaryDTO = new ProductSummaryDTO();
+            summaryDTO.setId((long) product.getId());
+            summaryDTO.setName(product.getName());
+            summaryDTO.setShelfLifeDays(product.getShelfLifeDays());
+            summaryDTO.setTotalProductBatch(productBatches.size());
+            summaryDTO.setTotalNearExpiry(
+                    (int) productBatches.stream()
+                            .filter(batch -> "NEAR_EXPIRY".equalsIgnoreCase(batch.getStatus()))
+                            .count()
+            );
+            summaryDTO.setTotalExpiry(
+                    (int) productBatches.stream()
+                            .filter(batch -> "EXPIRED".equalsIgnoreCase(batch.getStatus()))
+                            .count()
+            );
+            summaryDTO.setProductBatches(productBatchDTOs);
+            productSummaryDTOList.add(summaryDTO);
+        }
+        return ApiResponse.success(productSummaryDTOList);
+    }
+    @Override
+    public ApiResponse<List<ProductBatchDetailDTO>> getListProductBatchByStatues(List<String> statuses) {
+        List<Object[]> results = productBatchRepository.findProductBatchDetailsByStatuses(statuses);
+
+        List<ProductBatchDetailDTO> dtos = results.stream()
+                .map(result -> {
+                    ProductBatchDetailDTO dto = new ProductBatchDetailDTO();
+                    dto.setId(((Number) result[0]).longValue());
+                    dto.setName((String) result[1]);
+                    dto.setStatus((String) result[2]);
+                    dto.setQuantity(((Number) result[3]).intValue());
+
+                    // Xử lý chuyển đổi Timestamp sang LocalDate
+                    if (result[4] instanceof java.sql.Timestamp) {
+                        dto.setDateExpiry(((java.sql.Timestamp) result[4]).toLocalDateTime().toLocalDate());
+                    } else if (result[4] instanceof java.sql.Date) {
+                        dto.setDateExpiry(((java.sql.Date) result[4]).toLocalDate());
+                    }
+
+                    dto.setCountDown(((Number) result[5]).intValue());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
+        return ApiResponse.success(dtos);
+    }
+
     public ProductActiveDTO convertToProductDTO(Product product) {
         ProductActiveDTO dto = new ProductActiveDTO();
         dto.setId(product.getId());
@@ -295,8 +372,7 @@ public class ProductServiceImpl implements ProductService {
         dto.setLength(product.getLength());
         dto.setWidth(product.getWidth());
         dto.setHeight(product.getHeight());
-
-        // Map Category
+//dto.setShelfLifeDays();
         if (product.getCategory() != null) {
             CategoryDTO categoryDTO = new CategoryDTO();
             categoryDTO.setId(product.getCategory().getId());
@@ -325,6 +401,45 @@ public class ProductServiceImpl implements ProductService {
 
         return dto;
     }
-
+//    public ProductActiveDTO convertToProductDTO(Product product) {
+//        ProductActiveDTO dto = new ProductActiveDTO();
+//        dto.setId(product.getId());
+//        dto.setName(product.getName());
+//        dto.setCurrentPrice(product.getCurrentPrice());
+//        dto.setDescription(product.getDescription());
+//        dto.setShelfLifeDays(product.getShelfLifeDays());
+//        dto.setWeight(product.getWeight());
+//        dto.setLength(product.getLength());
+//        dto.setWidth(product.getWidth());
+//        dto.setHeight(product.getHeight());
+////dto.setShelfLifeDays();
+//        if (product.getCategory() != null) {
+//            CategoryDTO categoryDTO = new CategoryDTO();
+//            categoryDTO.setId(product.getCategory().getId());
+//            categoryDTO.setName(product.getCategory().getName());
+//            dto.setCategory(categoryDTO);
+//        }
+//
+//        List<ImageDTO> imageDTOs = product.getImages().stream().map(image -> {
+//            ImageDTO imageDTO = new ImageDTO();
+//            imageDTO.setId(image.getId());
+//            imageDTO.setUrl(image.getUrl());
+//            return imageDTO;
+//        }).collect(Collectors.toList());
+//        dto.setImages(imageDTOs);
+//
+//        List<ProductBatchDTO> batchDTOs = product.getProductBatches().stream().map(batch -> {
+//            ProductBatchDTO batchDTO = new ProductBatchDTO();
+//            batchDTO.setId(batch.getId());
+//            batchDTO.setExpirationDate(batch.getExpirationDate().toString());
+//            batchDTO.setCurrentDiscount(Double.valueOf(batch.getCurrentDiscount()));
+//            batchDTO.setStatus(batch.getStatus());
+//            batchDTO.setQuantity(batch.getQuantity());
+//            return batchDTO;
+//        }).collect(Collectors.toList());
+//        dto.setProductBatches(batchDTOs);
+//
+//        return dto;
+//    }
 
 }

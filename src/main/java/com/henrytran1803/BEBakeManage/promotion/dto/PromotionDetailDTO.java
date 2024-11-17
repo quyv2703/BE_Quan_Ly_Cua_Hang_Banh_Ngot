@@ -5,5 +5,4 @@ import lombok.Data;
 @Data
 public class PromotionDetailDTO {
     private Integer productBatchId;
-    private Double specialPrice;
 }

@@ -32,11 +32,11 @@ public class CategoryImpl implements CategoryService {
         Optional<Category> category = categoryRepository.findById(id);
         if (category.isPresent()) {
             Category existingCategory = category.get();
-            if (existingCategory.getActive()){
-                existingCategory.setActive(false);
+            if (existingCategory.getIsActive()){
+                existingCategory.setIsActive(false);
                 categoryRepository.save(existingCategory);
             }else {
-                existingCategory.setActive(true);
+                existingCategory.setIsActive(true);
                 categoryRepository.save(existingCategory);
             }
 
@@ -54,7 +54,7 @@ public class CategoryImpl implements CategoryService {
         Category category = new Category();
         category.setName(newCategory.getName());
         category.setImageUrl(newCategory.getUrl());
-        category.setActive(true);
+        category.setIsActive(true);
         Category savedCategory = categoryRepository.save(category);
         return Optional.of(savedCategory);
     }
@@ -71,10 +71,8 @@ public class CategoryImpl implements CategoryService {
             throw new RuntimeException("Category name already exists.");
         }
 
-        // Gán lại giá trị cho `active` nếu `category.active` là null
-        category.setActive(category.getActive() != null ? category.getActive() : categoryToUpdate.get().getActive());
+        category.setIsActive(category.getIsActive() != null ? category.getIsActive() : categoryToUpdate.get().getIsActive());
 
-        // Lưu category đã cập nhật
         return Optional.of(categoryRepository.save(category));
     }
 

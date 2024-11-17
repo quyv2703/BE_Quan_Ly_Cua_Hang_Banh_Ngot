@@ -28,6 +28,10 @@ public class CreateProductDTO {
     @Min(value = 0, message = "shelfLifeDays must be greater than 0")
     private int shelfLifeDays;
 
+    @NotNull(message = "shelfLifeDaysWarning is required")
+    @Min(value = 0, message = "shelfLifeDaysWarning must be greater than 0")
+    private int shelfLifeDaysWarning;
+
     @NotNull(message = "Weight is required")
     @Min(value = 0, message = "Weight must be greater than 0")
     private Double weight;
