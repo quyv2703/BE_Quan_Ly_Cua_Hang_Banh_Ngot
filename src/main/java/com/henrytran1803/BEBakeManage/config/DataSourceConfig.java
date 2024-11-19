@@ -1,3 +1,4 @@
+/*
 package com.henrytran1803.BEBakeManage.config;
 
 import com.henrytran1803.BEBakeManage.common.util.RoleBasedRoutingDataSource;
@@ -61,9 +62,7 @@ public class DataSourceConfig {
         return new EntityManagerFactoryBuilder(
                 new HibernateJpaVendorAdapter(), new HashMap<>(), null)
                 .dataSource(dataSource)
-                .packages("com.henrytran1803.BEBakeManage.category.entity", // Cập nhật cho entity
-                        "com.henrytran1803.BEBakeManage.user.entity",
-                        "com.henrytran1803.BEBakeManage.recipe.entity") // Thêm các package entity khác nếu có
+                .packages("com.henrytran1803.BEBakeManage") // Thêm các package entity khác nếu có
                 .persistenceUnit("roleBasedPU")
                 .build();
     }
@@ -74,3 +73,4 @@ public class DataSourceConfig {
         return new JpaTransactionManager(entityManagerFactory.getObject());
     }
 }
+*/
