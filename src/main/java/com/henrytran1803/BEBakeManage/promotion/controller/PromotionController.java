@@ -3,6 +3,7 @@ package com.henrytran1803.BEBakeManage.promotion.controller;
 import com.henrytran1803.BEBakeManage.common.exception.error.ErrorCode;
 import com.henrytran1803.BEBakeManage.common.response.ApiResponse;
 import com.henrytran1803.BEBakeManage.promotion.dto.*;
+import com.henrytran1803.BEBakeManage.promotion.entity.DailyDiscount;
 import com.henrytran1803.BEBakeManage.promotion.entity.Promotion;
 import com.henrytran1803.BEBakeManage.promotion.entity.PromotionDetail;
 import com.henrytran1803.BEBakeManage.promotion.service.PromotionService;
@@ -133,7 +134,6 @@ public class PromotionController {
     @PostMapping("")
     public ResponseEntity<ApiResponse<Promotion>> createPromotion(@RequestBody CreatePromotionDTO createPromotionDTO) {
         try {
-            System.out.println(createPromotionDTO);
             if (!isValidPromotionData(createPromotionDTO)) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(ApiResponse.error(
@@ -161,7 +161,30 @@ public class PromotionController {
                             ErrorCode.PROMOTION_CREATE_FAILED.getCode()));
         }
     }
+    @PostMapping("/quick")
+    public ResponseEntity<ApiResponse<String>> createPromotionQuick(@RequestBody CreateDailyDiscount createDailyDiscount) {
+        try {
+            if (promotionService.createPromotionQuick(createDailyDiscount)){
+                return ResponseEntity.ok(ApiResponse.success("Create success"));
+            }else {
+                ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(ApiResponse.error(
+                                "Fail",
+                                ErrorCode.PROMOTION_CREATE_FAILED.getCode()));
 
+            }
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(
+                            e.getMessage(),
+                            ErrorCode.PROMOTION_CREATE_FAILED.getCode()));
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(
+                        "Fail",
+                        ErrorCode.PROMOTION_CREATE_FAILED.getCode()));
+    }
     @DeleteMapping("/{promotionId}")
     public ResponseEntity<ApiResponse<Promotion>> updatePromotionStatus(
             @PathVariable Integer promotionId) {

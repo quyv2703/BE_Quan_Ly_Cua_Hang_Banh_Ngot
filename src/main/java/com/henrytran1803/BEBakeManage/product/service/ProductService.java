@@ -18,5 +18,8 @@ public interface ProductService {
     ApiResponse<Page<ProductDTO>> searchProducts(ProductSearchCriteria criteria);
     ApiResponse<ProductDetailDTO> getProductDetail(Integer id);
     ApiResponse<List<ProductSummaryDTO>> getListProductBatch();
-ApiResponse<List<ProductBatchDetailDTO>> getListProductBatchByStatues(List<String> statuses);
+    ApiResponse<List<ProductBatchDetailDTO>> getListProductBatchByStatues(List<String> statuses);
+    Boolean disposedProduct(DisposedProductDTO disposedProductDTO);
+
+
 }

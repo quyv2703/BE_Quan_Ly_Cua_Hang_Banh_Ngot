@@ -14,6 +14,8 @@ public class ProductBatchDetailDTO {
     private Long id;
     private String name;
     private String status;
+    private int currentDiscount;
+    private int dailyDiscount;
     private int quantity;
     private LocalDate dateExpiry;
     private int countDown;

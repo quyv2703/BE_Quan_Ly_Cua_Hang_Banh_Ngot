@@ -110,9 +110,7 @@ public class ProductController {
         }
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> deleteProduct(
-            @PathVariable("id") Integer productId)
-            {
+    public ResponseEntity<ApiResponse<?>> deleteProduct(@PathVariable("id") Integer productId) {
         try {
             productService.deleteProduct(productId);
             return ResponseEntity.ok(ApiResponse.success("sucess"));
@@ -139,5 +137,14 @@ public class ProductController {
     @GetMapping("/productbatches/statuses")
     public ApiResponse<List<ProductBatchDetailDTO>> getListProductBatchByStatus(@RequestParam List<String> statuses) {
         return productService.getListProductBatchByStatues(statuses);
+    }
+    @PostMapping("/productbatches")
+    public ResponseEntity<ApiResponse<String>>getListProductBatchByStatus(@RequestBody DisposedProductDTO disposedProductDTO) {
+        if (productService.disposedProduct(disposedProductDTO)){
+            return ResponseEntity.ok().body(ApiResponse.success("Success"));
+        }
+
+        return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.RECIPE_UPDATE_FAILED.getCode(), ErrorCode.RECIPE_UPDATE_FAILED.getMessage()));
+
     }
 }

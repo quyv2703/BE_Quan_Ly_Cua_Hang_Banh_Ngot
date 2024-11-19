@@ -8,6 +8,8 @@ public class ProductBatchSumaryDTO {
     private Long id;
     private String status;
     private int quantity;
-    private LocalDate dateExpiry; // Hoặc LocalDate nếu dùng định dạng ngày
+    private int currentDiscount;
+    private int dailyDiscount;
+    private LocalDate dateExpiry;
     private int countDown;
 }

@@ -146,27 +146,25 @@ create index user_id
          primary key,
      production_date datetime not null
  );
- create table disposed_products
- (
-     id                int auto_increment
-         primary key,
-     disposed_quantity int                                                   not null,
-     product_batch_id  int                                                   null,
-     reason            enum ('EXPIRED', 'DAMAGED', 'QUALITY_ISSUE', 'OTHER') not null,
-     note              text                                                  null,
-     staff_id          int                                                   null,
-     date_disposed     datetime default CURRENT_TIMESTAMP                    null,
-     constraint disposed_products_ibfk_1
-         foreign key (product_batch_id) references product_batches (id),
-     constraint disposed_products_ibfk_2
-         foreign key (staff_id) references users (id)
- );
+create table disposed_products
+(
+    id                int auto_increment
+        primary key,
+    note              text                                                  null,
+    staff_id          int                                                   null,
+    date_disposed     datetime default CURRENT_TIMESTAMP                    null,
+    constraint disposed_products_ibfk_2
+        foreign key (staff_id) references users (id)
+);
 
- create index product_batch_id
-     on disposed_products (product_batch_id);
-
- create index staff_id
-     on disposed_products (staff_id);
+CREATE TABLE disposed_product_details (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    disposed_product_id INT NOT NULL,
+    product_batch_id INT NOT NULL,
+    disposed_quantity INT NOT NULL,
+    CONSTRAINT disposed_product_details_ibfk_1 FOREIGN KEY (disposed_product_id) REFERENCES disposed_products (id),
+    CONSTRAINT disposed_product_details_ibfk_2 FOREIGN KEY (product_batch_id) REFERENCES product_batches (id)
+);
 
  create table promotions
  (
@@ -198,3 +196,11 @@ create index product_batch_id
 
 create index promotion_id
     on promotion_details (promotion_id);
+
+ CREATE TABLE daily_discounts (
+     id INT AUTO_INCREMENT PRIMARY KEY,
+     product_batch_id INT NOT NULL,
+     discount INT NOT NULL,
+     date DATE NOT NULL,
+     FOREIGN KEY (product_batch_id) REFERENCES product_batches(id)
+ );
