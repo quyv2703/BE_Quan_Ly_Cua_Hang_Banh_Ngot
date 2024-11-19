@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @EnableTransactionManagement
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.henrytran1803.BEBakeManage"})
 public class BeBakeManageApplication {
 
 	public static void main(String[] args) {

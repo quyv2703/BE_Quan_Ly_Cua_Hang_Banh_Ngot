@@ -49,6 +49,8 @@ public class Product {
     @Column(name = "discount_limit")
     private Double discountLimit;
 
+    @Column(name = "shelf_life_days_warning")
+    private int shelfLifeDaysWarning;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id")

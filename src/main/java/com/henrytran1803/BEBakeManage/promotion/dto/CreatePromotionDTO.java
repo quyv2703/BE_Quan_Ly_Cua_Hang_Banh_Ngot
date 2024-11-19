@@ -1,9 +1,6 @@
 package com.henrytran1803.BEBakeManage.promotion.dto;
 
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,7 +19,8 @@ public class CreatePromotionDTO {
     @Size(min = 1, max = 250, message = "Description must be between 1 and 250 characters")
     private String description;
     @NotNull(message = "Discount is required")
-    @Size(min = 1, max = 100, message = "Discount must be between 1 and 100")
+    @Min(value = 1, message = "Discount must be at least 1")
+    @Max(value = 100, message = "Discount must be at most 100")
     private int discount;
     @NotNull(message = "Start date is required")
     @Future(message = "Start date must be in the future")

@@ -61,9 +61,11 @@ public class DataSourceConfig {
         return new EntityManagerFactoryBuilder(
                 new HibernateJpaVendorAdapter(), new HashMap<>(), null)
                 .dataSource(dataSource)
-                .packages("com.henrytran1803.BEBakeManage.category.entity", // Cập nhật cho entity
+                .packages("com.henrytran1803.BEBakeManage.category.entity",
                         "com.henrytran1803.BEBakeManage.user.entity",
-                        "com.henrytran1803.BEBakeManage.recipe.entity") // Thêm các package entity khác nếu có
+                        "com.henrytran1803.BEBakeManage.product.entity",
+                        "com.henrytran1803.BEBakeManage.image.entity",
+                        "com.henrytran1803.BEBakeManage.recipe.entity")
                 .persistenceUnit("roleBasedPU")
                 .build();
     }

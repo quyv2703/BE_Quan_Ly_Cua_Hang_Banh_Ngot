@@ -25,6 +25,10 @@ public class ProductBatch {
     @Column(name = "expiration_date", nullable = false)
     private LocalDateTime expirationDate;
 
+
+    @Column(name = "daily_discount")
+    private Integer dailyDiscount;
+
     @Column(name = "current_discount")
     private Integer currentDiscount;
 

@@ -41,7 +41,7 @@ public class ProductMapper {
         dto.setHeight(product.getHeight());
         dto.setDiscountLimit(product.getDiscountLimit());
         dto.setRecipeId(product.getRecipeId());
-
+        dto.setShelfLifeDaysWarning(product.getShelfLifeDaysWarning());
         // Map Category info
         if (product.getCategory() != null) {
             ProductDetailDTO.CategoryInfo categoryInfo = new ProductDetailDTO.CategoryInfo();
