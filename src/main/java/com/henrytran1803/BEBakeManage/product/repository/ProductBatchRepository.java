@@ -20,10 +20,8 @@ public interface ProductBatchRepository extends JpaRepository<ProductBatch,Integ
 
     @Query("SELECT p.discountLimit FROM Product p JOIN p.productBatches pb WHERE pb.id = :productBatchId")
     Double findDiscountLimitByProductBatchId(@Param("productBatchId") Integer productBatchId);
-    @Query("SELECT pb.currentDiscount FROM ProductBatch pb WHERE pb.id = :productBatchId")
-    Integer findCurrentDiscountByProductBatchId(Long productBatchId);
 
-    // Query to get daily discount by product batch id
+
     @Query("SELECT pb.dailyDiscount FROM ProductBatch pb WHERE pb.id = :productBatchId")
     Integer findDailyDiscountByProductBatchId(Long productBatchId);
 

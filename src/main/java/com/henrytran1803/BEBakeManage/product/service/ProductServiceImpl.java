@@ -11,6 +11,9 @@ import com.henrytran1803.BEBakeManage.product.entity.*;
 import com.henrytran1803.BEBakeManage.product.mapper.ProductMapper;
 import com.henrytran1803.BEBakeManage.product.repository.*;
 import com.henrytran1803.BEBakeManage.product.specification.ProductSpecification;
+import com.henrytran1803.BEBakeManage.promotion.entity.Promotion;
+import com.henrytran1803.BEBakeManage.promotion.entity.PromotionDetail;
+import com.henrytran1803.BEBakeManage.promotion.repository.PromotionRepository;
 import com.henrytran1803.BEBakeManage.recipe.entity.Recipe;
 import com.henrytran1803.BEBakeManage.recipe.repository.RecipeRepository;
 import com.henrytran1803.BEBakeManage.user.entity.User;
@@ -19,8 +22,11 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -28,9 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.sql.Timestamp;
-import org.springframework.data.domain.Page;
 
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -50,6 +53,11 @@ public class ProductServiceImpl implements ProductService {
     private final DisposedProductDetailRepository disposedProductDetailRepository;
     private final DisposedProductRepository disposedProductRepository;
     private final ProductMapper productMapper;
+    private final PromotionRepository promotionRepository;
+
+
+
+
     private final ProductDetailsRepository productDetailsRepository;
     @Override
     @Transactional
@@ -242,7 +250,6 @@ public class ProductServiceImpl implements ProductService {
                 ProductBatch batch = new ProductBatch();
                 batch.setId(projection.getBatchId());
                 batch.setExpirationDate(projection.getBatchExpirationDate());
-                batch.setCurrentDiscount(projection.getBatchCurrentDiscount());
                 batch.setQuantity(projection.getBatchQuantity());
                 batch.setStatus(projection.getBatchStatus());
                 product.getProductBatches().add(batch);
@@ -311,7 +318,6 @@ public class ProductServiceImpl implements ProductService {
                 dto.setId((long) batch.getId());
                 dto.setStatus(batch.getStatus());
                 dto.setQuantity(batch.getQuantity());
-                dto.setCurrentDiscount(batch.getCurrentDiscount());
                 dto.setDailyDiscount(batch.getDailyDiscount());
                 dto.setDateExpiry(batch.getExpirationDate().toLocalDate());
                 dto.setCountDown((int) ChronoUnit.DAYS.between(LocalDate.now(), batch.getExpirationDate().toLocalDate()));
@@ -362,8 +368,6 @@ public class ProductServiceImpl implements ProductService {
                     // Set countDown value
                     dto.setCountDown(((Number) result[5]).intValue());
 
-                    Integer currentDiscount = productBatchRepository.findCurrentDiscountByProductBatchId(dto.getId());
-                    dto.setCurrentDiscount(currentDiscount != null ? currentDiscount : 0);
 
                     Integer dailyDiscount = productBatchRepository.findDailyDiscountByProductBatchId(dto.getId());
                     dto.setDailyDiscount(dailyDiscount != null ? dailyDiscount : 0);
@@ -452,7 +456,6 @@ public class ProductServiceImpl implements ProductService {
             ProductBatchDTO batchDTO = new ProductBatchDTO();
             batchDTO.setId(batch.getId());
             batchDTO.setExpirationDate(batch.getExpirationDate().toString());
-            batchDTO.setCurrentDiscount(Double.valueOf(batch.getCurrentDiscount()));
             batchDTO.setStatus(batch.getStatus());
             batchDTO.setQuantity(batch.getQuantity());
             return batchDTO;
@@ -460,5 +463,187 @@ public class ProductServiceImpl implements ProductService {
         dto.setProductBatches(batchDTOs);
 
         return dto;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<SearchProductResponse> searchProducts(
+            String productName,
+            List<Integer> categoryIds,
+            Pageable pageable
+    ) {
+        // 1. Tìm products theo điều kiện
+        Page<Product> productsPage;
+
+        if (categoryIds != null && !categoryIds.isEmpty()) {
+            if (productName != null && !productName.trim().isEmpty()) {
+                productsPage = productRepository.findByCategoryIdInAndNameContainingIgnoreCaseAndStatusIsTrue(
+                        categoryIds, productName, pageable);
+            } else {
+                productsPage = productRepository.findByCategoryIdInAndStatusIsTrue(categoryIds, pageable);
+            }
+        } else {
+            if (productName != null && !productName.trim().isEmpty()) {
+                productsPage = productRepository.findByNameContainingIgnoreCaseAndStatusIsTrue(productName, pageable);
+            } else {
+                productsPage = productRepository.findByStatusIsTrue(pageable);
+            }
+        }
+
+        return productsPage.map(product -> {
+            // Lấy URL ảnh đầu tiên
+            String imageUrl = product.getImages().stream()
+                    .findFirst()
+                    .map(Image::getUrl)
+                    .orElse(null);
+
+            // Lấy thông tin từ product batches
+            List<ProductBatch> activeBatches = productBatchRepository.findByProductIdAndStatusIn(
+                    product.getId(),
+                    Arrays.asList("ACTIVE", "NEAR_EXPIRY")
+            );
+
+            // Tính max discount và total quantity
+            Integer maxDiscount = activeBatches.stream()
+                    .map(ProductBatch::getDailyDiscount)
+                    .filter(discount -> discount != null)
+                    .max(Integer::compareTo)
+                    .orElse(0);
+
+            Integer totalQuantity = activeBatches.stream()
+                    .map(ProductBatch::getQuantity)
+                    .filter(quantity -> quantity != null)
+                    .reduce(0, Integer::sum);
+
+            return new SearchProductResponse(
+                    product.getId(),
+                    product.getName(),
+                    imageUrl,
+                    product.getCategory() != null ? product.getCategory().getName() : null,
+                    product.getCategory() != null ? product.getCategory().getId() : null,
+                    maxDiscount,
+                    product.getCurrentPrice(),
+                    totalQuantity
+            );
+        });
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public ProductDetailResponse getProductDetailForUser(Integer productId) {
+        Product product = productRepository.findById(productId)
+                .orElse(null);
+
+        return convertToDetailResponse(product);
+    }
+
+    private ProductDetailResponse convertToDetailResponse(Product product) {
+        ProductDetailResponse response = new ProductDetailResponse();
+
+        response.setId(product.getId());
+        response.setName(product.getName());
+        response.setDescription(product.getDescription());
+        response.setCurrentPrice(product.getCurrentPrice());
+
+        // Set category info if exists
+        if (product.getCategory() != null) {
+            ProductDetailResponse.CategoryInfo categoryInfo = new ProductDetailResponse.CategoryInfo(
+                    product.getCategory().getId(),
+                    product.getCategory().getName()
+            );
+            response.setCategory(categoryInfo);
+        }
+
+        // Convert all images to list
+        List<String> imageUrls = product.getImages().stream()
+                .map(Image::getUrl)
+                .collect(Collectors.toList());
+        response.setImageUrls(imageUrls);  // Thay đổi từ setImageUrl sang setImageUrls
+
+        // Convert product batches
+        List<ProductDetailResponse.ProductBatchInfo> batchInfos = product.getProductBatches().stream()
+                .filter(batch -> "ACTIVE".equals(batch.getStatus()) ||
+                        "NEAR_EXPIRY".equals(batch.getStatus()))
+                .map(batch -> new ProductDetailResponse.ProductBatchInfo(
+                        batch.getId(),
+                        batch.getExpirationDate(),
+                        batch.getQuantity(),
+                        batch.getStatus(),
+                        batch.getDailyDiscount()
+                ))
+                .collect(Collectors.toList());
+        response.setProductBatches(batchInfos);
+
+        return response;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CartResponseDTO> getCartInfo(CartDTO cartDTO) {
+        List<CartResponseDTO> cartResponseList = new ArrayList<>();
+        Promotion validPromotion = null;
+        if (cartDTO.getDiscountCode() != null && !cartDTO.getDiscountCode().isEmpty()) {
+            validPromotion = getValidPromotion(cartDTO.getDiscountCode());
+        }
+        for (ProductBatchCart item : cartDTO.getProductBatchCarts()) {
+            Optional<ProductBatch> batchOpt = productBatchRepository.findById(item.getProductBatchId());
+
+            if (batchOpt.isPresent()) {
+                ProductBatch batch = batchOpt.get();
+                CartResponseDTO response = new CartResponseDTO();
+
+                // Set basic product information
+                response.setProductBatchId(batch.getId());
+                response.setName(batch.getProduct().getName());
+                response.setDailyDiscount(batch.getDailyDiscount() != null ? batch.getDailyDiscount() : 0);
+                response.setCategoryName(batch.getProduct().getCategory().getName());
+                response.setPrice(batch.getProduct().getCurrentPrice());
+
+                // Set quantity information
+                response.setQuantity(item.getQuantity());
+                response.setQuantityRemain(batch.getQuantity() != null ? batch.getQuantity() : 0);
+
+                // Get first image URL if available
+                Optional<Image> firstImage = batch.getProduct().getImages().stream().findFirst();
+                response.setImageUrl(firstImage.map(Image::getUrl).orElse(null));
+
+                // Check if this batch is eligible for promotion discount
+                int promotionDiscount = 0;
+                if (validPromotion != null) {
+                    promotionDiscount = getPromotionDiscountForBatch(validPromotion, batch);
+                }
+                response.setDiscountBonus(promotionDiscount);
+
+                cartResponseList.add(response);
+            }
+        }
+
+        return cartResponseList;
+    }
+
+    private Promotion getValidPromotion(String discountCode) {
+        Optional<Promotion> promotionOpt = promotionRepository.findByName(discountCode);
+
+        if (promotionOpt.isPresent()) {
+            Promotion promotion = promotionOpt.get();
+            LocalDateTime now = LocalDateTime.now();
+
+            // Check if promotion is active and within valid date range
+            if (promotion.getIsActive() &&
+                    now.isAfter(promotion.getStartDate()) &&
+                    now.isBefore(promotion.getEndDate())) {
+                return promotion;
+            }
+        }
+        return null;
+    }
+
+    private int getPromotionDiscountForBatch(Promotion promotion, ProductBatch batch) {
+        // Check if this batch is included in the promotion
+        for (PromotionDetail detail : promotion.getPromotionDetails()) {
+            if (detail.getProductBatch().getId() == batch.getId()) {
+                return promotion.getDiscount();
+            }
+        }
+        return 0;
     }
 }
