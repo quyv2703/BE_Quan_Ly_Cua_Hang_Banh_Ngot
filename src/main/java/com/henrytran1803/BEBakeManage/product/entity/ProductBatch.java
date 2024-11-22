@@ -20,7 +20,7 @@ public class ProductBatch {
 
     @ManyToOne
     @JoinColumn(name = "daily_production_id")
-    private DailyProductInventory dailyProduction;
+    private DailyProduction dailyProduction;
 
     @Column(name = "expiration_date", nullable = false)
     private LocalDateTime expirationDate;
@@ -28,9 +28,6 @@ public class ProductBatch {
 
     @Column(name = "daily_discount")
     private Integer dailyDiscount;
-
-    @Column(name = "current_discount")
-    private Integer currentDiscount;
 
     @Column(name = "status")
     private String status;

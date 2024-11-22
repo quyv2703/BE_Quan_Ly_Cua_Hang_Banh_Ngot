@@ -1,5 +1,6 @@
 package com.henrytran1803.BEBakeManage.product.controller;
 
+import com.google.protobuf.Api;
 import com.henrytran1803.BEBakeManage.common.exception.error.ErrorCode;
 import com.henrytran1803.BEBakeManage.common.response.ApiResponse;
 import com.henrytran1803.BEBakeManage.product.dto.*;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -147,4 +149,40 @@ public class ProductController {
         return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.RECIPE_UPDATE_FAILED.getCode(), ErrorCode.RECIPE_UPDATE_FAILED.getMessage()));
 
     }
+    @GetMapping("/search/active")
+    public ResponseEntity<ApiResponse<Page<SearchProductResponse>>> searchProducts(
+            @RequestParam(required = false) String productName,
+            @RequestParam(required = false) List<Integer> categoryIds, // Changed to List
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "name") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDirection
+    ) {
+        Sort.Direction direction = Sort.Direction.fromString(sortDirection);
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+        Page<SearchProductResponse> products = productService.searchProducts(
+                productName,
+                categoryIds,
+                pageRequest
+        );
+
+        return ResponseEntity.ok(ApiResponse.success(products));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<ProductDetailResponse>> getProductDetailForUser(@PathVariable Integer id) {
+        ProductDetailResponse product = productService.getProductDetailForUser(id);
+        return ResponseEntity.ok(ApiResponse.success(product));
+
+    }
+
+    @PostMapping("/cart")
+    public ResponseEntity<ApiResponse< List<CartResponseDTO>>> getCartInfo(@RequestBody CartDTO cartDTO) {
+        List<CartResponseDTO> product = productService.getCartInfo(cartDTO);
+        return ResponseEntity.ok(ApiResponse.success(product));
+
+    }
+
+
 }

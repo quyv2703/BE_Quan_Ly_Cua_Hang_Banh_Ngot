@@ -14,7 +14,7 @@ SELECT
     i.url as image_url,
     pb.id as batch_id,
     pb.expiration_date as batch_expiration_date,
-    pb.current_discount as batch_current_discount,
+    pb.daily_discount as batch_daily_discount,
     pb.quantity as batch_quantity,
     pb.status as batch_status
 FROM products p
