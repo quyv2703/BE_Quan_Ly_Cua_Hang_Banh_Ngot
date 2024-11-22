@@ -26,4 +26,3 @@ public class DisposedProduct {
     @Column(name = "date_disposed", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime dateDisposed;
 }
-

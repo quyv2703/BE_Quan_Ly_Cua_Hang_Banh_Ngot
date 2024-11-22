@@ -8,9 +8,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PromotionRepository  extends JpaRepository<Promotion, Integer>, JpaSpecificationExecutor<Promotion> {
     List<Promotion> findByIsActiveTrue();
     Page<Promotion> findAll(Pageable pageable);
     Page<Promotion> findByNameContainingIgnoreCase(String keyword, Pageable pageable);
+    Optional<Promotion> findByName(String name);
+
 }

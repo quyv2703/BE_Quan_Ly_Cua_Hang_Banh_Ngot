@@ -20,21 +20,20 @@ public class ProductBatch {
     @JoinColumn(name = "product_id")
     private Product product;
 
+    @ManyToOne
+    @JoinColumn(name = "daily_production_id")
+    private DailyProduction dailyProduction;
+
     @Column(name = "expiration_date", nullable = false)
     private LocalDateTime expirationDate;
 
+
     @Column(name = "daily_discount")
     private Integer dailyDiscount;
-
-    @Column(name = "current_discount")
-    private Integer currentDiscount;
 
     @Column(name = "status")
     private String status;
 
     @Column(name = "quantity")
     private Integer quantity;
-
-    @OneToMany(mappedBy = "productBatch", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<DailyProductInventory> dailyInventories = new ArrayList<>();
 }

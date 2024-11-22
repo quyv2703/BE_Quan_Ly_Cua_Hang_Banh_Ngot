@@ -7,7 +7,10 @@ public enum QuyExeption {
     TABLE_NOT_FOUND("Q1002", "Table not found"),
     PRODUCT_BATCH_NOT_FOUND("Q1003","Product batch not found"),
     BILL_NOT_FOUND("Q1005","Bill not found"),
-    INVALID_BILL_STATUS("INVALID_BILL_STATUS","Bill status invalid");
+    INVALID_BILL_STATUS("Q1006","Bill status invalid"),
+    EMAIL_ALREADY_EXISTS("Q1007","Email already exists"),
+    ROLE_NOT_FOUND("Q1008","Role not found"),
+    USER_NOT_FOUND("Q1009","User not found");
     // Thuộc tính của Enum
     private final String code;
     private final String message;

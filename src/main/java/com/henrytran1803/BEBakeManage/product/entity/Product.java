@@ -5,7 +5,7 @@ import com.henrytran1803.BEBakeManage.product.dto.ProductDetailProjection;
 import com.henrytran1803.BEBakeManage.recipe.entity.Recipe;
 import com.henrytran1803.BEBakeManage.Image.entity.Image; // Import Image entity
 import jakarta.persistence.*;
-        import lombok.Data;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -50,7 +50,7 @@ public class Product {
     private Double discountLimit;
 
     @Column(name = "shelf_life_days_warning")
-    private Integer shelfLifeDaysWarning;
+    private int shelfLifeDaysWarning;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id")

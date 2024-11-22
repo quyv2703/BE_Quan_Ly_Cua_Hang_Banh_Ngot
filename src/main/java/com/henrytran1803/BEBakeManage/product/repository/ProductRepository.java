@@ -1,9 +1,12 @@
 package com.henrytran1803.BEBakeManage.product.repository;
 
+
 import com.henrytran1803.BEBakeManage.product.dto.ProductDetailProjection;
 import com.henrytran1803.BEBakeManage.product.entity.Product;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -26,5 +29,28 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
 
     @Query(value = "SELECT * FROM v_product_details", nativeQuery = true)
     List<ProductDetailProjection> findAllProductDetails();
+    Page<Product> findByNameContainingIgnoreCaseAndStatusIsTrue(
+            String name,
+            Pageable pageable
+    );
+
+//    Page<Product> findByCategoryIdInAndStatusIsTrue(
+//            List<Integer> categoryIds,
+//            Pageable pageable
+//    );
+//
+//    Page<Product> findByCategoryIdInAndNameContainingIgnoreCaseAndStatusIsTrue(
+//            List<Integer>  categoryIds,
+//            String name,
+//            Pageable pageable
+//    );
+
+    @Query("SELECT p FROM Product p WHERE p.category.id IN :categoryIds AND LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')) AND p.status = true")
+    Page<Product> findByCategoryIdInAndNameContainingIgnoreCaseAndStatusIsTrue(@Param("categoryIds") List<Integer> categoryIds, @Param("name") String name, Pageable pageable);
+
+    @Query("SELECT p FROM Product p WHERE p.category.id IN :categoryIds AND p.status = true")
+    Page<Product> findByCategoryIdInAndStatusIsTrue(@Param("categoryIds") List<Integer> categoryIds, Pageable pageable);
+
+    Page<Product> findByStatusIsTrue(Pageable pageable);
 
 }
