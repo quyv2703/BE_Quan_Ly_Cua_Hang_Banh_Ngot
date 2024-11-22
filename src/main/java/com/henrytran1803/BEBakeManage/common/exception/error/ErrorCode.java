@@ -39,7 +39,10 @@ public enum ErrorCode {
     PROMOTION_DISCOUNT_INVALID("PR010", "Invalid discount value"),
     PROMOTION_PRODUCT_ALREADY_EXISTS("PR011", "Product already exists in promotion"),
     PROMOTION_EXPIRED("PR012", "Promotion has expired"),
-    PROMOTION_NOT_ACTIVE("PR013", "Promotion is not active");
+    PROMOTION_NOT_ACTIVE("PR013", "Promotion is not active"),
+    IMAGE_DELETION_FAILED("I01"," IMAGE_DELETION_FAILED"),
+    IMAGE_NOT_FOUND("I02"," IMAGE_NOT_FOUND"),
+    INVALID_IMAGE_DATA("I03","INVALID_IMAGE_DATA");
 
     private final String code;
     private final String message;

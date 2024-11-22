@@ -5,7 +5,9 @@ public enum QuyExeption {
     AREA_NOT_FOUND("Q1001", "Area not found"),
     AREA_ALREADY_EXISTS("Q1004", "Area already exists"),
     TABLE_NOT_FOUND("Q1002", "Table not found"),
-    PRODUCT_BATCH_NOT_FOUND("Q1003","Product batch not found");
+    PRODUCT_BATCH_NOT_FOUND("Q1003","Product batch not found"),
+    BILL_NOT_FOUND("Q1005","Bill not found"),
+    INVALID_BILL_STATUS("INVALID_BILL_STATUS","Bill status invalid");
     // Thuộc tính của Enum
     private final String code;
     private final String message;

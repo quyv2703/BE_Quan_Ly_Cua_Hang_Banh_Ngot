@@ -11,7 +11,7 @@ public class BillRequest {
     private String customerName;
     private String customerPhone;
     private String paymentMethod;
-    private String paymentStatus;
+ /*   private String billStatus;*/
     private Long tableId; // Thông tin bàn
     private List<BillDetailRequest> billDetails;
 

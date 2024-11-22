@@ -3,6 +3,7 @@ package com.henrytran1803.BEBakeManage.config.security.securityconfig;
 import com.henrytran1803.BEBakeManage.config.security.jwt.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -36,6 +37,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/auth/**", "/uploads/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/admin/bills").permitAll() // Cho phép công khai tạo bill
                         .requestMatchers("/api/upload").hasRole("MANAGE")
                         .requestMatchers("/api/admin/**", "/api/categories/**", "/api/categories/", "/api/recipes/**", "/api/products/**", "/api/promotions/**").hasRole("MANAGE")
                         .requestMatchers("/api/user/**").hasRole("USER")

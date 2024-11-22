@@ -110,16 +110,15 @@ public class ProductController {
         }
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> deleteProduct(
-            @PathVariable("id") Integer productId)
-            {
+    public ResponseEntity<ApiResponse<?>> deleteProduct(@PathVariable("id") Integer productId) {
         try {
             productService.deleteProduct(productId);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok(ApiResponse.success("sucess"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.RECIPE_UPDATE_FAILED.getCode(), e.getMessage()));
         }
     }
+
     @Transactional
     @GetMapping("/{id}/price/history")
     public ResponseEntity<ApiResponse<List<ProductHistoryDTO>>> getPriceHistory(@PathVariable("id") Integer productId) {
@@ -130,5 +129,22 @@ public class ProductController {
     @GetMapping("/{id}/detail")
     public ApiResponse<ProductDetailDTO> getProductDetail(@PathVariable Integer id) {
         return productService.getProductDetail(id);
+    }
+    @GetMapping("/productbatches")
+    public ApiResponse<List<ProductSummaryDTO>> getListProductBatch() {
+        return productService.getListProductBatch();
+    }
+    @GetMapping("/productbatches/statuses")
+    public ApiResponse<List<ProductBatchDetailDTO>> getListProductBatchByStatus(@RequestParam List<String> statuses) {
+        return productService.getListProductBatchByStatues(statuses);
+    }
+    @PostMapping("/productbatches")
+    public ResponseEntity<ApiResponse<String>>getListProductBatchByStatus(@RequestBody DisposedProductDTO disposedProductDTO) {
+        if (productService.disposedProduct(disposedProductDTO)){
+            return ResponseEntity.ok().body(ApiResponse.success("Success"));
+        }
+
+        return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.RECIPE_UPDATE_FAILED.getCode(), ErrorCode.RECIPE_UPDATE_FAILED.getMessage()));
+
     }
 }

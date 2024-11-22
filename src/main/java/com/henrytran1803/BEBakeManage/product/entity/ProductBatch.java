@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
@@ -18,12 +20,11 @@ public class ProductBatch {
     @JoinColumn(name = "product_id")
     private Product product;
 
-    @ManyToOne
-    @JoinColumn(name = "daily_production_id")
-    private DailyProductInventory dailyProduction;
-
     @Column(name = "expiration_date", nullable = false)
     private LocalDateTime expirationDate;
+
+    @Column(name = "daily_discount")
+    private Integer dailyDiscount;
 
     @Column(name = "current_discount")
     private Integer currentDiscount;
@@ -33,4 +34,7 @@ public class ProductBatch {
 
     @Column(name = "quantity")
     private Integer quantity;
+
+    @OneToMany(mappedBy = "productBatch", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DailyProductInventory> dailyInventories = new ArrayList<>();
 }

@@ -32,7 +32,7 @@ public class Bill {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", nullable = false)
-    private BillStatus paymentStatus; // Trạng thái thanh toán: "NOT_PAID", "PAID", "COMPLETED"
+    private BillStatus billStatus; // Trạng thái thanh toán: "NOT_PAID", "PAID", "COMPLETED"
 
     @Column(name = "total_amount", nullable = false)
     private Double totalAmount = 0.0; // Tổng tiền của hóa đơn

@@ -13,6 +13,7 @@ public class ProductDetailDTO {
     private Double currentPrice;
     private String description;
     private int shelfLifeDays;
+    private int shelfLifeDaysWarning;
     private Boolean status;
     private Double weight;
     private Double length;
