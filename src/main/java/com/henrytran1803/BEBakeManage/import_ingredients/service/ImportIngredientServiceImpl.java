@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.henrytran1803.BEBakeManage.import_ingredients.dto.ImportIngredientDetailRequest;
@@ -16,6 +17,8 @@ import com.henrytran1803.BEBakeManage.import_ingredients.entity.ImportIngredient
 import com.henrytran1803.BEBakeManage.import_ingredients.repository.ImportIngredientRepository;
 import com.henrytran1803.BEBakeManage.ingredients.repository.IngredientRepository;
 
+@Service
+@Transactional
 public class ImportIngredientServiceImpl implements ImportIngredientService {
 
     @Autowired
@@ -24,7 +27,6 @@ public class ImportIngredientServiceImpl implements ImportIngredientService {
     @Autowired
     private IngredientRepository ingredientRepository;
 
-    @Transactional
     @Override
     public ImportIngredient importIngredients(ImportIngredientRequest request) {
         ImportIngredient importIngredient = new ImportIngredient();
@@ -61,7 +63,6 @@ public class ImportIngredientServiceImpl implements ImportIngredientService {
         return importIngredientRepository.save(importIngredient);
     }
 
-    @Transactional
     @Override
     public List<ImportIngredientResponse> getImportIngredients() {
         List<ImportIngredient> imports = importIngredientRepository.findAll();

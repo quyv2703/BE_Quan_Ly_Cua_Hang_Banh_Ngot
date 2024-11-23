@@ -5,12 +5,18 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.henrytran1803.BEBakeManage.product.entity.DailyProduction;
+import com.henrytran1803.BEBakeManage.product.entity.Product;
+import com.henrytran1803.BEBakeManage.product.entity.ProductBatch;
+import com.henrytran1803.BEBakeManage.product.repository.DailyProductionRepository;
+import com.henrytran1803.BEBakeManage.product.repository.ProductBatchRepository;
+import com.henrytran1803.BEBakeManage.product.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.henrytran1803.BEBakeManage.daily_productions.entity.DailyProduction;
-import com.henrytran1803.BEBakeManage.daily_productions.repository.DailyProductionRepository;
+//import com.henrytran1803.BEBakeManage.daily_productions.entity.DailyProduction;
+//import com.henrytran1803.BEBakeManage.daily_productions.repository.DailyProductionRepository;
 import com.henrytran1803.BEBakeManage.export_ingredients.dto.ExportIngredientDetailRequest;
 import com.henrytran1803.BEBakeManage.export_ingredients.dto.ExportIngredientProductDetailRequest;
 import com.henrytran1803.BEBakeManage.export_ingredients.dto.ExportIngredientRequest;
@@ -20,8 +26,8 @@ import com.henrytran1803.BEBakeManage.export_ingredients.entity.ExportIngredient
 import com.henrytran1803.BEBakeManage.export_ingredients.entity.ExportIngredientDetailId;
 import com.henrytran1803.BEBakeManage.export_ingredients.repository.ExportIngredientRepository;
 import com.henrytran1803.BEBakeManage.ingredients.repository.IngredientRepository;
-import com.henrytran1803.BEBakeManage.product_batches.entity.ProductBatch;
-import com.henrytran1803.BEBakeManage.product_batches.repository.ProductBatchRepository;
+//import com.henrytran1803.BEBakeManage.product_batches.entity.ProductBatch;
+//import com.henrytran1803.BEBakeManage.product_batches.repository.ProductBatchRepository;
 
 @Service
 public class ExportIngredientServiceImpl implements ExportIngredientService {
@@ -31,6 +37,9 @@ public class ExportIngredientServiceImpl implements ExportIngredientService {
 
     @Autowired
     private IngredientRepository ingredientRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
     
     @Autowired
     private DailyProductionRepository dailyProductionRepository;
@@ -53,12 +62,12 @@ public class ExportIngredientServiceImpl implements ExportIngredientService {
         
         // Lấy ngày hiện tại
         LocalDate currentDate = LocalDate.now();
-
+        LocalDateTime currentDateTime = currentDate.atStartOfDay();
         // Thêm mới hoặc lấy daily_productions theo ngày hiện tại
         DailyProduction dailyProduction = dailyProductionRepository.findByProductionDate(currentDate)
                 .orElseGet(() -> {
                     DailyProduction newDailyProduction = new DailyProduction();
-                    newDailyProduction.setProductionDate(currentDate);
+                    newDailyProduction.setProductionDate(currentDateTime);
                     return dailyProductionRepository.save(newDailyProduction);
                 });
         
@@ -95,8 +104,17 @@ public class ExportIngredientServiceImpl implements ExportIngredientService {
         // Xử lý sản phẩm
         for (ExportIngredientProductDetailRequest productRequest : request.getProducts()) {
             ProductBatch productBatch = new ProductBatch();
-            productBatch.setProduct_id(productRequest.getProduct_id());
-            productBatch.setDaily_production_id(dailyProduction.getId());
+
+            // Lấy đối tượng Product từ repository theo product_id
+            Product product = productRepository.findById(productRequest.getProduct_id())
+                    .orElseThrow(() -> new RuntimeException("Product not found for ID: " + productRequest.getProduct_id()));
+
+            // Lấy đối tượng DailyProduction từ repository theo dailyProduction_id
+            DailyProduction dlProduction = dailyProductionRepository.findById(dailyProduction.getId())
+                    .orElseThrow(() -> new RuntimeException("DailyProduction not found for ID: " + dailyProduction.getId()));
+
+            productBatch.setProduct(product);
+            productBatch.setDailyProduction(dlProduction);
             productBatch.setQuantity(productRequest.getQuantity());
             productBatchRepository.save(productBatch);
         }

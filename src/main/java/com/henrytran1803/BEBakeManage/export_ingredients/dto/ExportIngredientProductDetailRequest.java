@@ -2,7 +2,7 @@ package com.henrytran1803.BEBakeManage.export_ingredients.dto;
 
 public class ExportIngredientProductDetailRequest {
 	private int product_id;
-    private double quantity;
+    private int quantity;
 
 	public int getProduct_id() {
 		return product_id;
@@ -12,11 +12,11 @@ public class ExportIngredientProductDetailRequest {
 		this.product_id = product_id;
 	}
 
-	public double getQuantity() {
+	public int getQuantity() {
 		return quantity;
 	}
 	
-	public void setQuantity(double quantity) {
+	public void setQuantity(int quantity) {
 		this.quantity = quantity;
 	} 
 }

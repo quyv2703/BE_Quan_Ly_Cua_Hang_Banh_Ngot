@@ -21,7 +21,7 @@ import com.henrytran1803.BEBakeManage.supplier.service.SupplierService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/supplier")
+@RequestMapping("/api/supplier")
 public class SupplierController {
 	@Autowired
 	private SupplierService supplierService;

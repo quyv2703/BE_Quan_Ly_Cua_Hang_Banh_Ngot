@@ -24,7 +24,13 @@ public class JpaConfig {
                         "com.henrytran1803.BEBakeManage.recipe.entity",
                         "com.henrytran1803.BEBakeManage.product.entity",
                         "com.henrytran1803.BEBakeManage.promotion.entity",
-                        "com.henrytran1803.BEBakeManage.image.entity"
+                        "com.henrytran1803.BEBakeManage.image.entity",
+                        "com.henrytran1803.BEBakeManage.export_ingredients.entity",
+                        "com.henrytran1803.BEBakeManage.import_ingredients.entity",
+                        "com.henrytran1803.BEBakeManage.ingredients.entity",
+                        "com.henrytran1803.BEBakeManage.product_batches.entity",
+                        "com.henrytran1803.BEBakeManage.supplier.entity",
+                        "com.henrytran1803.BEBakeManage.units.entity"
                 )
                 .persistenceUnit("roleBasedPU")
                 .build();
