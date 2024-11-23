@@ -42,7 +42,13 @@ public enum ErrorCode {
     PROMOTION_NOT_ACTIVE("PR013", "Promotion is not active"),
     IMAGE_DELETION_FAILED("I01"," IMAGE_DELETION_FAILED"),
     IMAGE_NOT_FOUND("I02"," IMAGE_NOT_FOUND"),
-    INVALID_IMAGE_DATA("I03","INVALID_IMAGE_DATA");
+    INVALID_IMAGE_DATA("I03","INVALID_IMAGE_DATA"),
+    SUPPLIER_CREATE_FAIL("S01", "Supplier create fail"),
+	SUPPLIER_UPDATE_FAIL("S02", "Supplier update fail"),
+	IMPORT_INGREDIENT_CREATE_FAIL("IP01", "Import ingredients fail"),
+	IMPORT_INGREDIENT_FETCH_FAIL("IP02", "Import ingredients fetch fail"),
+	EXPORT_INGREDIENT_CREATE_FAIL("EI01", "Export ingredients fail"),
+	EXPORT_INGREDIENT_FETCH_FAIL("EI02", "Export ingredients fetch fail");
 
     private final String code;
     private final String message;
