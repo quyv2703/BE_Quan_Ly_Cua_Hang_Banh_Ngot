@@ -132,7 +132,6 @@ create index user_id
      product_id          int                                                                    null,
      daily_production_id int                                                                    null,
      expiration_date     datetime                                                               null,
-     current_discount    int                                                                    null,
      quantity            int                                                                    null,
      status              enum ('ACTIVE', 'NEAR_EXPIRY', 'EXPIRED', 'DISPOSED') default 'ACTIVE' not null,
      constraint product_batches_ibfk_1
