@@ -27,30 +27,28 @@ public class ImportIngredientController {
     @Autowired
     private ImportIngredientService importIngredientService;
 
-//    @PostMapping
-//    public ImportIngredient importIngredients(@RequestBody ImportIngredientRequest request) {
-//        return importIngredientService.importIngredients(request);
-//    }
+
     @PostMapping
     public ResponseEntity<ApiResponse<ImportIngredient>> importIngredients(@Valid @RequestBody ImportIngredientRequest request, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.IMPORT_INGREDIENT_CREATE_FAIL.name(), "Invalid import ingredient data"));
+            return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.IMPORT_INGREDIENT_CREATE_FAIL.name(),  bindingResult.getAllErrors().get(0).getDefaultMessage()));
         }
 
         try {
             ImportIngredient importedIngredient = importIngredientService.importIngredients(request);
             return ResponseEntity.ok(ApiResponse.success(importedIngredient));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.IMPORT_INGREDIENT_CREATE_FAIL.name(), "Could not import ingredients"));
+            return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.IMPORT_INGREDIENT_CREATE_FAIL.name(), e.getMessage()));
         }
     }
+
     @GetMapping
     public ResponseEntity<ApiResponse<List<ImportIngredientResponse>>> getAllImportIngredients() {
         try {
             List<ImportIngredientResponse> importIngredients = importIngredientService.getImportIngredients();
             return ResponseEntity.ok(ApiResponse.success(importIngredients));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.IMPORT_INGREDIENT_FETCH_FAIL.name(), "Error fetching import ingredients"));
+            return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.IMPORT_INGREDIENT_FETCH_FAIL.name(), e.getMessage()));
         }
     }
 }

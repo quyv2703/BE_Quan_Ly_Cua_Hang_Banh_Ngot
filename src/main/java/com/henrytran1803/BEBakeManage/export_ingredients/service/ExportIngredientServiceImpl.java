@@ -60,14 +60,14 @@ public class ExportIngredientServiceImpl implements ExportIngredientService {
             }
         }
         
-        // Lấy ngày hiện tại
-        LocalDate currentDate = LocalDate.now();
-        LocalDateTime currentDateTime = currentDate.atStartOfDay();
+        // Lấy ngày hiện tại không lấy giờ
+        LocalDateTime currentDate = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+
         // Thêm mới hoặc lấy daily_productions theo ngày hiện tại
         DailyProduction dailyProduction = dailyProductionRepository.findByProductionDate(currentDate)
                 .orElseGet(() -> {
                     DailyProduction newDailyProduction = new DailyProduction();
-                    newDailyProduction.setProductionDate(currentDateTime);
+                    newDailyProduction.setProductionDate(currentDate);
                     return dailyProductionRepository.save(newDailyProduction);
                 });
         

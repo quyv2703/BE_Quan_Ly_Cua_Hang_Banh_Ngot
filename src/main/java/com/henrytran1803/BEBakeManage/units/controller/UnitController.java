@@ -2,6 +2,7 @@ package com.henrytran1803.BEBakeManage.units.controller;
 
 import java.util.List;
 
+import com.henrytran1803.BEBakeManage.common.exception.error.ErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,23 +25,36 @@ public class UnitController {
 	
 	@PostMapping
     public ResponseEntity<ApiResponse<Units>> createUnit(@RequestBody UnitCreationRequest request) {
-        Units createdUnit = unitService.createUnit(request);
-        return ResponseEntity.ok(ApiResponse.success(createdUnit));
+
+        try {
+            Units createdUnit = unitService.createUnit(request);
+            return ResponseEntity.ok(ApiResponse.success(createdUnit));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.UNITS_CREATE_FAIL.getCode(), e.getMessage()));
+        }
     }
 	
 	@GetMapping
     public ResponseEntity<ApiResponse<List<Units>>> getUnits() {
-        List<Units> units = unitService.getUnits();
-        return ResponseEntity.ok(ApiResponse.success(units));
+
+        try {
+            List<Units> units = unitService.getUnits();
+            return ResponseEntity.ok(ApiResponse.success(units));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.UNITS_GET_FAIL.getCode(), e.getMessage()));
+        }
     }
 	
-//	@GetMapping("/{unitId}")
-//	Units getUnit(@PathVariable("unitId") String unitId) {
-//		return unitService.getUnit(unitId);
-//	}
+
 	@GetMapping("/{id}")
     public ResponseEntity<ApiResponse<Units>> getUnitById(@PathVariable("id") int id) {
-        Units unit = unitService.getUnit(id);
-        return ResponseEntity.ok(ApiResponse.success(unit));
+
+        try {
+            Units unit = unitService.getUnit(id);
+            return ResponseEntity.ok(ApiResponse.success(unit));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.UNITS_GET_FAIL.getCode(), e.getMessage()));
+        }
+
     }
 }

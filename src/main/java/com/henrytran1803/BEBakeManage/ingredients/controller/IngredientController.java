@@ -2,6 +2,7 @@ package com.henrytran1803.BEBakeManage.ingredients.controller;
 
 import java.util.List;
 
+import com.henrytran1803.BEBakeManage.common.exception.error.ErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,20 +36,38 @@ public class IngredientController {
 	
 	@PostMapping
     public ResponseEntity<ApiResponse<Ingredients>> createIngredient(@RequestBody IngredientCreationRequest request) {
-        Ingredients ingredient = ingredientService.createIngredient(request);
-        return ResponseEntity.ok(ApiResponse.success(ingredient));
+        try {
+            Ingredients ingredient = ingredientService.createIngredient(request);
+            return ResponseEntity.ok(ApiResponse.success(ingredient));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(
+                    ApiResponse.error(ErrorCode.INGREDIENT_CREATION_FAILED.getCode(), e.getMessage())
+            );
+        }
     }
 
 	@PutMapping("/{id}")
     public ResponseEntity<ApiResponse<Ingredients>> updateIngredient(@PathVariable int id, @RequestBody IngredientCreationRequest request) {
-        Ingredients updatedIngredient = ingredientService.updateIngredient(id, request);
-        return ResponseEntity.ok(ApiResponse.success(updatedIngredient));
+        try {
+            Ingredients updatedIngredient = ingredientService.updateIngredient(id, request);
+            return ResponseEntity.ok(ApiResponse.success(updatedIngredient));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(
+                    ApiResponse.error(ErrorCode.INGREDIENT_UPDATE_FAILED.getCode(),  e.getMessage())
+            );
+        }
     }
 
 	@DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteIngredient(@PathVariable int id) {
-        ingredientService.deleteIngredient(id);
-        return ResponseEntity.ok(ApiResponse.success(null));
+        try {
+            ingredientService.deleteIngredient(id);
+            return ResponseEntity.ok(ApiResponse.success(null));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(
+                    ApiResponse.error(ErrorCode.INGREDIENT_DELETE_FAILED.getCode(), e.getMessage())
+            );
+        }
     }
 	
 	@GetMapping("/search")

@@ -2,6 +2,7 @@ package com.henrytran1803.BEBakeManage.supplier.controller;
 
 import java.util.List;
 
+import com.henrytran1803.BEBakeManage.common.exception.error.ErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -29,7 +30,11 @@ public class SupplierController {
 	@GetMapping
     public ResponseEntity<ApiResponse<List<Supplier>>> getAllSuppliers() {
         List<Supplier> suppliers = supplierService.getAllSuppliers();
-        return ResponseEntity.ok(ApiResponse.success(suppliers));
+        try {
+            return ResponseEntity.ok(ApiResponse.success(suppliers));
+        } catch(Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.SUPPLIER_GET_FAIL.getCode(), e.getMessage()));
+        }
     }
     
 	@PostMapping
@@ -38,7 +43,7 @@ public class SupplierController {
             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("SUPPLIER_CREATE_FAIL", "Invalid supplier data"));
+                    .body(ApiResponse.error(ErrorCode.SUPPLIER_CREATE_FAIL.getCode(), bindingResult.getAllErrors().get(0).getDefaultMessage() ));
         }
 
         Supplier createdSupplier = supplierService.addSupplier(request);
@@ -52,17 +57,15 @@ public class SupplierController {
             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("SUPPLIER_UPDATE_FAIL", "Invalid supplier data"));
+                    .body(ApiResponse.error(ErrorCode.SUPPLIER_UPDATE_FAIL.getCode(), bindingResult.getAllErrors().get(0).getDefaultMessage()));
         }
 
-        Supplier updatedSupplier = supplierService.updateSupplier(id, request);
-        return ResponseEntity.ok(ApiResponse.success(updatedSupplier));
+        try {
+            Supplier updatedSupplier = supplierService.updateSupplier(id, request);
+            return ResponseEntity.ok(ApiResponse.success(updatedSupplier));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.SUPPLIER_UPDATE_FAIL.getCode(), e.getMessage()));
+        }
+
     }
-    
-//    @GetMapping("/{id}")
-//    public ResponseEntity<ApiResponse<Supplier>> getSupplierById(@PathVariable int id) {
-//        Supplier supplier = supplierService.getSupplierById(id)
-//                .orElseThrow(() -> new RuntimeException("Supplier not found with id " + id));
-//        return ResponseEntity.ok(ApiResponse.success(supplier));
-//    }
 }

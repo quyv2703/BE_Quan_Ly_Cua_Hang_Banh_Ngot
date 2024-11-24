@@ -20,8 +20,10 @@ public class ExportIngredient {
     
     private int sender_id;
     private LocalDateTime export_date;
+
     private int daily_production_id;
-    private double total_amount;
+
+	private double total_amount;
 
     @OneToMany(mappedBy = "exportIngredient", cascade = CascadeType.ALL)
     private List<ExportIngredientDetail> details;

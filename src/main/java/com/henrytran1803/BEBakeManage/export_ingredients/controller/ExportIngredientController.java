@@ -31,14 +31,14 @@ public class ExportIngredientController {
     public ResponseEntity<ApiResponse<ExportIngredient>> exportIngredients(@Valid @RequestBody ExportIngredientRequest request, BindingResult bindingResult) {
         // Kiểm tra lỗi dữ liệu đầu vào
         if (bindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.EXPORT_INGREDIENT_CREATE_FAIL.name(), "Invalid export ingredient data"));
+            return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.EXPORT_INGREDIENT_CREATE_FAIL.name(), bindingResult.getAllErrors().get(0).getDefaultMessage()));
         }
 
         try {
             ExportIngredient exportedIngredient = exportIngredientService.exportIngredients(request);
             return ResponseEntity.ok(ApiResponse.success(exportedIngredient));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.EXPORT_INGREDIENT_CREATE_FAIL.name(), "Could not export ingredients"));
+            return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.EXPORT_INGREDIENT_CREATE_FAIL.name(), e.getMessage()));
         }
     }
 
@@ -48,7 +48,7 @@ public class ExportIngredientController {
             List<ExportIngredientResponse> exportIngredients = exportIngredientService.getExportIngredients();
             return ResponseEntity.ok(ApiResponse.success(exportIngredients));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.EXPORT_INGREDIENT_FETCH_FAIL.name(), "Error fetching export ingredients"));
+            return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.EXPORT_INGREDIENT_FETCH_FAIL.name(), e.getMessage()));
         }
     }
 }

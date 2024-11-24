@@ -44,11 +44,17 @@ public enum ErrorCode {
     IMAGE_NOT_FOUND("I02"," IMAGE_NOT_FOUND"),
     INVALID_IMAGE_DATA("I03","INVALID_IMAGE_DATA"),
     SUPPLIER_CREATE_FAIL("S01", "Supplier create fail"),
-	SUPPLIER_UPDATE_FAIL("S02", "Supplier update fail"),
+    SUPPLIER_GET_FAIL("S02", "Supplier get fail"),
+	SUPPLIER_UPDATE_FAIL("S03", "Supplier update fail"),
+    INGREDIENT_CREATION_FAILED("IN01", "Ingredient creation failed"),
+    INGREDIENT_UPDATE_FAILED("IN02", "Ingredient update failed"),
+    INGREDIENT_DELETE_FAILED("IN03", "Ingredient delete failed"),
 	IMPORT_INGREDIENT_CREATE_FAIL("IP01", "Import ingredients fail"),
 	IMPORT_INGREDIENT_FETCH_FAIL("IP02", "Import ingredients fetch fail"),
 	EXPORT_INGREDIENT_CREATE_FAIL("EI01", "Export ingredients fail"),
-	EXPORT_INGREDIENT_FETCH_FAIL("EI02", "Export ingredients fetch fail");
+	EXPORT_INGREDIENT_FETCH_FAIL("EI02", "Export ingredients fetch fail"),
+    UNITS_GET_FAIL("UN01", "Get unit fail"),
+    UNITS_CREATE_FAIL("UN01", "Create unit fail");
 
     private final String code;
     private final String message;
