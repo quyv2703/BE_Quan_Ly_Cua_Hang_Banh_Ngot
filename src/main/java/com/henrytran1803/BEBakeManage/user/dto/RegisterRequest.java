@@ -1,11 +1,40 @@
 package com.henrytran1803.BEBakeManage.user.dto;
 
+import com.henrytran1803.BEBakeManage.user.entity.Role;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+import java.util.Date;
+import java.util.Set;
+
 public class RegisterRequest {
+    @NotBlank(message = "{first.name.not.blank}")
     private String firstName;
+
+    @NotBlank(message = "{last.name.not.blank}")
     private String lastName;
+
+    @Email(message = "{email.invalid.format}")
+    @NotBlank(message = "{email.not.blank}")
     private String email;
+
+    @NotNull(message = "{date.of.birth.not.null}")
     private String dateOfBirth;
+
+    @NotBlank(message = "{password.not.blank}")
     private String password;
+
+    @NotNull(message = "{roles.not.null}")
+    private Set<String> roles;
+
+    public Set<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<String> roles) {
+        this.roles = roles;
+    }
 
     // Getters and Setters
     public String getFirstName() {

@@ -3,15 +3,18 @@ package com.henrytran1803.BEBakeManage.user.service;
 import com.henrytran1803.BEBakeManage.common.exception.error.QuyExeption;
 import com.henrytran1803.BEBakeManage.common.response.ApiResponse;
 import com.henrytran1803.BEBakeManage.user.dto.UserRequest;
+import com.henrytran1803.BEBakeManage.user.dto.UserResponseRegisterDTO;
 import com.henrytran1803.BEBakeManage.user.entity.Role;
 import com.henrytran1803.BEBakeManage.user.entity.User;
 import com.henrytran1803.BEBakeManage.user.repository.RoleRepository;
 import com.henrytran1803.BEBakeManage.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,6 +26,8 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
     @Autowired
     private RoleRepository roleRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     @Override
     public Optional<User> getUserByUserName(String userName) {
         return userRepository.findByEmail(userName);
@@ -32,59 +37,115 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id);
     }
 
+
     @Override
-    public ApiResponse<User> createUser(User user, Set<String> roleNames) {
-        // Kiểm tra xem Email đã tồn tại chưa
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            return ApiResponse.Q_failure(null, QuyExeption.EMAIL_ALREADY_EXISTS);
+    public ApiResponse<List<UserResponseRegisterDTO>> getActiveUsers(boolean isActive) {
+        // Lấy danh sách user dựa trên trạng thái
+        List<User> users = userRepository.findByIsActive(isActive);
+
+        // Map danh sách user sang danh sách DTO
+        List<UserResponseRegisterDTO> userDTOs = users.stream()
+                .map(user -> new UserResponseRegisterDTO(
+                        user.getId(),
+                        user.getFirstName(),
+                        user.getLastName(),
+                        user.getEmail(),
+                        user.getActive(),
+                        user.getRoles().stream().map(Role::getName).collect(Collectors.toSet())
+                ))
+                .collect(Collectors.toList());
+
+        return ApiResponse.Q_success(userDTOs, QuyExeption.SUCCESS);
+    }
+
+    @Override
+    @Transactional
+    public ApiResponse<UserResponseRegisterDTO> updateUser(int id, UserRequest userRequest) {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isEmpty()) {
+            return ApiResponse.Q_failure(null, QuyExeption.USER_NOT_FOUND);
         }
 
+        User user = optionalUser.get();
+
+        // Cập nhật thông tin cơ bản
+        user.setFirstName(userRequest.getFirstName());
+        user.setLastName(userRequest.getLastName());
+        user.setEmail(userRequest.getEmail());
+
+        // Kiểm tra và mã hóa mật khẩu nếu có thay đổi
+        if (!userRequest.getPassword().equals(user.getPassword())) {
+            user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+        }
+
+        user.setDateOfBirth(userRequest.getDateOfBirth());
+        user.setActive(userRequest.getIsActive());
+
+        // Cập nhật roles
         Set<Role> roles = new HashSet<>();
-        for (String roleName : roleNames) {
+        for (String roleName : userRequest.getRoles()) {
             Optional<Role> roleOptional = roleRepository.findByName(roleName);
             if (roleOptional.isEmpty()) {
-                return ApiResponse.Q_failure(null, QuyExeption.ROLE_NOT_FOUND); // Role không tồn tại
+                return ApiResponse.Q_failure(null, QuyExeption.ROLE_NOT_FOUND);
             }
             roles.add(roleOptional.get());
         }
         user.setRoles(roles);
 
-        // Lưu user vào cơ sở dữ liệu
-        User savedUser = userRepository.save(user);
-        return ApiResponse.Q_success(savedUser, QuyExeption.SUCCESS);
-    }
-
-    @Override
-    public ApiResponse<User> updateUser(int id, UserRequest userRequest) {
-        Optional<User> optionalUser = userRepository.findById(id);
-        if (optionalUser.isEmpty()) {
-            return ApiResponse.Q_failure(null, QuyExeption.USER_NOT_FOUND);
-        }
-
-        User user = optionalUser.get();
-        user.setFirstName(userRequest.getFirstName());
-        user.setLastName(userRequest.getLastName());
-        user.setEmail(userRequest.getEmail());
-        user.setPassword(userRequest.getPassword()); // Nên mã hóa mật khẩu ở đây
-        user.setDateOfBirth(userRequest.getDateOfBirth());
-        user.setActive(userRequest.getIsActive());
+        // Lưu thông tin vào cơ sở dữ liệu
         userRepository.save(user);
-
-        return ApiResponse.Q_success(user, QuyExeption.SUCCESS);
+        // Map sang DTO
+        UserResponseRegisterDTO userDTO = new UserResponseRegisterDTO(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getActive(),
+                user.getRoles().stream().map(Role::getName).collect(Collectors.toSet())
+        );
+        return ApiResponse.Q_success(userDTO, QuyExeption.SUCCESS);
     }
 
     @Override
+    @Transactional
     public ApiResponse<Void> deactivateUser(int id) {
+        // Tìm User theo ID
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isEmpty()) {
-            return ApiResponse.Q_failure(null, QuyExeption.USER_NOT_FOUND);
+            return ApiResponse.Q_failure(null, QuyExeption.USER_NOT_FOUND); // Lỗi nếu không tìm thấy
         }
 
+        // Cập nhật trạng thái active của user
         User user = optionalUser.get();
+        if (!user.getActive()) {
+            return ApiResponse.Q_failure(null, QuyExeption.USER_ALREADY_INACTIVE); // Nếu đã inactive thì trả lỗi
+        }
+
         user.setActive(false); // Khóa tài khoản
         userRepository.save(user);
 
-        return ApiResponse.Q_success(null, QuyExeption.SUCCESS);
+        return ApiResponse.Q_success(null, QuyExeption.SUCCESS); // Thành công
+    }
+
+    @Override
+    public ApiResponse<UserResponseRegisterDTO> findUserById(int id) {
+        Optional<User> optionalUser = userRepository.findById(id);
+
+        if (optionalUser.isEmpty()) {
+            return ApiResponse.Q_failure(null, QuyExeption.USER_NOT_FOUND);
+        }
+
+        User user = optionalUser.get();
+        UserResponseRegisterDTO userDTO = new UserResponseRegisterDTO(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getActive(),
+                user.getRoles().stream().map(Role::getName).collect(Collectors.toSet())
+        );
+
+        return ApiResponse.Q_success(userDTO, QuyExeption.SUCCESS);
     }
 
 }

@@ -21,6 +21,10 @@ public class ApiResponse<T> {
         return new ApiResponse<>(true, quyExeption.getCode(), quyExeption.getMessage(), data);
     }
     public static <T> ApiResponse<T> Q_failure(T data, QuyExeption quyExeption) {
-        return new ApiResponse<>(true, quyExeption.getCode(), quyExeption.getMessage(), data);
+        return new ApiResponse<>(false, quyExeption.getCode(), quyExeption.getMessage(), data);
     }
+    public static <T> ApiResponse<T> Q_failure(T data, QuyExeption error, String details) {
+        return new ApiResponse<>(false, error.getMessage() + ": " + details, error.getCode(), data);
+    }
+
 }

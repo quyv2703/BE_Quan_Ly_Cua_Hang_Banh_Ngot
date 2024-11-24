@@ -10,7 +10,10 @@ public enum QuyExeption {
     INVALID_BILL_STATUS("Q1006","Bill status invalid"),
     EMAIL_ALREADY_EXISTS("Q1007","Email already exists"),
     ROLE_NOT_FOUND("Q1008","Role not found"),
-    USER_NOT_FOUND("Q1009","User not found");
+    USER_NOT_FOUND("Q1009","User not found"),
+    INVALID_DATE_FORMAT("Q1010","Invalid date format"),
+    INVALID_INPUT("Q1010", "Invalid input provided"),
+    USER_ALREADY_INACTIVE("Q1011","User already inactive");
     // Thuộc tính của Enum
     private final String code;
     private final String message;
