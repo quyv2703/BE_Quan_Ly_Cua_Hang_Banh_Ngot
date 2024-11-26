@@ -25,6 +25,11 @@ public class IngredientServiceImpl implements IngredientService {
     }
 
     @Override
+    public List<Ingredients> getAllIngredients() {
+        return ingredientRepository.findAll();
+    }
+
+    @Override
     public Ingredients createIngredient(IngredientCreationRequest request) {
         Ingredients ingredient = new Ingredients();
         ingredient.setName(request.getName());

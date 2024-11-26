@@ -28,9 +28,15 @@ public class IngredientController {
 	@Autowired
     private IngredientService ingredientService;
 
-	@GetMapping
+	@GetMapping("/active")
     public ResponseEntity<ApiResponse<List<Ingredients>>> getActiveIngredients() {
         List<Ingredients> ingredients = ingredientService.getActiveIngredients();
+        return ResponseEntity.ok(ApiResponse.success(ingredients));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<Ingredients>>> getAllIngredients() {
+        List<Ingredients> ingredients = ingredientService.getAllIngredients();
         return ResponseEntity.ok(ApiResponse.success(ingredients));
     }
 	

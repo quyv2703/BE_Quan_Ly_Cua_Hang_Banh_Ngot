@@ -9,7 +9,7 @@ import com.henrytran1803.BEBakeManage.ingredients.entity.Ingredients;
 
 public interface IngredientService {
     List<Ingredients> getActiveIngredients();
-
+    List<Ingredients> getAllIngredients();
     Ingredients createIngredient(IngredientCreationRequest request);
 
     Ingredients updateIngredient(int id, IngredientCreationRequest request);
