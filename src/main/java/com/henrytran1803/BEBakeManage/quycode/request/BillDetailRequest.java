@@ -1,4 +1,4 @@
-package com.henrytran1803.BEBakeManage.quycode.dto;
+package com.henrytran1803.BEBakeManage.quycode.request;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -8,7 +8,7 @@ import lombok.Setter;
 public class BillDetailRequest {
     private Long productBatchId;
     private Integer quantity;
-    private Double price;
+
 
     // Getters and Setters
 }

@@ -1,5 +1,6 @@
 package com.henrytran1803.BEBakeManage.product.entity;
 
+import com.henrytran1803.BEBakeManage.promotion.entity.PromotionDetail;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -36,4 +37,8 @@ public class ProductBatch {
 
     @Column(name = "quantity")
     private Integer quantity;
+
+    // Thêm mối quan hệ với PromotionDetail
+    @OneToMany(mappedBy = "productBatch", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<PromotionDetail> promotionDetails;
 }
