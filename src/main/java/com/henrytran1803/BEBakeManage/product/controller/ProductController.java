@@ -1,6 +1,5 @@
 package com.henrytran1803.BEBakeManage.product.controller;
 
-import com.google.protobuf.Api;
 import com.henrytran1803.BEBakeManage.common.exception.error.ErrorCode;
 import com.henrytran1803.BEBakeManage.common.response.ApiResponse;
 import com.henrytran1803.BEBakeManage.product.dto.*;
@@ -172,8 +171,12 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<ProductDetailResponse>> getProductDetailForUser(@PathVariable Integer id) {
-        ProductDetailResponse product = productService.getProductDetailForUser(id);
-        return ResponseEntity.ok(ApiResponse.success(product));
+        try {
+            ProductDetailResponse product = productService.getProductDetailForUser(id);
+            return ResponseEntity.ok(ApiResponse.success(product));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("P011","Cant not find product"));
+        }
 
     }
 

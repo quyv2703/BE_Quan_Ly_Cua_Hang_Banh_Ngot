@@ -1,6 +1,10 @@
 package com.henrytran1803.BEBakeManage.recipe.service;
 
+import com.henrytran1803.BEBakeManage.ingredients.entity.Ingredients;
+import com.henrytran1803.BEBakeManage.ingredients.repository.IngredientRepository;
 import com.henrytran1803.BEBakeManage.recipe.dto.CreateRecipeDTO;
+import com.henrytran1803.BEBakeManage.recipe.dto.GetRecipeDTO;
+import com.henrytran1803.BEBakeManage.recipe.dto.GetRecipeDetailDTO;
 import com.henrytran1803.BEBakeManage.recipe.dto.RecipeDTO;
 import com.henrytran1803.BEBakeManage.recipe.entity.Recipe;
 import com.henrytran1803.BEBakeManage.recipe.entity.RecipeDetail;
@@ -25,7 +29,8 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Autowired
     private RecipeDetailRepository recipeDetailRepository;
-
+    @Autowired
+    private IngredientRepository ingredientRepository;
     @Autowired
     private ProductRepository productRepository;
 
@@ -35,10 +40,36 @@ public class RecipeServiceImpl implements RecipeService {
         return recipeRepository.findAll();
     }
 
+
     @Transactional
     @Override
-    public Optional<Recipe> getRecipeById(int id) {
-        return recipeRepository.findById(id);
+    public GetRecipeDTO getRecipeById(int id) {
+        GetRecipeDTO getRecipeDTO = new GetRecipeDTO();
+        Recipe recipe = recipeRepository.findById(id)
+                .orElseThrow();
+
+        getRecipeDTO.setId(recipe.getId());
+        getRecipeDTO.setName(recipe.getName());
+
+        List<GetRecipeDetailDTO> getRecipeDetailDTOS = new ArrayList<>();
+
+        for (RecipeDetail recipeDetail : recipe.getRecipeDetails()) {
+            GetRecipeDetailDTO detailDTO = new GetRecipeDetailDTO();
+
+            Ingredients ingredients = ingredientRepository.findById(recipeDetail.getId().getIngredientId())
+                    .orElseThrow();
+
+            detailDTO.setIngredientId(ingredients.getId());
+            detailDTO.setIngredientName(ingredients.getName());
+            detailDTO.setQuantity(recipeDetail.getQuantity());
+
+            getRecipeDetailDTOS.add(detailDTO);
+        }
+
+        // Set list recipe details vào DTO chính
+        getRecipeDTO.setDetailDTOS(getRecipeDetailDTOS);
+
+        return getRecipeDTO;
     }
 
     @Override
@@ -78,9 +109,18 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public Optional<Recipe> deleteRecipeById(int id) {
         Optional<Recipe> recipe = recipeRepository.findById(id);
+
         if (recipe.isPresent()) {
+            boolean isUsedInProduct = productRepository.existsByRecipeId(id);
+
+            if (isUsedInProduct) {
+                throw new IllegalStateException("Cannot delete recipe because it is being used in products");
+            }
+
+            recipeDetailRepository.deleteByRecipeId(id);
             recipeRepository.deleteById(id);
         }
+
         return recipe;
     }
 

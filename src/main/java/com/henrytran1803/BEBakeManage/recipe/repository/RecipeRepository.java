@@ -18,4 +18,6 @@ public interface RecipeRepository extends JpaRepository<Recipe, Integer> {
 
     @EntityGraph(attributePaths = {"recipeDetails"})
     Optional<Recipe> findById(int id);
+
+
 }
