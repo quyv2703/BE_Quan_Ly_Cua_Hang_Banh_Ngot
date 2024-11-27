@@ -10,6 +10,9 @@ import com.henrytran1803.BEBakeManage.user.entity.User;
 import com.henrytran1803.BEBakeManage.user.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -21,7 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/api/admin/user")
 public class UserController {
     @Autowired
     private UserService userService;
@@ -51,26 +54,24 @@ public class UserController {
         }
     }
 
-    // Lấy danh sách user active
     @GetMapping("/active")
-    public ResponseEntity<ApiResponse<List<UserResponseRegisterDTO>>> getActiveUsers() {
-        ApiResponse<List<UserResponseRegisterDTO>> response = userService.getActiveUsers(true);
-        if (response.isSuccess()) {
-            return ResponseEntity.ok(response); // HTTP 200
-        } else {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response); // HTTP 204 nếu không có user
-        }
+    public ResponseEntity<ApiResponse<Page<UserResponseRegisterDTO>>> getActiveUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        ApiResponse<Page<UserResponseRegisterDTO>> response = userService.getActiveUsers(true, pageable);
+
+        return ResponseEntity.status(response.isSuccess() ? HttpStatus.OK : HttpStatus.NO_CONTENT).body(response);
     }
 
-    // Lấy danh sách user non-active
     @GetMapping("/inactive")
-    public ResponseEntity<ApiResponse<List<UserResponseRegisterDTO>>> getInactiveUsers() {
-        ApiResponse<List<UserResponseRegisterDTO>> response = userService.getActiveUsers(false);
-        if (response.isSuccess()) {
-            return ResponseEntity.ok(response); // HTTP 200
-        } else {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response); // HTTP 204 nếu không có user
-        }
+    public ResponseEntity<ApiResponse<Page<UserResponseRegisterDTO>>> getInactiveUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        ApiResponse<Page<UserResponseRegisterDTO>> response = userService.getActiveUsers(false, pageable);
+
+        return ResponseEntity.status(response.isSuccess() ? HttpStatus.OK : HttpStatus.NO_CONTENT).body(response);
     }
 
     // Lấy thông tin user theo ID

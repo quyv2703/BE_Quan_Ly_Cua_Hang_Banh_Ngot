@@ -114,6 +114,7 @@ public class AuthService {
                 savedUser.getFirstName(),
                 savedUser.getLastName(),
                 savedUser.getEmail(),
+                savedUser.getDateOfBirth().toString(),
                 savedUser.getActive(),
                 savedUser.getRoles().stream().map(Role::getName).collect(Collectors.toSet())
         );

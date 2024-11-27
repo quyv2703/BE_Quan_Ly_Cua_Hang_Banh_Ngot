@@ -10,6 +10,7 @@ public class BillResponseNoDetail {
     private String customerName;
     private String customerPhone;
     private String paymentMethod;
+    private String diningOption;
     private String billStatus;
     private Double totalAmount;
     public BillResponseNoDetail() {}

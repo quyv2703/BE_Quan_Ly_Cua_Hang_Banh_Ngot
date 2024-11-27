@@ -10,6 +10,8 @@ import com.henrytran1803.BEBakeManage.user.repository.RoleRepository;
 import com.henrytran1803.BEBakeManage.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -37,26 +39,32 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id);
     }
 
+ /*   @Override
+    public ApiResponse<List<UserResponseRegisterDTO>> getActiveUsers(boolean isActive) {
+        return null;
+    }*/
+
 
     @Override
-    public ApiResponse<List<UserResponseRegisterDTO>> getActiveUsers(boolean isActive) {
-        // Lấy danh sách user dựa trên trạng thái
-        List<User> users = userRepository.findByIsActive(isActive);
+    public ApiResponse<Page<UserResponseRegisterDTO>> getActiveUsers(boolean isActive, Pageable pageable) {
+        // Lấy danh sách user dựa trên trạng thái và phân trang
+        Page<User> users = userRepository.findByIsActive(isActive, pageable);
 
         // Map danh sách user sang danh sách DTO
-        List<UserResponseRegisterDTO> userDTOs = users.stream()
-                .map(user -> new UserResponseRegisterDTO(
-                        user.getId(),
-                        user.getFirstName(),
-                        user.getLastName(),
-                        user.getEmail(),
-                        user.getActive(),
-                        user.getRoles().stream().map(Role::getName).collect(Collectors.toSet())
-                ))
-                .collect(Collectors.toList());
+        Page<UserResponseRegisterDTO> userDTOs = users.map(user -> new UserResponseRegisterDTO(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getDateOfBirth().toString(),
+                user.getActive(),
+                user.getRoles().stream().map(Role::getName).collect(Collectors.toSet())
+        ));
 
+        // Trả về ApiResponse với phân trang
         return ApiResponse.Q_success(userDTOs, QuyExeption.SUCCESS);
     }
+
 
     @Override
     @Transactional
@@ -100,6 +108,7 @@ public class UserServiceImpl implements UserService {
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),
+                user.getDateOfBirth().toString(),
                 user.getActive(),
                 user.getRoles().stream().map(Role::getName).collect(Collectors.toSet())
         );
@@ -141,6 +150,7 @@ public class UserServiceImpl implements UserService {
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),
+                user.getDateOfBirth().toString(),
                 user.getActive(),
                 user.getRoles().stream().map(Role::getName).collect(Collectors.toSet())
         );

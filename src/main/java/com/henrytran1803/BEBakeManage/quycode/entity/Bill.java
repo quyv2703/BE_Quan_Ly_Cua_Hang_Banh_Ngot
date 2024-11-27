@@ -1,7 +1,9 @@
 package com.henrytran1803.BEBakeManage.quycode.entity;
 
+import com.henrytran1803.BEBakeManage.quycode.DiningOption;
 import com.henrytran1803.BEBakeManage.quycode.PaymentMethod;
 import com.henrytran1803.BEBakeManage.quycode.BillStatus;
+import com.henrytran1803.BEBakeManage.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -46,6 +48,12 @@ public class Bill {
 
     @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BillDetail> billDetails = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "dining_option", nullable = false)
+    private DiningOption diningOption; // Thêm trạng thái 'Tại bàn' hoặc 'Mang về'
+
+
 
     public void addBillDetail(BillDetail billDetail) {
         billDetails.add(billDetail);
