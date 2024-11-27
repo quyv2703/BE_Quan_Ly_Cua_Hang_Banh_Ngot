@@ -22,7 +22,7 @@ public class Recipe {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<RecipeDetail> recipeDetails = new ArrayList<>();
 
     public Recipe(String name) {

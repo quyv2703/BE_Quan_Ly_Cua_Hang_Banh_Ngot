@@ -17,5 +17,6 @@ public interface RecipeService {
     Recipe updateRecipe(Recipe updatedRecipe, List<RecipeDetail> updatedDetails);
     Optional<Recipe> deleteRecipeById(int id);
     Recipe updateRecipe(RecipeDTO recipeDTO) throws RuntimeException;
+    RecipeDTO findRecipeByProductId(int productId);
 
 }

@@ -1,4 +1,4 @@
-/*
+
 package com.henrytran1803.BEBakeManage.config;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -20,7 +20,19 @@ public class JpaConfig {
         return new EntityManagerFactoryBuilder(
                 new HibernateJpaVendorAdapter(), new HashMap<>(), null)
                 .dataSource(dataSource)
-                .packages("com.henrytran1803.BEBakeManage"
+                .packages("com.henrytran1803.BEBakeManage.user.entity",
+                        "com.henrytran1803.BEBakeManage.category.entity",
+                        "com.henrytran1803.BEBakeManage.recipe.entity",
+                        "com.henrytran1803.BEBakeManage.product.entity",
+                        "com.henrytran1803.BEBakeManage.promotion.entity",
+                        "com.henrytran1803.BEBakeManage.image.entity",
+                        "com.henrytran1803.BEBakeManage.export_ingredients.entity",
+                        "com.henrytran1803.BEBakeManage.import_ingredients.entity",
+                        "com.henrytran1803.BEBakeManage.ingredients.entity",
+                        "com.henrytran1803.BEBakeManage.product_batches.entity",
+                        "com.henrytran1803.BEBakeManage.supplier.entity",
+                        "com.henrytran1803.BEBakeManage.units.entity"
+
                 )
                 .persistenceUnit("roleBasedPU")
                 .build();
@@ -30,4 +42,4 @@ public class JpaConfig {
             @Qualifier("entityManagerFactory") LocalContainerEntityManagerFactoryBean entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory.getObject());
     }
-}*/
+}

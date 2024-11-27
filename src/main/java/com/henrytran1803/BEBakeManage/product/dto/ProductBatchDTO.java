@@ -6,7 +6,6 @@ import lombok.Data;
 public class ProductBatchDTO {
     private Integer id;
     private String expirationDate;
-    private Double currentDiscount;
     private String status;
     private Integer quantity;
 
