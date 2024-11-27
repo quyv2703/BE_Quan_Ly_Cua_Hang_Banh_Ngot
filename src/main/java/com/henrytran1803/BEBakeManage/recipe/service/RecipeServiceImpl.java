@@ -7,6 +7,7 @@ import com.henrytran1803.BEBakeManage.recipe.entity.RecipeDetail;
 import com.henrytran1803.BEBakeManage.recipe.entity.RecipeDetailId;
 import com.henrytran1803.BEBakeManage.recipe.repository.RecipeRepository;
 import com.henrytran1803.BEBakeManage.recipe.repository.RecipeDetailRepository;
+import com.henrytran1803.BEBakeManage.product.repository.ProductRepository;
 import com.henrytran1803.BEBakeManage.common.exception.error.ErrorCode;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,9 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Autowired
     private RecipeDetailRepository recipeDetailRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
 
     @Transactional
     @Override
@@ -106,5 +110,28 @@ public class RecipeServiceImpl implements RecipeService {
         }
         return recipeRepository.save(existingRecipe);
     }
+
+    @Transactional
+    @Override
+    public RecipeDTO findRecipeByProductId(int productId) {
+        Recipe recipe = productRepository.findRecipeByProductId(productId);
+
+        RecipeDTO recipeDTO = new RecipeDTO();
+        recipeDTO.setId(recipe.getId());
+        recipeDTO.setName(recipe.getName());
+
+        List<RecipeDTO.RecipeDetailDTO> detailDTOs = new ArrayList<>();
+        for (RecipeDetail detail : recipe.getRecipeDetails()) {
+            RecipeDTO.RecipeDetailDTO detailDTO = new RecipeDTO.RecipeDetailDTO();
+            detailDTO.setRecipeId(detail.getId().getRecipeId());
+            detailDTO.setIngredientId(detail.getId().getIngredientId());
+            detailDTO.setQuantity(detail.getQuantity());
+            detailDTOs.add(detailDTO);
+        }
+
+        recipeDTO.setRecipeDetails(detailDTOs);
+        return recipeDTO;
+    }
+
 
 }

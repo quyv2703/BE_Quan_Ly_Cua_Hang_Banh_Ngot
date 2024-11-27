@@ -3,6 +3,7 @@ package com.henrytran1803.BEBakeManage.product.repository;
 
 import com.henrytran1803.BEBakeManage.product.dto.ProductDetailProjection;
 import com.henrytran1803.BEBakeManage.product.entity.Product;
+import com.henrytran1803.BEBakeManage.recipe.entity.Recipe;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.Page;

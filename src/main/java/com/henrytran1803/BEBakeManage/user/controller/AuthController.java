@@ -1,12 +1,19 @@
 package com.henrytran1803.BEBakeManage.user.controller;
+
 import com.henrytran1803.BEBakeManage.common.exception.error.ErrorCode;
+import com.henrytran1803.BEBakeManage.common.exception.error.QuyExeption;
 import com.henrytran1803.BEBakeManage.common.response.ApiResponse;
 import com.henrytran1803.BEBakeManage.user.dto.LoginRequest;
 import com.henrytran1803.BEBakeManage.user.dto.LoginResponse;
 import com.henrytran1803.BEBakeManage.user.dto.RegisterRequest;
+import com.henrytran1803.BEBakeManage.user.dto.UserResponseRegisterDTO;
+import com.henrytran1803.BEBakeManage.user.entity.User;
 import com.henrytran1803.BEBakeManage.user.service.AuthService;
 import com.henrytran1803.BEBakeManage.user.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,27 +21,43 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     @Autowired
     private AuthService authService;
+
     @Autowired
     private UserService userService;
+
     @PostMapping("/login")
     public ApiResponse<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
-        System.out.println(loginRequest.getEmail());
+        System.out.println("Email đăng nhập: " + loginRequest.getEmail());
         try {
             LoginResponse token = authService.login(loginRequest.getEmail(), loginRequest.getPassword());
             return ApiResponse.success(token);
         } catch (Exception e) {
-            return new ApiResponse<>(false, e.getMessage(),ErrorCode.USER_NOT_FOUND.getCode(),null);
+            return new ApiResponse<>(false, "Không tìm thấy người dùng hoặc thông tin đăng nhập không chính xác",
+                    ErrorCode.USER_NOT_FOUND.getCode(), null);
         }
     }
+
+    /**
+     * API Đăng ký tài khoản người dùng mới với các quyền được chỉ định
+
+     */
     @PostMapping("/register")
-    public void register(@RequestBody RegisterRequest registerRequest) {
-        authService.register(
+    public ResponseEntity<ApiResponse<UserResponseRegisterDTO>> register( @Valid @RequestBody RegisterRequest registerRequest) {
+        // Gọi service để thực hiện đăng ký tài khoản
+        ApiResponse<UserResponseRegisterDTO> response = authService.register(
                 registerRequest.getFirstName(),
                 registerRequest.getLastName(),
                 registerRequest.getEmail(),
                 registerRequest.getDateOfBirth(),
-                registerRequest.getPassword()
+                registerRequest.getPassword(),
+                registerRequest.getRoles()
         );
-    }
 
+        if (response.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(response); // HTTP 201 nếu thành công
+
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response); // HTTP 500 nếu lỗi khác
+        }
+    }
 }
