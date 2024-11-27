@@ -31,8 +31,8 @@ public class JpaConfig {
                         "com.henrytran1803.BEBakeManage.ingredients.entity",
                         "com.henrytran1803.BEBakeManage.product_batches.entity",
                         "com.henrytran1803.BEBakeManage.supplier.entity",
-                        "com.henrytran1803.BEBakeManage.units.entity"
-
+                        "com.henrytran1803.BEBakeManage.units.entity",
+                        "com.henrytran1803.BEBakeManage.quycode.entity"
                 )
                 .persistenceUnit("roleBasedPU")
                 .build();
