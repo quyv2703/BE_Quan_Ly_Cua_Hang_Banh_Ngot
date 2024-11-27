@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -78,5 +79,10 @@ public class RecipeController {
         }
     }
 
+    @GetMapping("/findByProduct/{id}")
+    public ResponseEntity<ApiResponse<RecipeDTO>> findRecipeByProductId(@PathVariable int id) {
+        RecipeDTO recipeDTO = recipeService.findRecipeByProductId(id);
+        return ResponseEntity.ok(ApiResponse.success(recipeDTO));
+    }
 
 }

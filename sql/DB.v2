@@ -1,3 +1,5 @@
+//user
+
 create table roles
 (
     id   int auto_increment
@@ -34,6 +36,8 @@ create index user_id
     on role_user (user_id);
 
 
+//Danh mục
+
  create table categories
  (
      id        int auto_increment
@@ -43,6 +47,7 @@ create index user_id
      isactive  tinyint(1)   null
  );
 
+// nguyên liệu
  create table ingredients
  (
      id             int auto_increment
@@ -51,7 +56,7 @@ create index user_id
      unit_id        int          null,
      warning_limits double       not null
  );
-
+// công thức
  create table recipes
  (
      id   int auto_increment
@@ -68,6 +73,8 @@ create index user_id
          foreign key (recipe_id) references recipes (id)
              on delete cascade
  );
+
+ // sản phẩm
  create table products
  (
      id                      int auto_increment
@@ -91,8 +98,8 @@ create index user_id
 
  create index category_id
      on products (category_id);
-
- reate table product_histories
+// LS giá
+ create table product_histories
  (
      id             int auto_increment
          primary key,
@@ -117,7 +124,7 @@ create index user_id
 
  create index product_id
      on images (product_id);
-
+// lô hàng
  create table product_batches
  (
      id                  int auto_increment
@@ -125,7 +132,6 @@ create index user_id
      product_id          int                                                                    null,
      daily_production_id int                                                                    null,
      expiration_date     datetime                                                               null,
-     current_discount    int                                                                    null,
      quantity            int                                                                    null,
      status              enum ('ACTIVE', 'NEAR_EXPIRY', 'EXPIRED', 'DISPOSED') default 'ACTIVE' not null,
      constraint product_batches_ibfk_1
@@ -139,13 +145,15 @@ create index user_id
 
  create index product_id
      on product_batches (product_id);
-
+// ngày sx
  create table daily_productions
  (
      id              int auto_increment
          primary key,
      production_date datetime not null
  );
+
+ // sp huỷ
 create table disposed_products
 (
     id                int auto_increment
@@ -165,7 +173,7 @@ CREATE TABLE disposed_product_details (
     CONSTRAINT disposed_product_details_ibfk_1 FOREIGN KEY (disposed_product_id) REFERENCES disposed_products (id),
     CONSTRAINT disposed_product_details_ibfk_2 FOREIGN KEY (product_batch_id) REFERENCES product_batches (id)
 );
-
+// giảm giá
  create table promotions
  (
      id          int auto_increment
@@ -196,7 +204,7 @@ create index product_batch_id
 
 create index promotion_id
     on promotion_details (promotion_id);
-
+// giảm giá hằng ngày
  CREATE TABLE daily_discounts (
      id INT AUTO_INCREMENT PRIMARY KEY,
      product_batch_id INT NOT NULL,
