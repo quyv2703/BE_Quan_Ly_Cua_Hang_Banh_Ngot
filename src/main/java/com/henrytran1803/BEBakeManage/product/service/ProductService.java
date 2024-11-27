@@ -11,16 +11,16 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProductService {
-    Optional<CreateProductDTO> createProduct(CreateProductDTO createProductDTO);
-    Optional<UpdateProductDTO> updateProduct(UpdateProductDTO product);
-    Void deleteProduct(int idProduct);
-    Page<ProductDTO> getAllProducts(Pageable pageable);
-    List<ProductActiveDTO> getAllActiveProducts();
-    ApiResponse<Page<ProductDTO>> searchProducts(ProductSearchCriteria criteria);
-    ApiResponse<ProductDetailDTO> getProductDetail(Integer id);
-    ApiResponse<List<ProductSummaryDTO>> getListProductBatch();
-    ApiResponse<List<ProductBatchDetailDTO>> getListProductBatchByStatues(List<String> statuses);
-    Boolean disposedProduct(DisposedProductDTO disposedProductDTO);
+ Optional<CreateProductDTO> createProduct(CreateProductDTO createProductDTO);
+ Optional<UpdateProductDTO> updateProduct(UpdateProductDTO product);
+ Void deleteProduct(int idProduct);
+ Page<ProductDTO> getAllProducts(Pageable pageable);
+ List<ProductActiveDTO> getAllActiveProducts();
+ ApiResponse<Page<ProductDTO>> searchProducts(ProductSearchCriteria criteria);
+ ApiResponse<ProductDetailDTO> getProductDetail(Integer id);
+ ApiResponse<List<ProductSummaryDTO>> getListProductBatch();
+ ApiResponse<List<ProductBatchDetailDTO>> getListProductBatchByStatues(List<String> statuses);
+ Boolean disposedProduct(DisposedProductDTO disposedProductDTO);
 
     Page<SearchProductResponse> searchProducts(
             String productName,
@@ -28,5 +28,6 @@ public interface ProductService {
             Pageable pageable
     );
     ProductDetailResponse getProductDetailForUser(Integer productId);
-    List<CartResponseDTO> getCartInfo(CartDTO cartDTO);
-}
+    List<CartResponseDTO> getCartInfo(CartDTO cartDTO)
+  }
+                                      

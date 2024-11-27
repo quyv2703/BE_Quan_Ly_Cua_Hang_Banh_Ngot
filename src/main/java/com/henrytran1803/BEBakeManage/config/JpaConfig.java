@@ -1,3 +1,4 @@
+
 package com.henrytran1803.BEBakeManage.config;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -31,6 +32,7 @@ public class JpaConfig {
                         "com.henrytran1803.BEBakeManage.product_batches.entity",
                         "com.henrytran1803.BEBakeManage.supplier.entity",
                         "com.henrytran1803.BEBakeManage.units.entity"
+
                 )
                 .persistenceUnit("roleBasedPU")
                 .build();

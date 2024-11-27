@@ -1,3 +1,4 @@
+
 package com.henrytran1803.BEBakeManage.config;
 
 import com.henrytran1803.BEBakeManage.common.util.RoleBasedRoutingDataSource;
@@ -83,3 +84,4 @@ public class DataSourceConfig {
         return new JpaTransactionManager(entityManagerFactory.getObject());
     }
 }
+

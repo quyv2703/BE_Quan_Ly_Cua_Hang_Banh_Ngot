@@ -16,3 +16,4 @@ public class DailyProduction {
     @Column(name ="production_date")
     private LocalDateTime productionDate;
 }
+

@@ -8,7 +8,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -55,7 +54,4 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
 
     Page<Product> findByStatusIsTrue(Pageable pageable);
 
-    @EntityGraph(attributePaths = {"recipe.recipeDetails"})
-    @Query("SELECT p.recipe FROM Product p WHERE p.id = :productId")
-    Recipe findRecipeByProductId(int productId);
 }
