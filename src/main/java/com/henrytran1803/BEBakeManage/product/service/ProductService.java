@@ -28,6 +28,6 @@ public interface ProductService {
             Pageable pageable
     );
     ProductDetailResponse getProductDetailForUser(Integer productId);
-    List<CartResponseDTO> getCartInfo(CartDTO cartDTO)
+    List<CartResponseDTO> getCartInfo(CartDTO cartDTO);
   }
                                       
