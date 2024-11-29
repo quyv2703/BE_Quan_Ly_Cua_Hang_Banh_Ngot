@@ -4,6 +4,7 @@ import com.henrytran1803.BEBakeManage.category.entity.Category;
 import com.henrytran1803.BEBakeManage.common.exception.error.ErrorCode;
 import com.henrytran1803.BEBakeManage.common.response.ApiResponse;
 import com.henrytran1803.BEBakeManage.recipe.dto.CreateRecipeDTO;
+import com.henrytran1803.BEBakeManage.recipe.dto.GetRecipeDTO;
 import com.henrytran1803.BEBakeManage.recipe.dto.RecipeDTO;
 import com.henrytran1803.BEBakeManage.recipe.entity.Recipe;
 import com.henrytran1803.BEBakeManage.recipe.entity.RecipeDetail;
@@ -41,14 +42,10 @@ public class RecipeController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Recipe>> getRecipeById(@PathVariable("id") int id) {
+    public ResponseEntity<ApiResponse<GetRecipeDTO>> getRecipeById(@PathVariable("id") int id) {
         try {
-            Optional<Recipe> recipeOptional = recipeService.getRecipeById(id);
-            if (recipeOptional.isPresent()) {
-                Recipe recipe = recipeOptional.get();
-                return ResponseEntity.ok(ApiResponse.success(recipe));
-            }
-            return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.RECIPE_NOT_FOUND.getCode(), "Recipe not found"));
+            GetRecipeDTO recipeOptional = recipeService.getRecipeById(id);
+            return ResponseEntity.ok(ApiResponse.success(recipeOptional));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.RECIPE_CREATE_FAILED.getCode(), "Failed to retrieve recipe"));
         } catch (Exception e) {
@@ -58,11 +55,22 @@ public class RecipeController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<String>> deleteRecipeById(@PathVariable int id) {
-        Optional<Recipe> deletedRecipe = recipeService.deleteRecipeById(id);
-        if (deletedRecipe.isPresent()) {
-            return ResponseEntity.ok(ApiResponse.success("Recipe deleted successfully"));
-        } else {
-            return ResponseEntity.status(404).body(ApiResponse.error(ErrorCode.RECIPE_DELETE_FAILED.name(), "Could not delete recipe"));
+        try {
+            Optional<Recipe> deletedRecipe = recipeService.deleteRecipeById(id);
+            if (deletedRecipe.isPresent()) {
+                return ResponseEntity.ok(ApiResponse.success("Recipe deleted successfully"));
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.error(ErrorCode.RECIPE_NOT_FOUND.name(), "Recipe not found"));
+            }
+        } catch (IllegalStateException e) {
+            // Xử lý lỗi recipe đang được sử dụng trong product
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(ErrorCode.RECIPE_IN_USE.name(), e.getMessage()));
+        } catch (Exception e) {
+            // Xử lý các lỗi khác
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(ErrorCode.RECIPE_DELETE_FAILED.name(), "Failed to delete recipe: " + e.getMessage()));
         }
     }
     @PutMapping
