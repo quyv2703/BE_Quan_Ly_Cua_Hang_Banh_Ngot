@@ -1,15 +1,14 @@
 package com.henrytran1803.BEBakeManage.export_ingredients.service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.henrytran1803.BEBakeManage.product.entity.DailyProduction;
+import com.henrytran1803.BEBakeManage.daily_productions.entity.DailyProduction;
 import com.henrytran1803.BEBakeManage.product.entity.Product;
-import com.henrytran1803.BEBakeManage.product.entity.ProductBatch;
-import com.henrytran1803.BEBakeManage.product.repository.DailyProductionRepository;
-import com.henrytran1803.BEBakeManage.product.repository.ProductBatchRepository;
+import com.henrytran1803.BEBakeManage.product_batches.entity.ProductBatch;
+import com.henrytran1803.BEBakeManage.daily_productions.repository.DailyProductionRepository;
+import com.henrytran1803.BEBakeManage.product_batches.repository.ProductBatchRepository;
 import com.henrytran1803.BEBakeManage.product.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -116,6 +115,8 @@ public class ExportIngredientServiceImpl implements ExportIngredientService {
             productBatch.setProduct(product);
             productBatch.setDailyProduction(dlProduction);
             productBatch.setQuantity(productRequest.getQuantity());
+            productBatch.setStatus("ACTIVE");
+
             productBatchRepository.save(productBatch);
         }
 

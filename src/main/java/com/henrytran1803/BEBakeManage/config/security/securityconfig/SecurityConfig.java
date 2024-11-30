@@ -36,8 +36,17 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/auth/**", "/uploads/**","/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/api/upload").hasRole("MANAGE")
-                        .requestMatchers("/api/admin/**", "/api/categories/**", "/api/categories/", "/api/recipes/**","/api/dashboard/**", "/api/products/**", "/api/promotions/**").hasRole("MANAGE")
-                        .requestMatchers("/api/user/**").hasRole("USER")
+                        .requestMatchers("/api/disposed/**",
+                                "/api/dashboard/**",
+                                "/api/discounts/**",
+                                "/api/admin/**",
+                                "/api/categories/**",
+                                "/api/recipes/**",
+                                "/api/products/**",
+                                "/api/promotions/**",
+                                "/api/productbatches/**",
+                                "/api/price/**")
+                        .hasRole("MANAGE")                        .requestMatchers("/api/user/**").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

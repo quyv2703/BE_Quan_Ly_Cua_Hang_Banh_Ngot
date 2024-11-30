@@ -5,7 +5,7 @@ import com.henrytran1803.BEBakeManage.quycode.entity.Bill;
 import com.henrytran1803.BEBakeManage.quycode.entity.BillDetail;
 import com.henrytran1803.BEBakeManage.quycode.repository.BillDetailRepository;
 import com.henrytran1803.BEBakeManage.quycode.repository.BillRepository;
-import com.henrytran1803.BEBakeManage.user.dto.DashBoardDTO;
+import com.henrytran1803.BEBakeManage.dashboard.dto.DashBoardDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
