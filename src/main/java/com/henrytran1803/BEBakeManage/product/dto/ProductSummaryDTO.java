@@ -1,5 +1,6 @@
 package com.henrytran1803.BEBakeManage.product.dto;
 
+import com.henrytran1803.BEBakeManage.product_batches.dto.ProductBatchSumaryDTO;
 import lombok.Data;
 
 import java.util.List;

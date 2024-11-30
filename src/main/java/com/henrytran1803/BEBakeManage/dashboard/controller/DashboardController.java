@@ -1,6 +1,6 @@
 package com.henrytran1803.BEBakeManage.dashboard.controller;
 import com.henrytran1803.BEBakeManage.dashboard.service.DashboardService;
-import com.henrytran1803.BEBakeManage.user.dto.DashBoardDTO;
+import com.henrytran1803.BEBakeManage.dashboard.dto.DashBoardDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

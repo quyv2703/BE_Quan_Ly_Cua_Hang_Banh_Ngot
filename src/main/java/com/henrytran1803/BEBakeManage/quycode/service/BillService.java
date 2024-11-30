@@ -3,9 +3,9 @@ package com.henrytran1803.BEBakeManage.quycode.service;
 import com.henrytran1803.BEBakeManage.common.exception.error.QuyExeption;
 import com.henrytran1803.BEBakeManage.common.response.ApiResponse;
 import com.henrytran1803.BEBakeManage.product.entity.Product;
-import com.henrytran1803.BEBakeManage.product.entity.ProductBatch;
+import com.henrytran1803.BEBakeManage.product_batches.entity.ProductBatch;
 
-import com.henrytran1803.BEBakeManage.product.repository.ProductBatchRepository;
+import com.henrytran1803.BEBakeManage.product_batches.repository.ProductBatchRepository;
 import com.henrytran1803.BEBakeManage.quycode.BillStatus;
 import com.henrytran1803.BEBakeManage.quycode.PaymentMethod;
 import com.henrytran1803.BEBakeManage.quycode.dto.BillDetailDTO;
