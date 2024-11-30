@@ -1,3 +1,4 @@
+/*
 
 package com.henrytran1803.BEBakeManage.config;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -43,3 +44,4 @@ public class JpaConfig {
         return new JpaTransactionManager(entityManagerFactory.getObject());
     }
 }
+*/
