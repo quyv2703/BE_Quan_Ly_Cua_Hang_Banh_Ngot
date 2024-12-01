@@ -2,11 +2,13 @@ package com.henrytran1803.BEBakeManage.product.controller;
 
 import com.henrytran1803.BEBakeManage.common.exception.error.ErrorCode;
 import com.henrytran1803.BEBakeManage.common.response.ApiResponse;
+import com.henrytran1803.BEBakeManage.disposed_product.dto.DisposedProductDTO;
 import com.henrytran1803.BEBakeManage.product.dto.*;
-import com.henrytran1803.BEBakeManage.product.entity.Product;
-import com.henrytran1803.BEBakeManage.product.service.ProductPriceService;
+import com.henrytran1803.BEBakeManage.product_batches.dto.CartDTO;
+import com.henrytran1803.BEBakeManage.product_batches.dto.CartResponseDTO;
+import com.henrytran1803.BEBakeManage.product_batches.dto.ProductBatchDetailDTO;
+import com.henrytran1803.BEBakeManage.product_history.service.ProductPriceService;
 import com.henrytran1803.BEBakeManage.product.service.ProductService;
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,7 +20,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/products")
@@ -99,17 +100,7 @@ public class ProductController {
                     .body(ApiResponse.error(ErrorCode.PRODUCT_CREATION_FAILED.getCode(), e.getMessage()));
         }
     }
-    @PostMapping("/{id}/price")
-    public ResponseEntity<ApiResponse<?>> updatePrice(
-            @PathVariable("id") Integer productId,
-            @RequestBody Map<String, Double> priceUpdate) {
-        try {
-            productPriceService.updateProductPrice(productId, priceUpdate.get("price"));
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.RECIPE_UPDATE_FAILED.getCode(), e.getMessage()));
-        }
-    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<?>> deleteProduct(@PathVariable("id") Integer productId) {
         try {
@@ -119,35 +110,12 @@ public class ProductController {
             return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.RECIPE_UPDATE_FAILED.getCode(), e.getMessage()));
         }
     }
-
-    @Transactional
-    @GetMapping("/{id}/price/history")
-    public ResponseEntity<ApiResponse<List<ProductHistoryDTO>>> getPriceHistory(@PathVariable("id") Integer productId) {
-        List<ProductHistoryDTO> history = productPriceService.getAllProductHistoryByIdProduct(productId);
-        return ResponseEntity.ok(ApiResponse.success(history));
-    }
-
     @GetMapping("/{id}/detail")
     public ApiResponse<ProductDetailDTO> getProductDetail(@PathVariable Integer id) {
         return productService.getProductDetail(id);
     }
-    @GetMapping("/productbatches")
-    public ApiResponse<List<ProductSummaryDTO>> getListProductBatch() {
-        return productService.getListProductBatch();
-    }
-    @GetMapping("/productbatches/statuses")
-    public ApiResponse<List<ProductBatchDetailDTO>> getListProductBatchByStatus(@RequestParam List<String> statuses) {
-        return productService.getListProductBatchByStatues(statuses);
-    }
-    @PostMapping("/productbatches")
-    public ResponseEntity<ApiResponse<String>>getListProductBatchByStatus(@RequestBody DisposedProductDTO disposedProductDTO) {
-        if (productService.disposedProduct(disposedProductDTO)){
-            return ResponseEntity.ok().body(ApiResponse.success("Success"));
-        }
 
-        return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.RECIPE_UPDATE_FAILED.getCode(), ErrorCode.RECIPE_UPDATE_FAILED.getMessage()));
 
-    }
     @GetMapping("/search/active")
     public ResponseEntity<ApiResponse<Page<SearchProductResponse>>> searchProducts(
             @RequestParam(required = false) String productName,

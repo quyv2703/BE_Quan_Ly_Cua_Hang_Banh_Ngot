@@ -1,9 +1,7 @@
 package com.henrytran1803.BEBakeManage.promotion.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.henrytran1803.BEBakeManage.product.entity.Product;
-import com.henrytran1803.BEBakeManage.product.entity.ProductBatch;
-import com.henrytran1803.BEBakeManage.recipe.entity.RecipeDetailId;
+import com.henrytran1803.BEBakeManage.product_batches.entity.ProductBatch;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;

@@ -1,7 +1,7 @@
 package com.henrytran1803.BEBakeManage.quycode.entity;
 
 
-import com.henrytran1803.BEBakeManage.product.entity.ProductBatch;
+import com.henrytran1803.BEBakeManage.product_batches.entity.ProductBatch;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import lombok.Data;
