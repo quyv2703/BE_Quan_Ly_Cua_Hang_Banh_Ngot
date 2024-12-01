@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 @Component
-@ServerEndpoint("/ws/{userId}")
+@ServerEndpoint("/ws/{paymentId}")
 public class WebSocketEndpoint {
     private static WebSocketSessionManager sessionManager;
 
@@ -21,15 +21,15 @@ public class WebSocketEndpoint {
     }
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("userId") Integer userId) {
-        sessionManager.addSession("public", userId, session);
-        System.out.println("New session opened for user " + userId + ": " + session.getId());
+    public void onOpen(Session session, @PathParam("paymentId") Integer paymentId) {
+        sessionManager.addSession("public", paymentId, session);
+        System.out.println("New session opened for user " + paymentId + ": " + session.getId());
     }
 
     @OnMessage
-    public void onMessage(String message, Session session, @PathParam("userId") Integer userId) {
-        System.out.println("Message from user " + userId + ": " + message);
-        sessionManager.sendToUser("public", userId, "Message for public group");
+    public void onMessage(String message, Session session, @PathParam("paymentId") Integer paymentId) {
+        System.out.println("Message from paymentId " + paymentId + ": " + message);
+        sessionManager.sendToUser("public", paymentId, "Message for public group");
     }
 
     @OnClose
