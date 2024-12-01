@@ -34,8 +34,10 @@ public class SecurityConfig {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(                                 "/websocket/**", "/ws/**").permitAll()
                         .requestMatchers("/api/auth/**", "/uploads/**","/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/api/upload").hasRole("MANAGE")
+                        .requestMatchers("/api/notifications/**").permitAll() // Bỏ bảo vệ tạm thời
                         .requestMatchers("/api/disposed/**",
                                 "/api/dashboard/**",
                                 "/api/discounts/**",
@@ -58,7 +60,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "ws://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
