@@ -72,4 +72,47 @@ public class NotificationService {
             System.err.println("Error sending notification: " + e.getMessage());
         }
     }
+    public void sendPaymentNotification(int paymentId, String message, NotificationMessage.MessageSeverity status) {
+        try {
+            NotificationMessage notification = new NotificationMessage();
+            notification.setType("PAYMENT_NOTIFICATION");
+            notification.setMessage(message);
+            notification.setSeverity(status);
+            notification.setDuration(5000);
+
+            String jsonMessage = objectMapper.writeValueAsString(notification);
+            sessionManager.sendToUser("public",paymentId , jsonMessage);
+        } catch (Exception e) {
+            System.err.println("Lỗi khi gửi thông báo thanh toán: " + e.getMessage());
+        }
+    }
+
+    public void noficationNewOrder(int paymentId, String message, NotificationMessage.MessageSeverity status) {
+        try {
+            NotificationMessage notification = new NotificationMessage();
+            notification.setType("NEW_ORDER");
+            notification.setMessage(message);
+            notification.setSeverity( NotificationMessage.MessageSeverity.INFO);
+            notification.setDuration(5000);
+
+            String jsonMessage = objectMapper.writeValueAsString(notification);
+            sessionManager.sendToAll("authenticated", jsonMessage);
+        } catch (Exception e) {
+            System.err.println("Lỗi khi gửi thông báo thanh toán: " + e.getMessage());
+        }
+    }
+//    public void sendStatusOrder(int paymentId, String message, NotificationMessage.MessageSeverity status) {
+//        try {
+//            NotificationMessage notification = new NotificationMessage();
+//            notification.setType("PAYMENT_NOTIFICATION");
+//            notification.setMessage(message);
+//            notification.setSeverity(status);
+//            notification.setDuration(5000);
+//
+//            String jsonMessage = objectMapper.writeValueAsString(notification);
+//            sessionManager.sendToUser("public",paymentId , jsonMessage);
+//        } catch (Exception e) {
+//            System.err.println("Lỗi khi gửi thông báo thanh toán: " + e.getMessage());
+//        }
+//    }
 }

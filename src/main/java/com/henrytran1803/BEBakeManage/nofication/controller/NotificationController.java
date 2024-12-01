@@ -15,7 +15,16 @@ public class NotificationController {
     public NotificationController(NotificationService notificationService) {
         this.notificationService = notificationService;
     }
-
+    @PostMapping("/send/payment")
+    public ResponseEntity<?> sendNotificationOrder() {
+        try {
+            notificationService.sendPaymentNotification(1,"test", NotificationMessage.MessageSeverity.ERROR);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body("Failed to send notification: " + e.getMessage());
+        }
+    }
 
 
     @PostMapping("/send")
