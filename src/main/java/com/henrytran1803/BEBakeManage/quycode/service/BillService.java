@@ -58,7 +58,27 @@ public class BillService {
     private BillStatusHistoryRepository billStatusHistoryRepository;
 
 
+    // API tìm kiếm theo ID, tên khách hàng hoặc số điện thoại với phân trang
+    public ApiResponse<Page<BillResponseNoDetail>> searchBills(Long id, String customerName, String customerPhone, Pageable pageable) {
+        // Lấy danh sách hóa đơn với phân trang
+        Page<Bill> billPage = billRepository.findByIdOrCustomerNameContainingOrCustomerPhoneContaining(id, customerName, customerPhone, pageable);
 
+        // Chuyển đổi danh sách hóa đơn thành danh sách phản hồi mà không có chi tiết
+        Page<BillResponseNoDetail> responsePage = billPage.map(bill -> {
+            BillResponseNoDetail responseNoDetail = new BillResponseNoDetail();
+            responseNoDetail.setBillId(bill.getId());
+            responseNoDetail.setCustomerName(bill.getCustomerName());
+            responseNoDetail.setCustomerPhone(bill.getCustomerPhone());
+            responseNoDetail.setPaymentMethod(bill.getPaymentMethod().name());
+            responseNoDetail.setBillStatus(bill.getBillStatus().name());
+            responseNoDetail.setDiningOption(String.valueOf(bill.getDiningOption()));
+            responseNoDetail.setTotalAmount(bill.getTotalAmount());
+            return responseNoDetail;
+        });
+
+        // Trả về kết quả bao bọc trong ApiResponse
+        return ApiResponse.success(responsePage);
+    }
 
 
 
@@ -100,51 +120,49 @@ public class BillService {
         response.setCustomerPhone(bill.getCustomerPhone());
         response.setPaymentMethod(bill.getPaymentMethod().name());
         response.setNameArea(bill.getTable().getArea().getName());
-        response.setNameArea(bill.getTable().getName());
+        response.setNameTable(bill.getTable().getName());
         response.setBillStatus(bill.getBillStatus().name());
         response.setDiningOption(bill.getDiningOption());
         response.setTotalAmount(bill.getTotalAmount());
-
 
         // Lấy danh sách chi tiết hóa đơn
         List<BillDetailDTO_ViewCake> billDetails = bill.getBillDetails().stream().map(detail -> {
             ProductBatch productBatch = detail.getProductBatch();
             Product product = productBatch.getProduct();
 
-    /*        // Tính tổng giảm giá
-            double promotionDiscount = productBatch.getPromotionDetails() != null
-                    ? productBatch.getPromotionDetails().stream()
-                    .filter(promo -> promo.getPromotion().getIsActive() &&
-                            !LocalDateTime.now().isBefore(promo.getPromotion().getStartDate()) &&
-                            !LocalDateTime.now().isAfter(promo.getPromotion().getEndDate()))
-                    .mapToDouble(promo -> promo.getPromotion().getDiscount())
-                    .max().orElse(0.0)
-                    : 0.0;
-            double dailyDiscount = productBatch.getDailyDiscount() != null ? productBatch.getDailyDiscount() : 0.0;
+            /*// Tính tổng giảm giá (promotion)
+            double promotionDiscount = 0.0;
+            if (productBatch.getPromotionDetails() != null) {
+                promotionDiscount = productBatch.getPromotionDetails().stream()
+                        .filter(promo -> promo.getPromotion().getIsActive() &&
+                                !LocalDateTime.now().isBefore(promo.getPromotion().getStartDate()) &&
+                                !LocalDateTime.now().isAfter(promo.getPromotion().getEndDate()))
+                        .mapToDouble(promo -> promo.getPromotion().getDiscount())
+                        .max()
+                        .orElse(0.0);
+            }*/
 
-            // Tính giá cuối cùng
-            double finalPrice = detail.getPrice();
-*/
-            // Map thông tin chi tiết hóa đơn sang DTO
-            return new BillDetailDTO_ViewCake(
-                    detail.getId(),
-                    (long) productBatch.getId(),
-                    product.getName(),
-                    product.getImages().stream().map(image -> image.getUrl()).collect(Collectors.toList()), // Ảnh sản phẩm
-                    detail.getQuantity(),
-                    /*bill.getTotalAmount(),*/
-                    productBatch.getExpirationDate(),
-                    productBatch.getStatus()/*,
-                    dailyDiscount,
-                    promotionDiscount*/
-            );
+            // Tạo BillDetailDTO_ViewCake
+            BillDetailDTO_ViewCake detailDTO = new BillDetailDTO_ViewCake();
+            detailDTO.setId(detail.getId());
+            detailDTO.setProductBatchId((long) productBatch.getId());
+            detailDTO.setProductImages(product.getImages().get(0).getUrl());
+            detailDTO.setProductName(product.getName());
+            detailDTO.setQuantity(detail.getQuantity());
+            detailDTO.setPrice(detail.getPrice());
+            detailDTO.setExpirationDate(productBatch.getExpirationDate());
+
+
+
+            return detailDTO;
         }).collect(Collectors.toList());
 
+        // Thêm danh sách chi tiết vào phản hồi
         response.setBillDetails(billDetails);
 
-        // Trả về phản hồi
-        return ApiResponse.Q_success(response, QuyExeption.SUCCESS);
+        return ApiResponse.Q_success(response,QuyExeption.SUCCESS);
     }
+
 
     //tạo bill
    /* public ApiResponse<BillResponse> createBill(BillRequest billRequest) {

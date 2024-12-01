@@ -4,6 +4,7 @@ import com.henrytran1803.BEBakeManage.common.exception.error.QuyExeption;
 import com.henrytran1803.BEBakeManage.common.response.ApiResponse;
 import com.henrytran1803.BEBakeManage.quycode.BillStatus;
 import com.henrytran1803.BEBakeManage.quycode.dto.BillStatusHistoryDTO;
+import com.henrytran1803.BEBakeManage.quycode.entity.Bill;
 import com.henrytran1803.BEBakeManage.quycode.request.BillRequest;
 import com.henrytran1803.BEBakeManage.quycode.dto.BillStatusDTO;
 
@@ -24,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/admin/bills")
+@RequestMapping("/api/user/bills")
 public class BillController {
     @Autowired
     private BillService billService;
@@ -39,6 +40,17 @@ public class BillController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
+    }
+    // API tìm kiếm hóa đơn với phân trang
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<Page<BillResponseNoDetail>>> searchBills(
+            @RequestParam(value = "id", required = false) Long id,
+            @RequestParam(value = "customerName", required = false) String customerName,
+            @RequestParam(value = "customerPhone", required = false) String customerPhone,
+            Pageable pageable) {
+        ApiResponse<Page<BillResponseNoDetail>> response=billService.searchBills(id,customerName,customerPhone,pageable);
+        return  ResponseEntity.status(response.isSuccess() ? HttpStatus.OK : HttpStatus.BAD_REQUEST)
+                .body(response);
     }
 
     // API tạo mới bill

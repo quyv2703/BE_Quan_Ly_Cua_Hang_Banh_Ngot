@@ -13,14 +13,13 @@ public class BillDetailDTO_ViewCake {
     private Long id;
     private Long productBatchId;
     private String productName;
-    private List<String> productImages; // Danh sách ảnh sản phẩm
+    private String productImages; // Danh sách ảnh sản phẩm
     private Integer quantity;
     private Double price; // Giá cuối cùng
     private LocalDateTime expirationDate; // Ngày hết hạn
-    private String batchStatus; // Trạng thái lô
+  /*  private String batchStatus; // Trạng thái lô
     private Double dailyDiscount; // Giảm giá hàng ngày
-    private Double promotionDiscount; // Giảm giá từ khuyến mãi
+    private Double promotionDiscount; // Giảm giá từ khuyến mãi*/
 
-    public <R> BillDetailDTO_ViewCake(Long id, long id1, String name, R collect, Integer quantity, LocalDateTime expirationDate, String status) {
-    }
+
 }

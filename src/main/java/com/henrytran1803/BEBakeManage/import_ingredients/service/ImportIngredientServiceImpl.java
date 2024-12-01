@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,8 +31,10 @@ public class ImportIngredientServiceImpl implements ImportIngredientService {
 
     @Override
     public ImportIngredient importIngredients(ImportIngredientRequest request) {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        int id = Integer.parseInt((String) authentication.getPrincipal());
         ImportIngredient importIngredient = new ImportIngredient();
-        importIngredient.setUser_id(request.getUser_id());
+        importIngredient.setUser_id(3); //id
         importIngredient.setImport_date(LocalDateTime.now());
         importIngredient.setId_supplier(request.getId_supplier());
 
