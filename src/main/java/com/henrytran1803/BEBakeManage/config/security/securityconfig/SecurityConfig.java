@@ -35,12 +35,23 @@ public class SecurityConfig {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(                                 "/websocket/**", "/ws/**").permitAll()
+                        .requestMatchers( "/websocket/**", "/ws/**").permitAll()
+                                       
                         .requestMatchers("/api/auth/**", "/uploads/**","/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                                       
                         .requestMatchers(HttpMethod.POST, "/api/user/bills").permitAll()
+                                       
                         .requestMatchers("/api/upload").hasRole("MANAGE")
-                        .requestMatchers("/api/notifications/**").permitAll() // Bỏ bảo vệ tạm thời
+                                       
+                        .requestMatchers("/api/user/bills/**","/api/admin/**", "/api/categories/**", "/api/categories/", "/api/recipes/**","/api/dashboard/**", "/api/products/**", "/api/promotions/**").hasRole("MANAGE")
+                                       
+                                       
+                        .requestMatchers("/api/user/**").hasRole("USER")
+                                       
+                        .requestMatchers("/api/notifications/**").permitAll() 
                         .requestMatchers("/api/disposed/**",
+                                         "/api/user/bills/**",
+                                         "/api/admin/**",
                                 "/api/dashboard/**",
                                 "/api/discounts/**",
                                 "/api/admin/**",
@@ -50,7 +61,7 @@ public class SecurityConfig {
                                 "/api/promotions/**",
                                 "/api/productbatches/**",
                                 "/api/price/**")
-                        .hasRole("MANAGE")                        .requestMatchers("/api/user/**").hasRole("USER")
+                        .hasRole("MANAGE")                       
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
