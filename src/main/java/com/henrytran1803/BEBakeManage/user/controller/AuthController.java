@@ -1,15 +1,12 @@
 package com.henrytran1803.BEBakeManage.user.controller;
 
 import com.henrytran1803.BEBakeManage.common.exception.error.ErrorCode;
-import com.henrytran1803.BEBakeManage.common.exception.error.QuyExeption;
 import com.henrytran1803.BEBakeManage.common.response.ApiResponse;
-import com.henrytran1803.BEBakeManage.user.dto.LoginRequest;
-import com.henrytran1803.BEBakeManage.user.dto.LoginResponse;
-import com.henrytran1803.BEBakeManage.user.dto.RegisterRequest;
-import com.henrytran1803.BEBakeManage.user.dto.UserResponseRegisterDTO;
-import com.henrytran1803.BEBakeManage.user.entity.User;
+import com.henrytran1803.BEBakeManage.nofication.model.NotificationMessage;
+import com.henrytran1803.BEBakeManage.user.dto.*;
 import com.henrytran1803.BEBakeManage.user.service.AuthService;
 import com.henrytran1803.BEBakeManage.user.service.UserService;
+import com.henrytran1803.BEBakeManage.websocket.WebSocketSessionManager;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

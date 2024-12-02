@@ -38,4 +38,7 @@ public interface ProductBatchRepository extends JpaRepository<ProductBatch,Integ
                 pb.status IN (:statuses)
             """, nativeQuery = true)
     List<Object[]> findProductBatchDetailsByStatuses(@Param("statuses") List<String> statuses);
+
+
+    long countByStatus(String status);
 }

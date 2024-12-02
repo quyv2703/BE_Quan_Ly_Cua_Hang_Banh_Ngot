@@ -9,5 +9,5 @@ import java.util.List;
 public interface ProductBatchService {
     ApiResponse<List<ProductSummaryDTO>> getListProductBatch();
     ApiResponse<List<ProductBatchDetailDTO>> getListProductBatchByStatues(List<String> statuses);
-
+    long countByStatus(String status);
 }

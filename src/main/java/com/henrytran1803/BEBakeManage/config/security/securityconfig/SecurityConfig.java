@@ -35,14 +35,23 @@ public class SecurityConfig {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers( "/websocket/**", "/ws/**").permitAll()
+                                       
                         .requestMatchers("/api/auth/**", "/uploads/**","/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                                       
                         .requestMatchers(HttpMethod.POST, "/api/user/bills").permitAll()
+                                       
                         .requestMatchers("/api/upload").hasRole("MANAGE")
-<<<<<<< HEAD
+                                       
                         .requestMatchers("/api/user/bills/**","/api/admin/**", "/api/categories/**", "/api/categories/", "/api/recipes/**","/api/dashboard/**", "/api/products/**", "/api/promotions/**").hasRole("MANAGE")
+                                       
+                                       
                         .requestMatchers("/api/user/**").hasRole("USER")
-=======
+                                       
+                        .requestMatchers("/api/notifications/**").permitAll() 
                         .requestMatchers("/api/disposed/**",
+                                         "/api/user/bills/**",
+                                         "/api/admin/**",
                                 "/api/dashboard/**",
                                 "/api/discounts/**",
                                 "/api/admin/**",
@@ -52,8 +61,7 @@ public class SecurityConfig {
                                 "/api/promotions/**",
                                 "/api/productbatches/**",
                                 "/api/price/**")
-                        .hasRole("MANAGE")                        .requestMatchers("/api/user/**").hasRole("USER")
->>>>>>> 5890633703525435d27b247d3b04e921cae443e5
+                        .hasRole("MANAGE")                       
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -65,7 +73,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "ws://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
