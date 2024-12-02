@@ -1,21 +1,21 @@
 package com.henrytran1803.BEBakeManage.promotion.service;
 
 import com.henrytran1803.BEBakeManage.common.exception.error.ErrorCode;
-import com.henrytran1803.BEBakeManage.product.entity.ProductBatch;
-import com.henrytran1803.BEBakeManage.product.repository.ProductBatchRepository;
+import com.henrytran1803.BEBakeManage.daily_discount.dto.CreateDailyDiscount;
+import com.henrytran1803.BEBakeManage.product_batches.entity.ProductBatch;
+import com.henrytran1803.BEBakeManage.product_batches.repository.ProductBatchRepository;
 import com.henrytran1803.BEBakeManage.promotion.dto.*;
-import com.henrytran1803.BEBakeManage.promotion.entity.DailyDiscount;
+import com.henrytran1803.BEBakeManage.daily_discount.entity.DailyDiscount;
 import com.henrytran1803.BEBakeManage.promotion.entity.Promotion;
 import com.henrytran1803.BEBakeManage.promotion.entity.PromotionDetail;
 import com.henrytran1803.BEBakeManage.promotion.entity.PromotionDetailId;
 import com.henrytran1803.BEBakeManage.promotion.mapper.PromotionMapper;
-import com.henrytran1803.BEBakeManage.promotion.repository.DailyDiscountRepository;
+import com.henrytran1803.BEBakeManage.daily_discount.repository.DailyDiscountRepository;
 import com.henrytran1803.BEBakeManage.promotion.repository.PromotionDetailRepository;
 import com.henrytran1803.BEBakeManage.promotion.repository.PromotionRepository;
 import com.henrytran1803.BEBakeManage.product.repository.ProductRepository;
 import com.henrytran1803.BEBakeManage.promotion.specification.PromotionSpecification;
 import jakarta.transaction.Transactional;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,11 +26,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 
 @Service
 public class PromotionServiceImpl implements PromotionService {
@@ -131,31 +129,7 @@ public class PromotionServiceImpl implements PromotionService {
         }
         promotionDetailRepository.deleteByPromotionIdAndProductBatchId(promotionId, productId);
     }
-    @Override
-    public Boolean createPromotionQuick(CreateDailyDiscount dto) {
-        if (dto.getGetLastestDate()) {
-            dto.setEndDate(productBatchRepository.findMaxExpiryDateByBatchIds(dto.getProductBatchIds()));
-        }
 
-        for (Integer productBatchId : dto.getProductBatchIds()) {
-            double discount = dto.getSkipDefaultDiscount()
-                    ? productBatchRepository.findDiscountLimitByProductBatchId(productBatchId)
-                    : dto.getDiscount();
-
-            DailyDiscount detail = new DailyDiscount();
-            ProductBatch productBatch = productBatchRepository.findById(productBatchId)
-                    .orElseThrow(() -> new IllegalArgumentException("ProductBatch not found for ID: " + productBatchId));
-
-            detail.setProductBatch(productBatch);
-            detail.setDiscount((int) discount);
-            detail.setStartDate(LocalDate.now());
-            detail.setEndDate(dto.getEndDate().toLocalDate());
-
-            dailyDiscountRepository.save(detail);
-        }
-
-        return true;
-    }
 
 
     @Transactional

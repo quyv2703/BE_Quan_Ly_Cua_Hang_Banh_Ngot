@@ -6,11 +6,21 @@ import com.henrytran1803.BEBakeManage.category.entity.Category;
 import com.henrytran1803.BEBakeManage.category.repository.CategoryRepository;
 import com.henrytran1803.BEBakeManage.common.exception.error.ErrorCode;
 import com.henrytran1803.BEBakeManage.common.response.ApiResponse;
+import com.henrytran1803.BEBakeManage.disposed_product.dto.DisposedProductDTO;
+import com.henrytran1803.BEBakeManage.disposed_product.entity.DisposedProduct;
+import com.henrytran1803.BEBakeManage.disposed_product.entity.DisposedProductDetail;
+import com.henrytran1803.BEBakeManage.disposed_product.repository.DisposedProductDetailRepository;
+import com.henrytran1803.BEBakeManage.disposed_product.repository.DisposedProductRepository;
 import com.henrytran1803.BEBakeManage.product.dto.*;
 import com.henrytran1803.BEBakeManage.product.entity.*;
 import com.henrytran1803.BEBakeManage.product.mapper.ProductMapper;
 import com.henrytran1803.BEBakeManage.product.repository.*;
 import com.henrytran1803.BEBakeManage.product.specification.ProductSpecification;
+import com.henrytran1803.BEBakeManage.product_batches.dto.*;
+import com.henrytran1803.BEBakeManage.product_batches.entity.ProductBatch;
+import com.henrytran1803.BEBakeManage.product_batches.repository.ProductBatchRepository;
+import com.henrytran1803.BEBakeManage.product_history.entity.ProductHistory;
+import com.henrytran1803.BEBakeManage.product_history.repository.ProductHistoryRepository;
 import com.henrytran1803.BEBakeManage.promotion.entity.Promotion;
 import com.henrytran1803.BEBakeManage.promotion.entity.PromotionDetail;
 import com.henrytran1803.BEBakeManage.promotion.repository.PromotionRepository;
@@ -26,7 +36,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -304,123 +313,6 @@ public class ProductServiceImpl implements ProductService {
             return ApiResponse.error("ERROR",
                     "Lỗi khi lấy thông tin chi tiết sản phẩm: " + e.getMessage());
         }
-    }
-
-    @Override
-    public ApiResponse<List<ProductSummaryDTO>> getListProductBatch() {
-        List<Product> products = productRepository.findAll();
-        List<String> statuses = Arrays.asList("active", "near_expiry");
-        List<ProductSummaryDTO> productSummaryDTOList = new ArrayList<>();
-        for (Product product : products) {
-            List<ProductBatch> productBatches = productBatchRepository.findByProductIdAndStatusIn(product.getId(), statuses);
-            List<ProductBatchSumaryDTO> productBatchDTOs = productBatches.stream().map(batch -> {
-                ProductBatchSumaryDTO dto = new ProductBatchSumaryDTO();
-                dto.setId((long) batch.getId());
-                dto.setStatus(batch.getStatus());
-                dto.setQuantity(batch.getQuantity());
-                dto.setDailyDiscount(batch.getDailyDiscount());
-                dto.setDateExpiry(batch.getExpirationDate().toLocalDate());
-                dto.setCountDown((int) ChronoUnit.DAYS.between(LocalDate.now(), batch.getExpirationDate().toLocalDate()));
-                return dto;
-            }).collect(Collectors.toList());
-            ProductSummaryDTO summaryDTO = new ProductSummaryDTO();
-            summaryDTO.setId((long) product.getId());
-            summaryDTO.setName(product.getName());
-            summaryDTO.setShelfLifeDays(product.getShelfLifeDays());
-            summaryDTO.setTotalProductBatch(productBatches.size());
-            summaryDTO.setTotalNearExpiry(
-                    (int) productBatches.stream()
-                            .filter(batch -> "NEAR_EXPIRY".equalsIgnoreCase(batch.getStatus()))
-                            .count()
-            );
-            summaryDTO.setTotalExpiry(
-                    (int) productBatches.stream()
-                            .filter(batch -> "EXPIRED".equalsIgnoreCase(batch.getStatus()))
-                            .count()
-            );
-            summaryDTO.setProductBatches(productBatchDTOs);
-            productSummaryDTOList.add(summaryDTO);
-        }
-        return ApiResponse.success(productSummaryDTOList);
-    }
-    @Override
-    public ApiResponse<List<ProductBatchDetailDTO>> getListProductBatchByStatues(List<String> statuses) {
-        List<Object[]> results = productBatchRepository.findProductBatchDetailsByStatuses(statuses);
-
-        // Map the results to ProductBatchDetailDTO
-        List<ProductBatchDetailDTO> dtos = results.stream()
-                .map(result -> {
-                    ProductBatchDetailDTO dto = new ProductBatchDetailDTO();
-
-                    // Set values for the DTO
-                    dto.setId(((Number) result[0]).longValue());
-                    dto.setName((String) result[1]);
-                    dto.setStatus((String) result[2]);
-                    dto.setQuantity(((Number) result[3]).intValue());
-
-                    // Set the dateExpiry based on the type of the result
-                    if (result[4] instanceof java.sql.Timestamp) {
-                        dto.setDateExpiry(((java.sql.Timestamp) result[4]).toLocalDateTime().toLocalDate());
-                    } else if (result[4] instanceof java.sql.Date) {
-                        dto.setDateExpiry(((java.sql.Date) result[4]).toLocalDate());
-                    }
-
-                    // Set countDown value
-                    dto.setCountDown(((Number) result[5]).intValue());
-
-
-                    Integer dailyDiscount = productBatchRepository.findDailyDiscountByProductBatchId(dto.getId());
-                    dto.setDailyDiscount(dailyDiscount != null ? dailyDiscount : 0);
-
-                    return dto;
-                })
-                .collect(Collectors.toList());
-
-        return ApiResponse.success(dtos);
-    }
-
-    @Override
-    public Boolean disposedProduct(DisposedProductDTO disposedProductDTO) {
-        DisposedProduct disposedProduct = new DisposedProduct();
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        int id = Integer.parseInt((String) authentication.getPrincipal());
-        Optional<User> user = userRepository.findById(id);
-
-        if (user.isEmpty()) {
-            throw new IllegalArgumentException("User not found");
-        }
-
-        disposedProduct.setStaff(user.get());
-        disposedProduct.setDateDisposed(LocalDateTime.now());
-        disposedProduct.setNote(disposedProductDTO.getNote());
-
-        disposedProduct = disposedProductRepository.save(disposedProduct);
-
-        for (Integer productBatchId : disposedProductDTO.getProductBatchIds()) {
-            Optional<ProductBatch> productBatchOpt = productBatchRepository.findById(productBatchId);
-
-            if (productBatchOpt.isEmpty()) {
-                throw new IllegalArgumentException("Product batch not found for ID: " + productBatchId);
-            }
-
-            ProductBatch productBatch = productBatchOpt.get();
-            if (productBatch.getQuantity() < 0 || "DISPOSED".equals(productBatch.getStatus())) {
-                throw new IllegalArgumentException(
-                        "Product batch is already disposed or has no quantity remaining: ID " + productBatchId
-                );
-            }
-            DisposedProductDetail disposedProductDetail = new DisposedProductDetail();
-            disposedProductDetail.setDisposedProduct(disposedProduct);
-            disposedProductDetail.setProductBatch(productBatch);
-            disposedProductDetail.setDisposedQuantity(productBatch.getQuantity());
-            disposedProductDetailRepository.save(disposedProductDetail);
-            productBatch.setQuantity(0);
-            productBatch.setStatus("DISPOSED");
-            productBatchRepository.save(productBatch);
-        }
-
-        return true;
     }
 
 

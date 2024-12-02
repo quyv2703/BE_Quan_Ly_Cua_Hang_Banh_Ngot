@@ -1,14 +1,14 @@
 package com.henrytran1803.BEBakeManage.product.entity;
 
 import com.henrytran1803.BEBakeManage.category.entity.Category;
-import com.henrytran1803.BEBakeManage.product.dto.ProductDetailProjection;
+import com.henrytran1803.BEBakeManage.product_batches.entity.ProductBatch;
+import com.henrytran1803.BEBakeManage.product_history.entity.ProductHistory;
 import com.henrytran1803.BEBakeManage.recipe.entity.Recipe;
 import com.henrytran1803.BEBakeManage.Image.entity.Image; // Import Image entity
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
 
