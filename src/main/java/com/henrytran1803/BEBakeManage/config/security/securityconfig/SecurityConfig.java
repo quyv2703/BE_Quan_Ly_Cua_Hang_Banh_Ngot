@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers( "/websocket/**", "/ws/**").permitAll()
                                        
-                        .requestMatchers("/api/auth/**", "/uploads/**","/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/api/auth/**","/api/payment/**", "/uploads/**","/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                                        
                         .requestMatchers(HttpMethod.POST, "/api/user/bills").permitAll()
                                        
