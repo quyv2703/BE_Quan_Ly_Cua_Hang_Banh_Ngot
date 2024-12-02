@@ -105,7 +105,7 @@ public class BillService {
 
 
 
-
+    @Transactional
     public ApiResponse<BillResponse_View_Cake> getBillDetailsById(Long billId) {
         Optional<Bill> billOptional = billRepository.findById(billId);
         if (billOptional.isEmpty()) {
