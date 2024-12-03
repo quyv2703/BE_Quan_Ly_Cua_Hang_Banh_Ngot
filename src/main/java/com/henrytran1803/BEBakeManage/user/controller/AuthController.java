@@ -47,7 +47,7 @@ public class AuthController {
                 registerRequest.getEmail(),
                 registerRequest.getDateOfBirth(),
                 registerRequest.getPassword(),
-                registerRequest.getRoles()
+                registerRequest.getRoleIds()
         );
 
         if (response.isSuccess()) {

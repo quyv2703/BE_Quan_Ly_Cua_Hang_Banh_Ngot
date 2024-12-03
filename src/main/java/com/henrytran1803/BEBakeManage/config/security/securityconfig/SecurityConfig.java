@@ -35,18 +35,17 @@ public class SecurityConfig {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
+
                         .requestMatchers( "/websocket/**", "/ws/**").permitAll()
-
+                        .requestMatchers(HttpMethod.POST,"/api/auth/register").hasRole("MANAGE")
                         .requestMatchers("/api/auth/**","/api/payment/**", "/uploads/**","/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-
                         .requestMatchers(HttpMethod.POST, "/api/user/bills").permitAll()
                         .requestMatchers("/api/upload").hasRole("MANAGE")
                         .requestMatchers("/api/user/bills/**").hasAnyRole("USER","MANAGE")
                         .requestMatchers("/api/user/**").hasRole("USER")
                         .requestMatchers("/api/admin/**", "/api/categories/**", "/api/categories/", "/api/recipes/**","/api/dashboard/**", "/api/products/**", "/api/promotions/**").hasRole("MANAGE")
-                        .requestMatchers("/api/disposed/**",
-                                         "/api/user/bills/**",
-                                         "/api/admin/**",
+                        .requestMatchers("/api/notifications/**").permitAll()
+                        .requestMatchers(
                                 "/api/dashboard/**",
                                 "/api/discounts/**",
                                 "/api/admin/**",
@@ -57,7 +56,6 @@ public class SecurityConfig {
                                 "/api/productbatches/**",
                                 "/api/price/**")
                         .hasRole("MANAGE")
-
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -70,7 +68,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "ws://localhost:3000"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
 

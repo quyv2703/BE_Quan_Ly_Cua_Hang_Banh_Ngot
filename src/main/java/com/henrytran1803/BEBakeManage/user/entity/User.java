@@ -1,17 +1,22 @@
 package com.henrytran1803.BEBakeManage.user.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.Date;
 import java.util.Set;
 
 @Entity
 @Table(name = "users")
+@Getter
+@Setter
 public class User {
 
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Column(name = "first_name", nullable = false)
     private String firstName;
@@ -28,37 +33,7 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
-    public void setActive(Boolean active) {
-        isActive = active;
-    }
 
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setDateOfBirth(Date dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     @Column(name = "isactive")
     private Boolean isActive;
@@ -69,35 +44,5 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
 
-    public Set<Role> getRoles() {
-        return roles;
-    }
 
-    public Boolean getActive() {
-        return isActive;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public Date getDateOfBirth() {
-        return dateOfBirth;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public int getId() {
-        return id;
-    }
 }
