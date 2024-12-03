@@ -42,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             System.out.println("Roles from JWT: " + roles);
 
             List<GrantedAuthority> authorities = Arrays.stream(roles.split(","))
-                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase())) // Thêm "ROLE_"
+                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase())) // Thêm tiền tố ROLE_
                     .collect(Collectors.toList());
 
             System.out.println("Authorities: " + authorities);

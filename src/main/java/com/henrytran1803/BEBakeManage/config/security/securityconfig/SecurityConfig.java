@@ -3,6 +3,7 @@ package com.henrytran1803.BEBakeManage.config.security.securityconfig;
 import com.henrytran1803.BEBakeManage.config.security.jwt.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -30,16 +31,33 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // Cấu hình CORS
         CorsConfigurationSource corsConfigurationSource = corsConfigurationSource();
         http.cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/auth/**", "/uploads/**").permitAll()
+                        .requestMatchers( "/websocket/**", "/ws/**").permitAll()
+
+                        .requestMatchers("/api/auth/**","/api/payment/**", "/uploads/**","/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+
+                        .requestMatchers(HttpMethod.POST, "/api/user/bills").permitAll()
                         .requestMatchers("/api/upload").hasRole("MANAGE")
-                        .requestMatchers("/api/admin/**", "/api/categories/**", "/api/categories/", "/api/recipes/**", "/api/products/**", "/api/promotions/**").hasRole("MANAGE")
+                        .requestMatchers("/api/user/bills/**").hasAnyRole("USER","MANAGE")
                         .requestMatchers("/api/user/**").hasRole("USER")
-                        .requestMatchers("/api/supplier/**", "/api/units/**", "/api/ingredients/**").permitAll()
+                        .requestMatchers("/api/admin/**", "/api/categories/**", "/api/categories/", "/api/recipes/**","/api/dashboard/**", "/api/products/**", "/api/promotions/**").hasRole("MANAGE")
+                        .requestMatchers("/api/disposed/**",
+                                         "/api/user/bills/**",
+                                         "/api/admin/**",
+                                "/api/dashboard/**",
+                                "/api/discounts/**",
+                                "/api/admin/**",
+                                "/api/categories/**",
+                                "/api/recipes/**",
+                                "/api/products/**",
+                                "/api/promotions/**",
+                                "/api/productbatches/**",
+                                "/api/price/**")
+                        .hasRole("MANAGE")
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -51,7 +69,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "ws://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);

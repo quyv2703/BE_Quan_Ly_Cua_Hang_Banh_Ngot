@@ -35,18 +35,8 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
             String name,
             Pageable pageable
     );
-
-//    Page<Product> findByCategoryIdInAndStatusIsTrue(
-//            List<Integer> categoryIds,
-//            Pageable pageable
-//    );
-//
-//    Page<Product> findByCategoryIdInAndNameContainingIgnoreCaseAndStatusIsTrue(
-//            List<Integer>  categoryIds,
-//            String name,
-//            Pageable pageable
-//    );
-
+    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM Product p WHERE p.recipe.id = :recipeId")
+    boolean existsByRecipeId(@Param("recipeId") int recipeId);
     @Query("SELECT p FROM Product p WHERE p.category.id IN :categoryIds AND LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')) AND p.status = true")
     Page<Product> findByCategoryIdInAndNameContainingIgnoreCaseAndStatusIsTrue(@Param("categoryIds") List<Integer> categoryIds, @Param("name") String name, Pageable pageable);
 
@@ -57,5 +47,4 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
 
     @EntityGraph(attributePaths = {"recipe.recipeDetails"})
     @Query("SELECT p.recipe FROM Product p WHERE p.id = :productId")
-    Recipe findRecipeByProductId(int productId);
-}
+    Recipe findRecipeByProductId(int productId);}

@@ -30,6 +30,47 @@
 		<java.version>23</java.version>
 	</properties>
 	<dependencies>
+<!--		<dependency>-->
+<!--			<groupId>me.paulschwarz</groupId>-->
+<!--			<artifactId>spring-dotenv</artifactId>-->
+<!--			<version>3.0.0</version>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>vn.payos</groupId>-->
+<!--			<artifactId>payos-java</artifactId>-->
+<!--			<version>1.0.1</version>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.springframework.boot</groupId>-->
+<!--			<artifactId>spring-boot-devtools</artifactId>-->
+<!--			<scope>runtime</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>com.google.zxing</groupId>-->
+<!--			<artifactId>core</artifactId>-->
+<!--			<version>3.5.2</version>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>javax.websocket</groupId>-->
+<!--			<artifactId>javax.websocket-api</artifactId>-->
+<!--			<version>1.1</version>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.springframework</groupId>-->
+<!--			<artifactId>spring-websocket</artifactId>-->
+<!--			<version>6.0.13</version>-->
+<!--		</dependency>-->
+
+<!--		<dependency>-->
+<!--			<groupId>org.springframework</groupId>-->
+<!--			<artifactId>spring-messaging</artifactId>-->
+<!--			<version>6.0.13</version>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>com.google.zxing</groupId>-->
+<!--			<artifactId>javase</artifactId>-->
+<!--			<version>3.5.2</version>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -52,6 +93,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.springdoc</groupId>-->
+<!--			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>-->
+<!--			<version>2.2.0</version> &lt;!&ndash; Ensure compatibility with your Spring Boot version &ndash;&gt;-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
