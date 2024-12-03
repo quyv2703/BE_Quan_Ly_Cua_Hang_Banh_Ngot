@@ -36,19 +36,14 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers( "/websocket/**", "/ws/**").permitAll()
-                                       
+
                         .requestMatchers("/api/auth/**","/api/payment/**", "/uploads/**","/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                                       
+
                         .requestMatchers(HttpMethod.POST, "/api/user/bills").permitAll()
-                                       
                         .requestMatchers("/api/upload").hasRole("MANAGE")
-                                       
-                        .requestMatchers("/api/user/bills/**","/api/admin/**", "/api/categories/**", "/api/categories/", "/api/recipes/**","/api/dashboard/**", "/api/products/**", "/api/promotions/**").hasRole("MANAGE")
-                                       
-                                       
+                        .requestMatchers("/api/user/bills/**").hasAnyRole("USER","MANAGE")
                         .requestMatchers("/api/user/**").hasRole("USER")
-                                       
-                        .requestMatchers("/api/notifications/**").permitAll() 
+                        .requestMatchers("/api/admin/**", "/api/categories/**", "/api/categories/", "/api/recipes/**","/api/dashboard/**", "/api/products/**", "/api/promotions/**").hasRole("MANAGE")
                         .requestMatchers("/api/disposed/**",
                                          "/api/user/bills/**",
                                          "/api/admin/**",
@@ -61,7 +56,8 @@ public class SecurityConfig {
                                 "/api/promotions/**",
                                 "/api/productbatches/**",
                                 "/api/price/**")
-                        .hasRole("MANAGE")                       
+                        .hasRole("MANAGE")
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
