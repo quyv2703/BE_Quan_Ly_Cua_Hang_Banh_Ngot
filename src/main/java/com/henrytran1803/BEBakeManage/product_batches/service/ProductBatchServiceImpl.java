@@ -96,7 +96,10 @@ public class ProductBatchServiceImpl implements ProductBatchService{
 
         return ApiResponse.success(dtos);
     }
-
+    @Override
+    public long countByStatus(String status) {
+        return productBatchRepository.countByStatus(status); // Truy vấn trong repository
+    }
 
 
 }
