@@ -35,17 +35,16 @@ public class SecurityConfig {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
-
                         .requestMatchers( "/websocket/**", "/ws/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/auth/register").hasRole("MANAGE")
+                        .requestMatchers(HttpMethod.POST,"/api/auth/register").permitAll()
                         .requestMatchers("/api/auth/**","/api/payment/**", "/uploads/**","/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/user/bills").permitAll()
                         .requestMatchers("/api/upload").hasRole("MANAGE")
                         .requestMatchers("/api/user/bills/**").hasAnyRole("USER","MANAGE")
                         .requestMatchers("/api/user/**").hasRole("USER")
-                        .requestMatchers("/api/admin/**", "/api/categories/**", "/api/categories/", "/api/recipes/**","/api/dashboard/**", "/api/products/**", "/api/promotions/**").hasRole("MANAGE")
                         .requestMatchers("/api/notifications/**").permitAll()
                         .requestMatchers(
+                                "/api/admin/**",
                                 "/api/dashboard/**",
                                 "/api/discounts/**",
                                 "/api/admin/**",

@@ -18,10 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.sql.Date;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -70,38 +67,29 @@ public class AuthService {
 
     @Transactional
     public ApiResponse<UserResponseRegisterDTO> register(String firstName, String lastName, String email,
-                                                         String dateOfBirth, String password, Set<Long> roleIds) {
-        // Kiểm tra email đã tồn tại
+                                                         Date dateOfBirth, String password, List<Integer> roleIds) {
         synchronized (this) {
             if (userRepository.findByEmail(email).isPresent()) {
                 return ApiResponse.Q_failure(null, QuyExeption.EMAIL_ALREADY_EXISTS);
             }
         }
-
-        // Lấy thông tin Role từ roleIds
         Set<Role> roles = new HashSet<>();
-        for (Long roleId : roleIds) {
+        for (Integer roleId : roleIds) {
             Optional<Role> roleOptional = roleRepository.findById(Math.toIntExact(roleId));
             if (roleOptional.isEmpty()) {
                 return ApiResponse.Q_failure(null, QuyExeption.ROLE_NOT_FOUND);
             }
             roles.add(roleOptional.get());
         }
-
-        // Tạo người dùng mới
         User user = new User();
         user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setEmail(email);
-        user.setDateOfBirth(Date.valueOf(dateOfBirth));  // Chuyển đổi từ String sang Date
-        user.setPassword(passwordEncoder.encode(password));  // Bạn có thể mã hóa mật khẩu ở đây nếu cần
+        user.setDateOfBirth(dateOfBirth);
+        user.setPassword(passwordEncoder.encode(password));
         user.setRoles(roles);
-        user.setIsActive(true);  // Mặc định là hoạt động
-
-        // Lưu người dùng vào cơ sở dữ liệu
+        user.setIsActive(true);
         User saveUser =userRepository.save(user);
-
-        // Trả về thông tin người dùng đã tạo
         UserResponseRegisterDTO userResponse = new UserResponseRegisterDTO(
                 saveUser.getId(),
                 saveUser.getFirstName(),
@@ -114,7 +102,4 @@ public class AuthService {
                         .collect(Collectors.toSet()));
         return ApiResponse.Q_success(userResponse, QuyExeption.SUCCESS);
     }
-
-
-
 }
