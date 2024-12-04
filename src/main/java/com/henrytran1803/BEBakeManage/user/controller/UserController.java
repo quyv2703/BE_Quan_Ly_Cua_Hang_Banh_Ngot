@@ -74,6 +74,17 @@ public class UserController {
         return ResponseEntity.status(response.isSuccess() ? HttpStatus.OK : HttpStatus.NO_CONTENT).body(response);
     }
 
+    // API kích hoạt tài khoản người dùng
+    @PatchMapping("/{id}/activate")
+    public ResponseEntity<ApiResponse<Void>> activateUser(@PathVariable int id) {
+        ApiResponse<Void> response = userService.deactivateUser(id);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response); // HTTP 200 nếu thành công
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response); // HTTP 400 nếu lỗi
+        }
+    }
     // Lấy thông tin user theo ID
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<UserResponseRegisterDTO>> getUserById(@PathVariable int id) {

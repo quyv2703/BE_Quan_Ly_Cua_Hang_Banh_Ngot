@@ -16,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -137,6 +136,27 @@ public class UserServiceImpl implements UserService {
         }
 
         user.setIsActive(false); // Khóa tài khoản
+        userRepository.save(user);
+
+        return ApiResponse.Q_success(null, QuyExeption.SUCCESS); // Thành công
+    }
+
+    @Override
+    @Transactional
+    public ApiResponse<Void> activateUser(int id) {
+        // Tìm User theo ID
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isEmpty()) {
+            return ApiResponse.Q_failure(null, QuyExeption.USER_NOT_FOUND); // Lỗi nếu không tìm thấy
+        }
+
+        // Cập nhật trạng thái active của user
+        User user = optionalUser.get();
+        if (!user.getIsActive()) {
+            return ApiResponse.Q_failure(null, QuyExeption.USER_ALREADY_INACTIVE); // Nếu đã inactive thì trả lỗi
+        }
+
+        user.setIsActive(true); // Khóa tài khoản
         userRepository.save(user);
 
         return ApiResponse.Q_success(null, QuyExeption.SUCCESS); // Thành công

@@ -15,12 +15,14 @@ public enum QuyExeption {
     INVALID_DATE_FORMAT("Q1010","Invalid date format"),
     INVALID_INPUT("Q1010", "Invalid input provided"),
     USER_ALREADY_INACTIVE("Q1011","User already inactive"),
+    USER_ALREADY_ACTIVE("Q1011","User already active"),
     DISCOUNT_EXCEEDS_LIMIT("Q1012","Discount exceeds limit"),
     INSUFFICIENT_STOCK("Q1013","Insufficient stock"),
     PRODUCT_BATCH_EXPIRED("Q1014","Product batch expired"),
     NO_HISTORY_FOUND("Q1015","No history found"),
     INVALID_STATUS_TRANSITION("Q1016","Can not change Paid -> Cancel"),
-    BILL_STATUS_ALREADY_UPDATED("Q1017","Bill status already update");
+    BILL_STATUS_ALREADY_UPDATED("Q1017","Bill status already update"),
+    INVALID_STATUS("Q1018","invalid status");
     // Thuộc tính của Enum
     private final String code;
     private final String message;

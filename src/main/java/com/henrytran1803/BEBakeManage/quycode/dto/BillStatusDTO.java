@@ -13,7 +13,7 @@ public class BillStatusDTO {
     private Long billId;
     private String oldStatus;
     private String newStatus;
-    private String updatedBy; // Ai thực hiện cập nhật (User hoặc SYSTEM)
-    private LocalDateTime updatedAt;
+
+
 
 }

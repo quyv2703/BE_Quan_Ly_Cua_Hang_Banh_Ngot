@@ -4,6 +4,7 @@ import com.henrytran1803.BEBakeManage.user.dto.CreateUserRequest;
 import com.henrytran1803.BEBakeManage.user.dto.UserRequest;
 import com.henrytran1803.BEBakeManage.user.dto.UserResponseRegisterDTO;
 import com.henrytran1803.BEBakeManage.user.entity.User;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -21,6 +22,9 @@ public interface UserService {
 
     ApiResponse<UserResponseRegisterDTO> updateUser(int id, UserRequest userRequest); // Cập nhật thông tin
     ApiResponse<Void> deactivateUser(int id); // Khóa tài khoản
+
+    @Transactional
+    ApiResponse<Void> activateUser(int id);
 
     ApiResponse<UserResponseRegisterDTO> findUserById(int id);
 }
