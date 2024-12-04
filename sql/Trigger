@@ -105,3 +105,57 @@ END;
 //
 
 DELIMITER ;
+\
+
+
+
+DELIMITER //
+
+CREATE TRIGGER update_daily_discount_after_insert_update
+AFTER INSERT ON product_batches
+FOR EACH ROW
+BEGIN
+    DECLARE max_discount INT;
+    DECLARE max_end_date DATE;
+
+    -- Find the highest valid discount for this product batch
+    SELECT discount, end_date INTO max_discount, max_end_date
+    FROM daily_discounts
+    WHERE product_batch_id = NEW.id
+    AND CURDATE() BETWEEN start_date AND end_date
+    ORDER BY end_date DESC
+    LIMIT 1;
+
+    -- Update the product batch with the found discount
+    IF max_discount IS NOT NULL AND max_end_date >= CURDATE() THEN
+        UPDATE product_batches
+        SET daily_discount = max_discount
+        WHERE id = NEW.id;
+    ELSE
+        UPDATE product_batches
+        SET daily_discount = 0
+        WHERE id = NEW.id;
+    END IF;
+END//
+
+DELIMITER ;
+
+CREATE EVENT update_product_batch_discounts
+ON SCHEDULE EVERY 30 MINUTE
+DO
+BEGIN
+    -- Update valid discounts
+    UPDATE product_batches pb
+    LEFT JOIN (
+        SELECT product_batch_id, discount
+        FROM daily_discounts
+        WHERE CURDATE() BETWEEN start_date AND end_date
+        GROUP BY product_batch_id
+        HAVING MAX(end_date)
+    ) valid_discounts ON pb.id = valid_discounts.product_batch_id
+    SET pb.daily_discount = COALESCE(valid_discounts.discount, 0)
+    WHERE pb.id IN (
+        SELECT DISTINCT product_batch_id
+        FROM daily_discounts
+    );
+END

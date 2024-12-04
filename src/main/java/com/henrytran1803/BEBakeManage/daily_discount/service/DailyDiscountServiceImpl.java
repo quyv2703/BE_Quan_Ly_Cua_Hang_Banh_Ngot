@@ -15,7 +15,12 @@ import java.time.LocalDate;
 public class DailyDiscountServiceImpl implements DailyDiscountService{
     private ProductBatchRepository productBatchRepository;
     private DailyDiscountRepository dailyDiscountRepository;
-
+    @Autowired
+    public DailyDiscountServiceImpl(ProductBatchRepository productBatchRepository,
+                                    DailyDiscountRepository dailyDiscountRepository) {
+        this.productBatchRepository = productBatchRepository;
+        this.dailyDiscountRepository = dailyDiscountRepository;
+    }
     @Override
     public Boolean createPromotionQuick(CreateDailyDiscount dto) {
         if (dto.getGetLastestDate()) {
@@ -23,6 +28,7 @@ public class DailyDiscountServiceImpl implements DailyDiscountService{
         }
 
         for (Integer productBatchId : dto.getProductBatchIds()) {
+            System.out.println(productBatchId);
             double discount = dto.getSkipDefaultDiscount()
                     ? productBatchRepository.findDiscountLimitByProductBatchId(productBatchId)
                     : dto.getDiscount();
@@ -35,7 +41,8 @@ public class DailyDiscountServiceImpl implements DailyDiscountService{
             detail.setDiscount((int) discount);
             detail.setStartDate(LocalDate.now());
             detail.setEndDate(dto.getEndDate().toLocalDate());
-
+            productBatch.setDailyDiscount((int) discount);
+            productBatchRepository.save(productBatch);
             dailyDiscountRepository.save(detail);
         }
 
