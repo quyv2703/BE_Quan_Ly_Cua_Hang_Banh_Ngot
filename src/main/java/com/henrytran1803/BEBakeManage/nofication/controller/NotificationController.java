@@ -25,8 +25,6 @@ public class NotificationController {
                     .body("Failed to send notification: " + e.getMessage());
         }
     }
-
-
     @PostMapping("/send")
     public ResponseEntity<?> sendNotification() {
         try {

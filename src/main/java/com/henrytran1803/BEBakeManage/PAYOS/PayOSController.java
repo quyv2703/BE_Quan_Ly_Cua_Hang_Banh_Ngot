@@ -37,8 +37,5 @@ public class PayOSController {
         return ResponseEntity.ok(payOSService.cancelPayment(orderId));
     }
 
-//    @PostMapping("/webhook")
-//    public ResponseEntity<ApiResponse<String>> handleWebhook(@RequestBody Map<String, String> webhookData) {
-//        return ResponseEntity.ok(payOSService.confirmWebhook(webhookData));
-//    }
+
 }
