@@ -1,15 +1,19 @@
 package com.henrytran1803.BEBakeManage.user.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Set;
 
 @Entity
 @Table(name = "roles")
+@Getter
+@Setter
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -17,26 +21,7 @@ public class Role {
     @ManyToMany(mappedBy = "roles")
     private Set<User> users;
 
-    public void setId(int id) {
-        this.id = id;
-    }
 
-    public void setUsers(Set<User> users) {
-        this.users = users;
-    }
 
-    public void setName(String name) {
-        this.name = name;
-    }
 
-    public int getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-    public Set<User> getUsers() {
-        return users;
-    }
 }

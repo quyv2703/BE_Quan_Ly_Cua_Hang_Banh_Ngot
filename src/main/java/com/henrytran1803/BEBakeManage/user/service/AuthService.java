@@ -18,9 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,8 +53,8 @@ public class AuthService {
                         .map(Role::getName)
                         .collect(Collectors.toSet());
 
-                String token = jwtUtils.generateJwtToken(user.getId(), String.join(",", roles));
-                UserDTO userDTO = new UserDTO(user.getId(), user.getEmail(), roles);
+                String token = jwtUtils.generateJwtToken(Math.toIntExact(user.getId()), String.join(",", roles));
+                UserDTO userDTO = new UserDTO(Math.toIntExact(user.getId()), user.getEmail(), roles);
 
                 return new LoginResponse(userDTO, token);
             } else {
@@ -67,59 +65,41 @@ public class AuthService {
         }
     }
 
-    @Transactional()
+    @Transactional
     public ApiResponse<UserResponseRegisterDTO> register(String firstName, String lastName, String email,
-                                                         String dateOfBirth, String password, Set<String> roleNames) {
-        // Kiểm tra email đã tồn tại
+                                                         Date dateOfBirth, String password, List<Integer> roleIds) {
         synchronized (this) {
             if (userRepository.findByEmail(email).isPresent()) {
                 return ApiResponse.Q_failure(null, QuyExeption.EMAIL_ALREADY_EXISTS);
             }
         }
-
-
-        // Lấy thông tin Role
         Set<Role> roles = new HashSet<>();
-        for (String roleName : roleNames) {
-            Optional<Role> roleOptional = roleRepository.findByName(roleName);
+        for (Integer roleId : roleIds) {
+            Optional<Role> roleOptional = roleRepository.findById(Math.toIntExact(roleId));
             if (roleOptional.isEmpty()) {
                 return ApiResponse.Q_failure(null, QuyExeption.ROLE_NOT_FOUND);
             }
             roles.add(roleOptional.get());
         }
-
-        // Tạo User mới
         User user = new User();
         user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setEmail(email);
-
-        try {
-            user.setDateOfBirth(java.sql.Date.valueOf(dateOfBirth));
-        } catch (Exception e) {
-            return ApiResponse.Q_failure(null, QuyExeption.INVALID_DATE_FORMAT);
-        }
-
-        // Mã hóa mật khẩu
+        user.setDateOfBirth(dateOfBirth);
         user.setPassword(passwordEncoder.encode(password));
-        user.setActive(true);
         user.setRoles(roles);
-
-        // Lưu User
-        User savedUser = userRepository.save(user);
-
-        // Map sang DTO
-        UserResponseRegisterDTO userDTO = new UserResponseRegisterDTO(
-                savedUser.getId(),
-                savedUser.getFirstName(),
-                savedUser.getLastName(),
-                savedUser.getEmail(),
-                savedUser.getDateOfBirth().toString(),
-                savedUser.getActive(),
-                savedUser.getRoles().stream().map(Role::getName).collect(Collectors.toSet())
-        );
-
-        return ApiResponse.Q_success(userDTO, QuyExeption.SUCCESS);
+        user.setIsActive(true);
+        User saveUser =userRepository.save(user);
+        UserResponseRegisterDTO userResponse = new UserResponseRegisterDTO(
+                saveUser.getId(),
+                saveUser.getFirstName(),
+                saveUser.getLastName(),
+                saveUser.getEmail(),
+                saveUser.getDateOfBirth().toString(),
+                saveUser.getIsActive(),
+                saveUser.getRoles().stream()
+                        .map(Role::getId)
+                        .collect(Collectors.toSet()));
+        return ApiResponse.Q_success(userResponse, QuyExeption.SUCCESS);
     }
-
 }
