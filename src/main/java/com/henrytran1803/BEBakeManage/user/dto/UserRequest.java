@@ -32,6 +32,6 @@ public class UserRequest {
     private Boolean isActive;
 
     @NotNull(message = "{roles.not.null}")
-    private Set<String> roles;
+    private Set<Long> roleIds;
     // Getters và Setters
 }

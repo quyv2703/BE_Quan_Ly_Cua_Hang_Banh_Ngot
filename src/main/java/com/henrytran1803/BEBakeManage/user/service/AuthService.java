@@ -18,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -55,8 +56,8 @@ public class AuthService {
                         .map(Role::getName)
                         .collect(Collectors.toSet());
 
-                String token = jwtUtils.generateJwtToken(user.getId(), String.join(",", roles));
-                UserDTO userDTO = new UserDTO(user.getId(), user.getEmail(), roles);
+                String token = jwtUtils.generateJwtToken(Math.toIntExact(user.getId()), String.join(",", roles));
+                UserDTO userDTO = new UserDTO(Math.toIntExact(user.getId()), user.getEmail(), roles);
 
                 return new LoginResponse(userDTO, token);
             } else {
@@ -67,9 +68,9 @@ public class AuthService {
         }
     }
 
-    @Transactional()
+    @Transactional
     public ApiResponse<UserResponseRegisterDTO> register(String firstName, String lastName, String email,
-                                                         String dateOfBirth, String password, Set<String> roleNames) {
+                                                         String dateOfBirth, String password, Set<Long> roleIds) {
         // Kiểm tra email đã tồn tại
         synchronized (this) {
             if (userRepository.findByEmail(email).isPresent()) {
@@ -77,49 +78,43 @@ public class AuthService {
             }
         }
 
-
-        // Lấy thông tin Role
+        // Lấy thông tin Role từ roleIds
         Set<Role> roles = new HashSet<>();
-        for (String roleName : roleNames) {
-            Optional<Role> roleOptional = roleRepository.findByName(roleName);
+        for (Long roleId : roleIds) {
+            Optional<Role> roleOptional = roleRepository.findById(Math.toIntExact(roleId));
             if (roleOptional.isEmpty()) {
                 return ApiResponse.Q_failure(null, QuyExeption.ROLE_NOT_FOUND);
             }
             roles.add(roleOptional.get());
         }
 
-        // Tạo User mới
+        // Tạo người dùng mới
         User user = new User();
         user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setEmail(email);
-
-        try {
-            user.setDateOfBirth(java.sql.Date.valueOf(dateOfBirth));
-        } catch (Exception e) {
-            return ApiResponse.Q_failure(null, QuyExeption.INVALID_DATE_FORMAT);
-        }
-
-        // Mã hóa mật khẩu
-        user.setPassword(passwordEncoder.encode(password));
-        user.setActive(true);
+        user.setDateOfBirth(Date.valueOf(dateOfBirth));  // Chuyển đổi từ String sang Date
+        user.setPassword(passwordEncoder.encode(password));  // Bạn có thể mã hóa mật khẩu ở đây nếu cần
         user.setRoles(roles);
+        user.setIsActive(true);  // Mặc định là hoạt động
 
-        // Lưu User
-        User savedUser = userRepository.save(user);
+        // Lưu người dùng vào cơ sở dữ liệu
+        User saveUser =userRepository.save(user);
 
-        // Map sang DTO
-        UserResponseRegisterDTO userDTO = new UserResponseRegisterDTO(
-                savedUser.getId(),
-                savedUser.getFirstName(),
-                savedUser.getLastName(),
-                savedUser.getEmail(),
-                savedUser.getDateOfBirth().toString(),
-                savedUser.getActive(),
-                savedUser.getRoles().stream().map(Role::getName).collect(Collectors.toSet())
-        );
-
-        return ApiResponse.Q_success(userDTO, QuyExeption.SUCCESS);
+        // Trả về thông tin người dùng đã tạo
+        UserResponseRegisterDTO userResponse = new UserResponseRegisterDTO(
+                saveUser.getId(),
+                saveUser.getFirstName(),
+                saveUser.getLastName(),
+                saveUser.getEmail(),
+                saveUser.getDateOfBirth().toString(),
+                saveUser.getIsActive(),
+                saveUser.getRoles().stream()
+                        .map(Role::getId)
+                        .collect(Collectors.toSet()));
+        return ApiResponse.Q_success(userResponse, QuyExeption.SUCCESS);
     }
+
+
 
 }

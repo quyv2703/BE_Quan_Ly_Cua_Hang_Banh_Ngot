@@ -57,8 +57,11 @@ public class UserServiceImpl implements UserService {
                 user.getLastName(),
                 user.getEmail(),
                 user.getDateOfBirth().toString(),
-                user.getActive(),
-                user.getRoles().stream().map(Role::getName).collect(Collectors.toSet())
+                user.getIsActive(),
+                // Chuyển đổi Set<Role> thành Set<Long> (id của roles)
+                user.getRoles().stream()
+                        .map(Role::getId) // Giả sử Role có phương thức getId() để lấy ID
+                        .collect(Collectors.toSet())
         ));
 
         // Trả về ApiResponse với phân trang
@@ -87,12 +90,12 @@ public class UserServiceImpl implements UserService {
         }
 
         user.setDateOfBirth(userRequest.getDateOfBirth());
-        user.setActive(userRequest.getIsActive());
+        user.setIsActive(userRequest.getIsActive());
 
         // Cập nhật roles
         Set<Role> roles = new HashSet<>();
-        for (String roleName : userRequest.getRoles()) {
-            Optional<Role> roleOptional = roleRepository.findByName(roleName);
+        for (Long roleId : userRequest.getRoleIds()) {
+            Optional<Role> roleOptional = roleRepository.findById(Math.toIntExact(roleId));
             if (roleOptional.isEmpty()) {
                 return ApiResponse.Q_failure(null, QuyExeption.ROLE_NOT_FOUND);
             }
@@ -109,8 +112,11 @@ public class UserServiceImpl implements UserService {
                 user.getLastName(),
                 user.getEmail(),
                 user.getDateOfBirth().toString(),
-                user.getActive(),
-                user.getRoles().stream().map(Role::getName).collect(Collectors.toSet())
+                user.getIsActive(),
+                // Chuyển đổi Set<Role> thành Set<Long> (id của roles)
+                user.getRoles().stream()
+                        .map(Role::getId) // Giả sử Role có phương thức getId() để lấy ID
+                        .collect(Collectors.toSet())
         );
         return ApiResponse.Q_success(userDTO, QuyExeption.SUCCESS);
     }
@@ -126,11 +132,11 @@ public class UserServiceImpl implements UserService {
 
         // Cập nhật trạng thái active của user
         User user = optionalUser.get();
-        if (!user.getActive()) {
+        if (!user.getIsActive()) {
             return ApiResponse.Q_failure(null, QuyExeption.USER_ALREADY_INACTIVE); // Nếu đã inactive thì trả lỗi
         }
 
-        user.setActive(false); // Khóa tài khoản
+        user.setIsActive(false); // Khóa tài khoản
         userRepository.save(user);
 
         return ApiResponse.Q_success(null, QuyExeption.SUCCESS); // Thành công
@@ -151,8 +157,11 @@ public class UserServiceImpl implements UserService {
                 user.getLastName(),
                 user.getEmail(),
                 user.getDateOfBirth().toString(),
-                user.getActive(),
-                user.getRoles().stream().map(Role::getName).collect(Collectors.toSet())
+                user.getIsActive(),
+                // Chuyển đổi Set<Role> thành Set<Long> (id của roles)
+                user.getRoles().stream()
+                        .map(Role::getId) // Giả sử Role có phương thức getId() để lấy ID
+                        .collect(Collectors.toSet())
         );
 
         return ApiResponse.Q_success(userDTO, QuyExeption.SUCCESS);
