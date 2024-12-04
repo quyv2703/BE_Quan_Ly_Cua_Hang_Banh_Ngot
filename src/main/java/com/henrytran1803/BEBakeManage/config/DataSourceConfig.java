@@ -25,9 +25,9 @@ public class DataSourceConfig {
     public DataSource adminDataSource() {
         System.out.println("admin");
         return DataSourceBuilder.create()
-                .url("jdbc:mysql://localhost:3306/bemanagebake")
+                .url("jdbc:mysql://localhost:3306/cuahangbn") //bemanagebake
                 .username("root")
-                .password("18032002")
+                .password("") //18032002
                 .driverClassName("com.mysql.cj.jdbc.Driver")
                 .build();
     }
@@ -36,9 +36,9 @@ public class DataSourceConfig {
     public DataSource userDataSource() {
         System.out.println("user");
         return DataSourceBuilder.create()
-                .url("jdbc:mysql://localhost:3306/bemanagebake")  //jdbc:mysql://localhost:3306/bemanagebake
+                .url("jdbc:mysql://localhost:3306/cuahangbn")  //jdbc:mysql://localhost:3306/bemanagebake
                 .username("root")
-                .password("18032002") //18032002
+                .password("") //18032002
                 .driverClassName("com.mysql.cj.jdbc.Driver")
                 .build();
     }

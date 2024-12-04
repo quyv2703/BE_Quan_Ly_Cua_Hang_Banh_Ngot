@@ -31,10 +31,10 @@ public class ImportIngredientServiceImpl implements ImportIngredientService {
 
     @Override
     public ImportIngredient importIngredients(ImportIngredientRequest request) {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        int id = Integer.parseInt((String) authentication.getPrincipal());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        int id = Integer.parseInt((String) authentication.getPrincipal());
         ImportIngredient importIngredient = new ImportIngredient();
-        importIngredient.setUser_id(3); //id
+        importIngredient.setUser_id(id); //id
         importIngredient.setImport_date(LocalDateTime.now());
         importIngredient.setId_supplier(request.getId_supplier());
 
