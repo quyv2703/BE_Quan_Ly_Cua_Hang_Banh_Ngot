@@ -15,7 +15,6 @@ public class BillResponse {
     private String paymentMethod;
     private String billStatus;
     private DiningOption diningOption; // Thêm trạng thái
-    private String updatedBy; // Tên nhân viên cập nhật
     private Double totalAmount;
     private List<BillDetailDTO> billDetails;
 

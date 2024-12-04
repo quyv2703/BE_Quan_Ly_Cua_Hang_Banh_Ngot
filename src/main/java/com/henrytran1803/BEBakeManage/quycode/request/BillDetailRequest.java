@@ -10,5 +10,6 @@ public class BillDetailRequest {
     private Integer quantity;
 
 
+
     // Getters and Setters
 }

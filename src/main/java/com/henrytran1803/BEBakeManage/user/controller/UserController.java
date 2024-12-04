@@ -66,7 +66,6 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<UserResponseRegisterDTO>> getUserById(@PathVariable int id) {
         ApiResponse<UserResponseRegisterDTO> response = userService.findUserById(id);

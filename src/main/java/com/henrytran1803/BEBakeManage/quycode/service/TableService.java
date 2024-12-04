@@ -1,6 +1,7 @@
 package com.henrytran1803.BEBakeManage.quycode.service;
 
 import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
@@ -23,6 +24,7 @@ import java.io.IOException;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -65,7 +67,8 @@ public class TableService {
         Area area = areaOptional.get();
 
         // Tạo QR Code nội dung
-        String qrContent = "Table: " + name + ", Area: " + area.getName();
+        String qrContent =
+                "http://localhost:3000/home";
         ByteArrayOutputStream qrImage = generateQRCodeImage(qrContent);
 
         // Lưu QR Code vào Local Storage và lấy URL
@@ -85,6 +88,11 @@ public class TableService {
 
     // Hàm tạo QR Code dưới dạng hình ảnh
     private ByteArrayOutputStream generateQRCodeImage(String qrContent) {
+        // Define the QR code encoding hints
+        Hashtable<EncodeHintType, String> hints = new Hashtable<>();
+        hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
+        // Ensure Vietnamese characters are encoded correctly
+
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
         try {
             BitMatrix bitMatrix = qrCodeWriter.encode(qrContent, BarcodeFormat.QR_CODE, 300, 300);

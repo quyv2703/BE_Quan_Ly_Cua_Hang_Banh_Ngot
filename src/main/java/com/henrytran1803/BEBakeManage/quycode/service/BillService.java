@@ -13,8 +13,6 @@ import com.henrytran1803.BEBakeManage.quycode.PaymentMethod;
 import com.henrytran1803.BEBakeManage.quycode.dto.BillDetailDTO;
 import com.henrytran1803.BEBakeManage.quycode.dto.BillDetailDTO_ViewCake;
 import com.henrytran1803.BEBakeManage.quycode.dto.BillStatusHistoryDTO;
-import com.henrytran1803.BEBakeManage.quycode.entity.BillStatusHistory;
-import com.henrytran1803.BEBakeManage.quycode.repository.BillStatusHistoryRepository;
 import com.henrytran1803.BEBakeManage.quycode.request.BillDetailRequest;
 import com.henrytran1803.BEBakeManage.quycode.request.BillRequest;
 import com.henrytran1803.BEBakeManage.quycode.dto.BillStatusDTO;
@@ -26,7 +24,6 @@ import com.henrytran1803.BEBakeManage.quycode.repository.TableRepository;
 import com.henrytran1803.BEBakeManage.quycode.response.BillResponse;
 import com.henrytran1803.BEBakeManage.quycode.response.BillResponseNoDetail;
 import com.henrytran1803.BEBakeManage.quycode.response.BillResponse_View_Cake;
-import com.henrytran1803.BEBakeManage.user.entity.User;
 import com.henrytran1803.BEBakeManage.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,7 +55,10 @@ public class BillService {
     @Autowired
     private NotificationService notificationService;
     @Autowired
-    private BillStatusHistoryRepository billStatusHistoryRepository;
+    private NotificationService notificationService;
+
+
+
 
 
     // API tìm kiếm theo ID, tên khách hàng hoặc số điện thoại với phân trang
@@ -167,57 +167,7 @@ public class BillService {
     }
 
 
-    //tạo bill
-   /* public ApiResponse<BillResponse> createBill(BillRequest billRequest) {
-        Bill bill = new Bill();
-        bill.setCustomerName(billRequest.getCustomerName());
-        bill.setCustomerPhone(billRequest.getCustomerPhone());
-        bill.setPaymentMethod(PaymentMethod.valueOf(billRequest.getPaymentMethod()));
-        bill.setBillStatus(BillStatus.NOT_PAID);
 
-        // Gán thông tin bàn nếu có
-        if (billRequest.getTableId() != null) {
-            Optional<Table> tableOptional = tableRepository.findById(billRequest.getTableId());
-            if (tableOptional.isEmpty()) {
-                return ApiResponse.Q_failure(null, QuyExeption.TABLE_NOT_FOUND);
-            }
-            bill.setTable(tableOptional.get());
-        }
-
-        // Xử lý danh sách chi tiết hóa đơn
-        for (BillDetailRequest detailRequest : billRequest.getBillDetails()) {
-            BillDetail billDetail = new BillDetail();
-            Optional<ProductBatch> productBatchOptional = productBatchRepository.findById(Math.toIntExact(detailRequest.getProductBatchId()));
-            if (productBatchOptional.isEmpty()) {
-                return ApiResponse.Q_failure(null, QuyExeption.PRODUCT_BATCH_NOT_FOUND);
-            }
-            billDetail.setProductBatch(productBatchOptional.get());
-            billDetail.setQuantity(detailRequest.getQuantity());
-            billDetail.setPrice(detailRequest.getPrice());
-
-            // Kiểm tra trùng lặp trước khi thêm
-            if (bill.getBillDetails().stream()
-                    .anyMatch(detail -> detail.getProductBatch().getId() == billDetail.getProductBatch().getId())) {
-                continue; // Bỏ qua nếu đã tồn tại
-            }
-
-            bill.addBillDetail(billDetail);
-        }
-
-        billRepository.save(bill);
-
-        // Chuyển đổi Bill sang DTO
-        BillResponse billResponse = new BillResponse();
-        billResponse.setBillId(bill.getId());
-        billResponse.setCustomerName(bill.getCustomerName());
-        billResponse.setCustomerPhone(bill.getCustomerPhone());
-        billResponse.setPaymentMethod(bill.getPaymentMethod().name());
-        billResponse.setBillStatus(bill.getBillStatus().name());
-        billResponse.setTotalAmount(bill.getTotalAmount());
-        billResponse.setBillDetails(getBillDetails(bill)); // Chuyển đổi danh sách chi tiết
-
-        return ApiResponse.Q_success(billResponse, QuyExeption.SUCCESS);
-    }*/
     // Tạo hóa đơn
     @Transactional
     public ApiResponse<BillResponse> createBill(BillRequest billRequest) {
@@ -277,7 +227,7 @@ public class BillService {
                         .max().orElse(0.0);
             }
 
-            // Tính giá cuối cùng
+            // Tính giá cuối cùng của productbatch sau giảm giá
             double finalPrice = productBatch.getProduct().getCurrentPrice() * (1 - dailyDiscount / 100)*(1-promotionDiscount/100);
 
             // Tạo BillDetail
@@ -326,6 +276,7 @@ public class BillService {
         )).collect(Collectors.toList());
     }*/
    @Transactional
+
    public ApiResponse<BillStatusDTO> updateBillStatus(Long billId, BillStatus newStatus, User user) {
 
 
@@ -338,12 +289,17 @@ public class BillService {
        BillStatus oldStatus = bill.getBillStatus();
 
        if (oldStatus == BillStatus.PAID && newStatus == BillStatus.CANCEL) {
+
            notificationService.sendPaymentNotification(Math.toIntExact(billId),"Đã thanh toán không cho huỷ", NotificationMessage.MessageSeverity.ERROR);
            return ApiResponse.Q_failure(null, QuyExeption.INVALID_STATUS_TRANSITION);
        }
 
        // Kiểm tra nếu trạng thái mới giống trạng thái hiện tại
        if (oldStatus == newStatus) {
+           notificationService.sendNotification(
+                   "Hóa đơn #" + billId + " đã ở trạng thái " + newStatus,
+                   NotificationMessage.MessageSeverity.WARNING
+           );
            return ApiResponse.Q_failure(null, QuyExeption.BILL_STATUS_ALREADY_UPDATED);
        }
 
@@ -354,61 +310,47 @@ public class BillService {
                productBatch.setQuantity(productBatch.getQuantity() + detail.getQuantity());
                productBatchRepository.save(productBatch); // Cập nhật lại kho
            }
+           notificationService.sendNotification(
+                   "Đã hoàn trả số lượng sản phẩm cho hóa đơn #" + billId,
+                   NotificationMessage.MessageSeverity.INFO
+           );
        }
 
        // Cập nhật trạng thái hóa đơn
        bill.setBillStatus(newStatus);
        billRepository.save(bill);
 
-       BillStatusHistory history = new BillStatusHistory();
-       history.setBill(bill);
-       history.setOldStatus(oldStatus);
-       history.setNewStatus(newStatus);
-       history.setUpdatedAt(LocalDateTime.now());
+// <<<<<<< quy
+// =======
+//        BillStatusHistory history = new BillStatusHistory();
+//        history.setBill(bill);
+//        history.setOldStatus(oldStatus);
+//        history.setNewStatus(newStatus);
+//        history.setUpdatedAt(LocalDateTime.now());
 
-       if (user == null) {
-           history.setUpdatedBySystem(true);
-           history.setUpdatedBy(null);
-       } else {
-           history.setUpdatedBy(user);
-           history.setUpdatedBySystem(false);
-       }
+//        if (user == null) {
+//            history.setUpdatedBySystem(true);
+//            history.setUpdatedBy(null);
+//        } else {
+//            history.setUpdatedBy(user);
+//            history.setUpdatedBySystem(false);
+//        }
 
-       billStatusHistoryRepository.save(history);
+//        billStatusHistoryRepository.save(history);
 
+// >>>>>>> main
        // Chuẩn bị dữ liệu trả về
        BillStatusDTO response = new BillStatusDTO();
        response.setBillId(bill.getId());
        response.setOldStatus(oldStatus.name());
        response.setNewStatus(newStatus.name());
-       response.setUpdatedBy(user != null ? user.getEmail() : "SYSTEM");
-       response.setUpdatedAt(history.getUpdatedAt());
-
        return ApiResponse.Q_success(response, QuyExeption.SUCCESS);
    }
 
 
 
 
-    //
-    public ApiResponse<List<BillStatusHistoryDTO>> getBillStatusHistory(Long billId) {
-        List<BillStatusHistory> histories = billStatusHistoryRepository.findByBillId(billId);
-        if (histories.isEmpty()) {
-            return ApiResponse.Q_failure(null, QuyExeption.NO_HISTORY_FOUND);
-        }
 
-        List<BillStatusHistoryDTO> historyDTOs = histories.stream().map(history -> new BillStatusHistoryDTO(
-                history.getId(),
-                history.getBill().getId(),
-                history.getOldStatus().name(),
-                history.getNewStatus().name(),
-                (long) history.getUpdatedBy().getId(),
-                history.getUpdatedBy().getFirstName() + " " + history.getUpdatedBy().getLastName(),
-                history.getUpdatedAt()
-        )).collect(Collectors.toList());
-
-        return ApiResponse.Q_success(historyDTOs, QuyExeption.SUCCESS);
-    }
     // dùng để map
     public List<BillDetailDTO> getBillDetails(Bill bill) {
         return bill.getBillDetails().stream().map(detail -> new BillDetailDTO(

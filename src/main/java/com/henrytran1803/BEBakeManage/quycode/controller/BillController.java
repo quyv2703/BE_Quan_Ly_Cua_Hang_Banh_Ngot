@@ -32,15 +32,7 @@ public class BillController {
     @Autowired
     UserRepository userRepository;
 
-    @GetMapping("/{id}/history")
-    public ResponseEntity<ApiResponse<List<BillStatusHistoryDTO>>> getBillStatusHistory(@PathVariable Long id) {
-        ApiResponse<List<BillStatusHistoryDTO>> response = billService.getBillStatusHistory(id);
-        if (response.isSuccess()) {
-            return ResponseEntity.ok(response);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        }
-    }
+
     // API tìm kiếm hóa đơn với phân trang
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<Page<BillResponseNoDetail>>> searchBills(
@@ -64,18 +56,20 @@ public class BillController {
     @PutMapping("/{billId}/status")
     public ResponseEntity<ApiResponse<BillStatusDTO>> updateBillStatus(
             @PathVariable Long billId,
-            @RequestParam BillStatus newStatus,
-            @RequestParam(required = false) Long userId) {
+            @RequestParam BillStatus newStatus) {  // Đổi thành String
+        try {
 
-        // Lấy thông tin người dùng nếu có
-        User user = userId != null ? userRepository.findById(Math.toIntExact(userId)).orElse(null) : null;
 
-        // Gọi service để cập nhật trạng thái hóa đơn
-        ApiResponse<BillStatusDTO> response = billService.updateBillStatus(billId, newStatus, user);
+            // Gọi service
+            ApiResponse<BillStatusDTO> response = billService.updateBillStatus(billId, newStatus);
 
-        // Trả về kết quả từ ApiResponse
-        return ResponseEntity.status(response.isSuccess() ? HttpStatus.OK : HttpStatus.BAD_REQUEST)
-                .body(response);
+            return ResponseEntity.status(response.isSuccess() ? HttpStatus.OK : HttpStatus.BAD_REQUEST)
+                    .body(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(
+                    ApiResponse.Q_failure(null, QuyExeption.INVALID_STATUS)
+            );
+        }
     }
 
     // API lấy danh sách bills theo trạng thái

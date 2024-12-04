@@ -35,8 +35,10 @@ public class SecurityConfig {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers( "/api/nofications/**").permitAll()
 
+                        .requestMatchers("/api/user/bills/*/status").permitAll()  // Rule cụ thể cho API status
+                        .requestMatchers("/websocket/**", "/ws/**").permitAll()
+                        .requestMatchers( "/api/nofications/**").permitAll()
                         .requestMatchers( "/websocket/**", "/ws/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/categories").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/products/search/active").permitAll()

@@ -13,5 +13,6 @@ public class BillRequest {
     private String paymentMethod;
     private Long tableId;
     private DiningOption diningOption; // Thêm trường mới
+
     private List<BillDetailRequest> billDetails;
 }
