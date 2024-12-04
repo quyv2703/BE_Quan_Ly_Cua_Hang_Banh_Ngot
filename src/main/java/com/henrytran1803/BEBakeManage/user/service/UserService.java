@@ -1,6 +1,8 @@
 package com.henrytran1803.BEBakeManage.user.service;
+import com.beust.jcommander.IStringConverter;
 import com.henrytran1803.BEBakeManage.common.response.ApiResponse;
 import com.henrytran1803.BEBakeManage.user.dto.CreateUserRequest;
+import com.henrytran1803.BEBakeManage.user.dto.UserBasicDTO;
 import com.henrytran1803.BEBakeManage.user.dto.UserRequest;
 import com.henrytran1803.BEBakeManage.user.dto.UserResponseRegisterDTO;
 import com.henrytran1803.BEBakeManage.user.entity.User;
@@ -18,10 +20,11 @@ public interface UserService {
 
    /* ApiResponse<List<UserResponseRegisterDTO>> getActiveUsers(boolean isActive);*/
 
-    ApiResponse<Page<UserResponseRegisterDTO>> getActiveUsers(boolean isActive, Pageable pageable);
+    ApiResponse<Page<UserResponseRegisterDTO>> getActiveUsers(String isActive, Pageable pageable);
 
     ApiResponse<UserResponseRegisterDTO> updateUser(int id, UserRequest userRequest); // Cập nhật thông tin
     ApiResponse<Void> deactivateUser(int id); // Khóa tài khoản
+    ApiResponse<List<UserBasicDTO>> getAllUser();
 
     @Transactional
     ApiResponse<Void> activateUser(int id);

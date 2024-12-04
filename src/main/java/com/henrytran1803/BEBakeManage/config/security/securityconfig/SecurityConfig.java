@@ -35,23 +35,40 @@ public class SecurityConfig {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                        // Đặt các permitAll() lên đầu và chi tiết hơn
+
                         .requestMatchers("/api/user/bills/*/status").permitAll()  // Rule cụ thể cho API status
                         .requestMatchers("/websocket/**", "/ws/**").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/payment/**").permitAll()
-                        .requestMatchers("/uploads/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers("/api/notifications/**").permitAll()
+                        .requestMatchers( "/api/nofications/**").permitAll()
+                        .requestMatchers( "/websocket/**", "/ws/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/categories").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/products/search/active").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/products/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/price/{id}/history").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/products/cart").permitAll()
 
-                        // Các rules yêu cầu authentication
-                        .requestMatchers(HttpMethod.POST,"/api/auth/register").hasRole("MANAGE")
+                        .requestMatchers(HttpMethod.POST,"/api/auth/register").permitAll()
+                        .requestMatchers("/api/auth/**","/api/payment/**", "/uploads/**","/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+
+                        .requestMatchers(HttpMethod.POST, "/api/user/bills").permitAll()
+                        .requestMatchers("/api/ingredients/**", "/api/supplier/**", "/api/units/**").hasRole("MANAGE")
                         .requestMatchers("/api/upload").hasRole("MANAGE")
                         .requestMatchers("/api/user/bills/**").hasAnyRole("USER","MANAGE")
                         .requestMatchers("/api/user/**").hasRole("USER")
-                        .requestMatchers("/api/admin/**", "/api/categories/**", "/api/recipes/**",
-                                "/api/dashboard/**", "/api/products/**", "/api/promotions/**",
-                                "/api/price/**","/api/productbatches/**").hasRole("MANAGE")
+                        .requestMatchers("/api/admin/**", "/api/categories/**", "/api/categories/", "/api/recipes/**","/api/dashboard/**", "/api/products/**", "/api/promotions/**").hasRole("MANAGE")
+                        .requestMatchers("/api/disposed/**",
+                                         "/api/user/bills/**",
+                                         "/api/admin/**",
+                                "/api/dashboard/**",
+                                "/api/discounts/**",
+                                "/api/admin/**",
+                                "/api/categories/**",
+                                "/api/recipes/**",
+                                "/api/products/**",
+                                "/api/promotions/**",
+                                "/api/productbatches/**",
+                                "/api/price/**")
+                        .hasRole("MANAGE")
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -64,7 +81,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "ws://localhost:3000"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
 

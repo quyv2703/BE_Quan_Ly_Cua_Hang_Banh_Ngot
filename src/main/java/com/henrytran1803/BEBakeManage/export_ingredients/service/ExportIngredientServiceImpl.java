@@ -51,9 +51,10 @@ public class ExportIngredientServiceImpl implements ExportIngredientService {
     @Transactional
     @Override
     public ExportIngredient exportIngredients(ExportIngredientRequest request) {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        int id = Integer.parseInt((String) authentication.getPrincipal());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        int id = Integer.parseInt((String) authentication.getPrincipal());
         // Kiểm tra số lượng nguyên liệu trước khi xuất
+
         for (ExportIngredientDetailRequest detailRequest : request.getIngredients()) {
             double currentQuantity = ingredientRepository.findById(detailRequest.getIngredient_id())
                                      .orElseThrow(() -> new RuntimeException("Nguyên liệu không tồn tại"))
@@ -76,7 +77,7 @@ public class ExportIngredientServiceImpl implements ExportIngredientService {
         
         // Lưu thông tin xuất nguyên liệu vào bảng export_ingredients
         ExportIngredient exportIngredient = new ExportIngredient();
-        exportIngredient.setSender_id(3); //id
+        exportIngredient.setSender_id(id); //id
         exportIngredient.setTotal_amount(request.getTotal_amount());
         exportIngredient.setExport_date(LocalDateTime.now());
         exportIngredient.setDaily_production_id(dailyProduction.getId());

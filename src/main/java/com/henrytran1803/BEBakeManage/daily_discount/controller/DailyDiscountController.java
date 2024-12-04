@@ -23,21 +23,18 @@ public class DailyDiscountController {
     @PostMapping("")
     public ResponseEntity<ApiResponse<String>> createPromotionQuick(@RequestBody CreateDailyDiscount createDailyDiscount) {
         try {
-            // Validate discount range
             if (createDailyDiscount.getDiscount() < 1 || createDailyDiscount.getDiscount() > 100) {
                 return ResponseEntity.badRequest().body(ApiResponse.error(
                         DailyDiscountError.INVALID_DISCOUNT_RANGE.getCode(),
                         DailyDiscountError.INVALID_DISCOUNT_RANGE.getMessage()));
             }
 
-            // Validate product batch ids
             if (createDailyDiscount.getProductBatchIds() == null || createDailyDiscount.getProductBatchIds().isEmpty()) {
                 return ResponseEntity.badRequest().body(ApiResponse.error(
                         DailyDiscountError.PRODUCT_BATCH_IDS_REQUIRED.getCode(),
                         DailyDiscountError.PRODUCT_BATCH_IDS_REQUIRED.getMessage()));
             }
 
-            // Validate end date
             if (createDailyDiscount.getEndDate() == null) {
                 return ResponseEntity.badRequest().body(ApiResponse.error(
                         DailyDiscountError.END_DATE_REQUIRED.getCode(),

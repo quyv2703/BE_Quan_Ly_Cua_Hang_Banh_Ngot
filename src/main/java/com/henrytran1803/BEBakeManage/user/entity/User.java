@@ -12,8 +12,6 @@ import java.util.Set;
 @Getter
 @Setter
 public class User {
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,8 +30,6 @@ public class User {
 
     @Column(name = "password", nullable = false)
     private String password;
-
-
 
     @Column(name = "isactive")
     private Boolean isActive;

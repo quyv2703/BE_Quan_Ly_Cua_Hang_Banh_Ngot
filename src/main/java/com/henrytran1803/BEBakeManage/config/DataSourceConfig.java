@@ -1,4 +1,3 @@
-/*
 
 package com.henrytran1803.BEBakeManage.config;
 
@@ -26,9 +25,9 @@ public class DataSourceConfig {
     public DataSource adminDataSource() {
         System.out.println("admin");
         return DataSourceBuilder.create()
-                .url("jdbc:mysql://localhost:3306/bemanagebake")
+                .url("jdbc:mysql://localhost:3306/bemanagebake") //bemanagebake
                 .username("root")
-                .password("18032002")
+                .password("18032002") //18032002
                 .driverClassName("com.mysql.cj.jdbc.Driver")
                 .build();
     }
@@ -87,4 +86,3 @@ public class DataSourceConfig {
     }
 }
 
-*/

@@ -40,7 +40,6 @@ public class AuthController {
      */
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<UserResponseRegisterDTO>> register( @Valid @RequestBody RegisterRequest registerRequest) {
-        // Gọi service để thực hiện đăng ký tài khoản
         ApiResponse<UserResponseRegisterDTO> response = authService.register(
                 registerRequest.getFirstName(),
                 registerRequest.getLastName(),
@@ -51,10 +50,10 @@ public class AuthController {
         );
 
         if (response.isSuccess()) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(response); // HTTP 201 nếu thành công
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response); // HTTP 500 nếu lỗi khác
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 }

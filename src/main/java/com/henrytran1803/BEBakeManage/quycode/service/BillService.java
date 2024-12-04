@@ -52,7 +52,8 @@ public class BillService {
 
     @Autowired
     private UserRepository userRepository;
-
+    @Autowired
+    private NotificationService notificationService;
     @Autowired
     private NotificationService notificationService;
 
@@ -275,8 +276,10 @@ public class BillService {
         )).collect(Collectors.toList());
     }*/
    @Transactional
-   public ApiResponse<BillStatusDTO> updateBillStatus(Long billId, BillStatus newStatus) {
-       // Tìm hóa đơn theo ID
+
+   public ApiResponse<BillStatusDTO> updateBillStatus(Long billId, BillStatus newStatus, User user) {
+
+
        Optional<Bill> billOptional = billRepository.findById(billId);
        if (billOptional.isEmpty()) {
            return ApiResponse.Q_failure(null, QuyExeption.BILL_NOT_FOUND);
@@ -285,12 +288,9 @@ public class BillService {
        Bill bill = billOptional.get();
        BillStatus oldStatus = bill.getBillStatus();
 
-       // Kiểm tra trạng thái không hợp lệ (PAID -> CANCEL)
        if (oldStatus == BillStatus.PAID && newStatus == BillStatus.CANCEL) {
-           notificationService.sendNotification(
-                   "Không thể hủy hóa đơn đã thanh toán #" + billId,
-                   NotificationMessage.MessageSeverity.WARNING
-           );
+
+           notificationService.sendPaymentNotification(Math.toIntExact(billId),"Đã thanh toán không cho huỷ", NotificationMessage.MessageSeverity.ERROR);
            return ApiResponse.Q_failure(null, QuyExeption.INVALID_STATUS_TRANSITION);
        }
 
@@ -303,9 +303,9 @@ public class BillService {
            return ApiResponse.Q_failure(null, QuyExeption.BILL_STATUS_ALREADY_UPDATED);
        }
 
-       // Nếu trạng thái mới là CANCEL, hoàn trả số lượng sản phẩm
        if (newStatus == BillStatus.CANCEL) {
            for (BillDetail detail : bill.getBillDetails()) {
+               notificationService.sendPaymentNotification(Math.toIntExact(billId),"Đơn hàng đã buỷ", NotificationMessage.MessageSeverity.INFO);
                ProductBatch productBatch = detail.getProductBatch();
                productBatch.setQuantity(productBatch.getQuantity() + detail.getQuantity());
                productBatchRepository.save(productBatch); // Cập nhật lại kho
@@ -320,6 +320,25 @@ public class BillService {
        bill.setBillStatus(newStatus);
        billRepository.save(bill);
 
+// <<<<<<< quy
+// =======
+//        BillStatusHistory history = new BillStatusHistory();
+//        history.setBill(bill);
+//        history.setOldStatus(oldStatus);
+//        history.setNewStatus(newStatus);
+//        history.setUpdatedAt(LocalDateTime.now());
+
+//        if (user == null) {
+//            history.setUpdatedBySystem(true);
+//            history.setUpdatedBy(null);
+//        } else {
+//            history.setUpdatedBy(user);
+//            history.setUpdatedBySystem(false);
+//        }
+
+//        billStatusHistoryRepository.save(history);
+
+// >>>>>>> main
        // Chuẩn bị dữ liệu trả về
        BillStatusDTO response = new BillStatusDTO();
        response.setBillId(bill.getId());
