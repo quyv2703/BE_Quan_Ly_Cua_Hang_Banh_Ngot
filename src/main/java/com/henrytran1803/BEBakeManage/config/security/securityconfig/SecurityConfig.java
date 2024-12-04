@@ -47,9 +47,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/products/cart").permitAll()
 
                         .requestMatchers(HttpMethod.POST,"/api/auth/register").permitAll()
+
                         .requestMatchers("/api/auth/**","/api/payment/**", "/uploads/**","/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
                         .requestMatchers(HttpMethod.POST, "/api/user/bills").permitAll()
+
                         .requestMatchers("/api/ingredients/**", "/api/supplier/**", "/api/units/**").hasRole("MANAGE")
                         .requestMatchers("/api/upload").hasRole("MANAGE")
                         .requestMatchers("/api/user/bills/**").hasAnyRole("USER","MANAGE")
