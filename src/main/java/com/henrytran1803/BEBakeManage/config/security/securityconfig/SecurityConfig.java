@@ -35,31 +35,28 @@ public class SecurityConfig {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
-
-                        .requestMatchers("/api/user/bills/*/status").permitAll()  // Rule cụ thể cho API status
-                        .requestMatchers("/websocket/**", "/ws/**").permitAll()
                         .requestMatchers( "/api/nofications/**").permitAll()
                         .requestMatchers( "/websocket/**", "/ws/**").permitAll()
+                        .requestMatchers("/api/user/bills/*/status").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/categories").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/products/search/active").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products/{id}").permitAll()
+                        .requestMatchers("/api/payment/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/price/{id}/history").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/products/cart").permitAll()
 
                         .requestMatchers(HttpMethod.POST,"/api/auth/register").permitAll()
-
                         .requestMatchers("/api/auth/**","/api/payment/**", "/uploads/**","/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
                         .requestMatchers(HttpMethod.POST, "/api/user/bills").permitAll()
-
                         .requestMatchers("/api/ingredients/**", "/api/supplier/**", "/api/units/**").hasRole("MANAGE")
                         .requestMatchers("/api/upload").hasRole("MANAGE")
                         .requestMatchers("/api/user/bills/**").hasAnyRole("USER","MANAGE")
                         .requestMatchers("/api/user/**").hasRole("USER")
                         .requestMatchers("/api/admin/**", "/api/categories/**", "/api/categories/", "/api/recipes/**","/api/dashboard/**", "/api/products/**", "/api/promotions/**").hasRole("MANAGE")
                         .requestMatchers("/api/disposed/**",
-                                         "/api/user/bills/**",
-                                         "/api/admin/**",
+                                "/api/user/bills/**",
+                                "/api/admin/**",
                                 "/api/dashboard/**",
                                 "/api/discounts/**",
                                 "/api/admin/**",
@@ -82,10 +79,17 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "ws://localhost:3000"));
+        // Thêm cả http và https
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:3000",
+                "http://127.0.0.1:3000",
+                "ws://localhost:3000"
+                ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
