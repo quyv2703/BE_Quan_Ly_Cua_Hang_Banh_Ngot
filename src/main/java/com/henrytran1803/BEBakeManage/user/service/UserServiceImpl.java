@@ -150,17 +150,21 @@ public class UserServiceImpl implements UserService {
             return ApiResponse.Q_failure(null, QuyExeption.USER_NOT_FOUND); // Lỗi nếu không tìm thấy
         }
 
-        // Cập nhật trạng thái active của user
+        // Kiểm tra trạng thái active của user
         User user = optionalUser.get();
-        if (!user.getIsActive()) {
-            return ApiResponse.Q_failure(null, QuyExeption.USER_ALREADY_INACTIVE); // Nếu đã inactive thì trả lỗi
+        // Log giá trị trước khi kiểm tra
+        System.out.println("isActive: " + user.getIsActive());
+        if (user.getIsActive()) { // Nếu isActive = false
+            return ApiResponse.Q_failure(null, QuyExeption.USER_ALREADY_INACTIVE); // Trả lỗi nếu đã không hoạt động
         }
 
-        user.setIsActive(true); // Khóa tài khoản
+        // Cập nhật trạng thái thành active (true)
+        user.setIsActive(true);
         userRepository.save(user);
 
         return ApiResponse.Q_success(null, QuyExeption.SUCCESS); // Thành công
     }
+
 
     @Override
     public ApiResponse<UserResponseRegisterDTO> findUserById(int id) {

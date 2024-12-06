@@ -77,7 +77,7 @@ public class UserController {
     // API kích hoạt tài khoản người dùng
     @PatchMapping("/{id}/activate")
     public ResponseEntity<ApiResponse<Void>> activateUser(@PathVariable int id) {
-        ApiResponse<Void> response = userService.deactivateUser(id);
+        ApiResponse<Void> response = userService.activateUser(id);
 
         if (response.isSuccess()) {
             return ResponseEntity.ok(response); // HTTP 200 nếu thành công

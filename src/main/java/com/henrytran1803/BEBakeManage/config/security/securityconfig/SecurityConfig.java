@@ -39,6 +39,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/user/bills/*/status").permitAll()  // Rule cụ thể cho API status
                         .requestMatchers("/websocket/**", "/ws/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+                        // api cho giao dien khach hang
+                        .requestMatchers(HttpMethod.GET,"/api/products/active","/api/products","/api/products/search","/api/products/search/active","/api/products/{id}","/api/categories", "/api/price/{id}/history").permitAll()
                         .requestMatchers("/api/payment/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
