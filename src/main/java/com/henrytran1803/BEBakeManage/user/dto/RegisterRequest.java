@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 @Getter
 @Setter
@@ -23,13 +24,11 @@ public class RegisterRequest {
     private String email;
 
     @NotNull(message = "{date.of.birth.not.null}")
-    private String dateOfBirth;
+    private Date dateOfBirth;
 
     @NotBlank(message = "{password.not.blank}")
     private String password;
 
     @NotNull(message = "{roles.not.null}")
-    private Set<Long> roleIds;
-
-
+    private List<Integer> roleIds;
 }

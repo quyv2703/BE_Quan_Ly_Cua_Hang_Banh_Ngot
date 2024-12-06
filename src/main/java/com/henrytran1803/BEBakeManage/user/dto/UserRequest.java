@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -27,11 +28,10 @@ public class UserRequest {
 
     @NotNull(message = "{date.of.birth.not.null}")
     private Date dateOfBirth;
-
-    @NotNull(message = "{active.status.not.null}")
-    private Boolean isActive;
+//
+//    @NotNull(message = "{active.status.not.null}")
+//    private Boolean isActive;
 
     @NotNull(message = "{roles.not.null}")
-    private Set<Long> roleIds;
-    // Getters và Setters
+    private List<Integer> roleIds;
 }
