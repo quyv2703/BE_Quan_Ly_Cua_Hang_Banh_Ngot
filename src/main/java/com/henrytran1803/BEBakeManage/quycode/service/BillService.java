@@ -24,6 +24,7 @@ import com.henrytran1803.BEBakeManage.quycode.repository.TableRepository;
 import com.henrytran1803.BEBakeManage.quycode.response.BillResponse;
 import com.henrytran1803.BEBakeManage.quycode.response.BillResponseNoDetail;
 import com.henrytran1803.BEBakeManage.quycode.response.BillResponse_View_Cake;
+import com.henrytran1803.BEBakeManage.user.entity.User;
 import com.henrytran1803.BEBakeManage.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -54,8 +55,7 @@ public class BillService {
     private UserRepository userRepository;
     @Autowired
     private NotificationService notificationService;
-    @Autowired
-    private NotificationService notificationService;
+
 
 
 
@@ -277,7 +277,7 @@ public class BillService {
     }*/
    @Transactional
 
-   public ApiResponse<BillStatusDTO> updateBillStatus(Long billId, BillStatus newStatus, User user) {
+   public ApiResponse<BillStatusDTO> updateBillStatus(Long billId, BillStatus newStatus) {
 
 
        Optional<Bill> billOptional = billRepository.findById(billId);

@@ -59,7 +59,7 @@ public class UserController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        ApiResponse<Page<UserResponseRegisterDTO>> response = userService.getActiveUsers(true, pageable);
+        ApiResponse<Page<UserResponseRegisterDTO>> response = userService.getActiveUsers(String.valueOf(true), pageable);
 
         return ResponseEntity.status(response.isSuccess() ? HttpStatus.OK : HttpStatus.NO_CONTENT).body(response);
     }
@@ -69,7 +69,7 @@ public class UserController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        ApiResponse<Page<UserResponseRegisterDTO>> response = userService.getActiveUsers(false, pageable);
+        ApiResponse<Page<UserResponseRegisterDTO>> response = userService.getActiveUsers(String.valueOf(false), pageable);
 
         return ResponseEntity.status(response.isSuccess() ? HttpStatus.OK : HttpStatus.NO_CONTENT).body(response);
     }
