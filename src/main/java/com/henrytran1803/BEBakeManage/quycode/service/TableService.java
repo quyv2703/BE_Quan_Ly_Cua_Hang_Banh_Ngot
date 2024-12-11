@@ -70,7 +70,6 @@ public class TableService {
             }
             Area area = areaOptional.get();
 
-            // Tạo Table object (chưa lưu)
             Table table = new Table();
             table.setName(name);
             table.setArea(area);
@@ -81,8 +80,8 @@ public class TableService {
 
                 // Tạo một temporary ID cho QR code
                 String tempId = UUID.randomUUID().toString();
-                String tableInfo = String.format("TABLE_ID:%s|URL:%s/home", tempId, BASE_URL);
-                String qrContent = String.format("%s/home?qrdata=%s",
+                String tableInfo = String.format("TABLE_ID:%s|URL:%s", tempId, BASE_URL);
+                String qrContent = String.format("%s?qrdata=%s",
                         BASE_URL,
                         URLEncoder.encode(tableInfo, StandardCharsets.UTF_8));
 
@@ -94,33 +93,27 @@ public class TableService {
 
                 // Lưu QR code tạm và lấy URL
                 String qrCodeUrl = saveQRCodeLocally(qrImage, name + "_temp");
-                tempQrPath = qrCodeUrl; // Lưu đường dẫn file tạm để xóa sau
+                tempQrPath = qrCodeUrl;
                 if (qrCodeUrl == null || qrCodeUrl.isEmpty()) {
                     throw new RuntimeException("Failed to save QR code image");
                 }
 
-                // Set URL trước khi lưu table
                 table.setQrCodeUrl(qrCodeUrl);
-
-                // Lưu table vào database để có ID thật
                 table = tableRepository.save(table);
 
                 // Tạo QR code mới với ID thật
-                tableInfo = String.format("TABLE_ID:%s|URL:%s/home", table.getId(), BASE_URL);
-                qrContent = String.format("%s/home?qrdata=%s",
+                tableInfo = String.format("TABLE_ID:%s|URL:%s", table.getId(), BASE_URL);
+                qrContent = String.format("%s?qrdata=%s",
                         BASE_URL,
                         URLEncoder.encode(tableInfo, StandardCharsets.UTF_8));
 
-                // Tạo và lưu QR code mới
                 qrImage = generateQRCodeImage(qrContent);
                 qrCodeUrl = saveQRCodeLocally(qrImage, name);
 
-                // Xóa file QR tạm nếu tồn tại
                 if (tempQrPath != null) {
                     deleteQRCodeFile(tempQrPath);
                 }
 
-                // Cập nhật URL mới
                 table.setQrCodeUrl(qrCodeUrl);
                 table = tableRepository.save(table);
 
