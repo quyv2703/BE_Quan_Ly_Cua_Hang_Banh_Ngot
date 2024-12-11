@@ -24,13 +24,19 @@ import com.henrytran1803.BEBakeManage.quycode.response.BillResponse_View_Cake;
 import com.henrytran1803.BEBakeManage.user.entity.User;
 import com.henrytran1803.BEBakeManage.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.threeten.bp.ZoneId;
 
 
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -80,10 +86,17 @@ public class BillService {
 
 
     public ApiResponse<Page<BillResponseNoDetail>> getBillsByStatus(BillStatus status, Pageable pageable) {
-        // Lấy danh sách hóa đơn với phân trang
-        Page<Bill> billPage = billRepository.findByBillStatus(status, pageable);
+        // Create a PageRequest with sorting by createdAt in descending order
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
 
-        // Chuyển đổi danh sách hóa đơn thành danh sách phản hồi mà không có chi tiết
+        // Get paginated bills with sorting
+        Page<Bill> billPage = billRepository.findByBillStatus(status, sortedPageable);
+
+        // Convert to response DTOs
         Page<BillResponseNoDetail> responsePage = billPage.map(bill -> {
             BillResponseNoDetail responseNoDetail = new BillResponseNoDetail();
             responseNoDetail.setBillId(bill.getId());
@@ -92,11 +105,14 @@ public class BillService {
             responseNoDetail.setPaymentMethod(bill.getPaymentMethod().name());
             responseNoDetail.setBillStatus(bill.getBillStatus().name());
             responseNoDetail.setDiningOption(String.valueOf(bill.getDiningOption()));
+            LocalDateTime createdAt = bill.getCreatedAt();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+            String formattedDateTime = createdAt.format(formatter);
+            responseNoDetail.setCreatedAt(formattedDateTime);
             responseNoDetail.setTotalAmount(bill.getTotalAmount());
             return responseNoDetail;
         });
 
-        // Trả về kết quả bao bọc trong ApiResponse
         return ApiResponse.Q_success(responsePage, QuyExeption.SUCCESS);
     }
 

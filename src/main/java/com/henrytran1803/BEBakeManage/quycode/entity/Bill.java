@@ -61,12 +61,6 @@ public class Bill {
         recalculateTotalAmount(); // Tính lại tổng tiền
     }
 
-    public void removeBillDetail(BillDetail billDetail) {
-        billDetails.remove(billDetail);
-        billDetail.setBill(null);
-        recalculateTotalAmount(); // Tính lại tổng tiền
-    }
-
     public void recalculateTotalAmount() {
         this.totalAmount = billDetails.stream()
                 .mapToDouble(billDetail -> billDetail.getPrice() * billDetail.getQuantity())
