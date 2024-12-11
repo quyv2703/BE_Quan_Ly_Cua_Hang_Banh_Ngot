@@ -52,6 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/upload").hasRole("MANAGE")
                         .requestMatchers("/api/user/bills/**").hasAnyRole("USER","MANAGE")
                         .requestMatchers("/api/user/**").hasRole("USER")
+                        .requestMatchers("/api/admin/tables").hasRole("MANAGE")
                         .requestMatchers("/api/admin/**", "/api/categories/**", "/api/categories/", "/api/recipes/**","/api/dashboard/**", "/api/products/**", "/api/promotions/**").hasRole("MANAGE")
                         .requestMatchers("/api/disposed/**",
                                 "/api/user/bills/**",
@@ -74,6 +75,7 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 
 @Bean
 public CorsConfigurationSource corsConfigurationSource() {
