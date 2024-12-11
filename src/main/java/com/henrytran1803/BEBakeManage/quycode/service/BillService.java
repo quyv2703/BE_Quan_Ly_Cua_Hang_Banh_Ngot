@@ -10,12 +10,9 @@ import com.henrytran1803.BEBakeManage.product_batches.entity.ProductBatch;
 import com.henrytran1803.BEBakeManage.product_batches.repository.ProductBatchRepository;
 import com.henrytran1803.BEBakeManage.quycode.BillStatus;
 import com.henrytran1803.BEBakeManage.quycode.PaymentMethod;
-import com.henrytran1803.BEBakeManage.quycode.dto.BillDetailDTO;
-import com.henrytran1803.BEBakeManage.quycode.dto.BillDetailDTO_ViewCake;
-import com.henrytran1803.BEBakeManage.quycode.dto.BillStatusHistoryDTO;
+import com.henrytran1803.BEBakeManage.quycode.dto.*;
 import com.henrytran1803.BEBakeManage.quycode.request.BillDetailRequest;
 import com.henrytran1803.BEBakeManage.quycode.request.BillRequest;
-import com.henrytran1803.BEBakeManage.quycode.dto.BillStatusDTO;
 import com.henrytran1803.BEBakeManage.quycode.entity.Bill;
 import com.henrytran1803.BEBakeManage.quycode.entity.BillDetail;
 import com.henrytran1803.BEBakeManage.quycode.entity.Table;
@@ -67,12 +64,9 @@ public class BillService {
 
 
 
-    // API tìm kiếm theo ID, tên khách hàng hoặc số điện thoại với phân trang
     public ApiResponse<Page<BillResponseNoDetail>> searchBills(Long id, String customerName, String customerPhone, Pageable pageable) {
-        // Lấy danh sách hóa đơn với phân trang
         Page<Bill> billPage = billRepository.findByIdOrCustomerNameContainingOrCustomerPhoneContaining(id, customerName, customerPhone, pageable);
 
-        // Chuyển đổi danh sách hóa đơn thành danh sách phản hồi mà không có chi tiết
         Page<BillResponseNoDetail> responsePage = billPage.map(bill -> {
             BillResponseNoDetail responseNoDetail = new BillResponseNoDetail();
             responseNoDetail.setBillId(bill.getId());
@@ -281,16 +275,72 @@ public class BillService {
 
         return ApiResponse.Q_success(billResponse, QuyExeption.SUCCESS);
     }
+    public ApiResponse<BillStatisticsDTO> getStatistics(LocalDateTime startDate, LocalDateTime endDate) {
+        List<Bill> bills = billRepository.findByBillStatusAndCreatedAtBetween(
+                BillStatus.PAID,
+                startDate,
+                endDate
+        );
 
-   /* // Phương thức để map BillDetails sang DTO
-    private List<BillDetailDTO> getBillDetails(Bill bill) {
-        return bill.getBillDetails().stream().map(detail -> new BillDetailDTO(
-                detail.getId(),
-                (long) detail.getProductBatch().getId(),
-                detail.getQuantity(),
-                detail.getPrice()
-        )).collect(Collectors.toList());
-    }*/
+        return createStatisticsResponse(bills);
+    }
+
+    public ApiResponse<BillStatisticsDTO> getTodayStatistics() {
+        LocalDateTime startOfDay = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime endOfDay = LocalDateTime.now().withHour(23).withMinute(59).withSecond(59);
+
+        return getStatistics(startOfDay, endOfDay);
+    }
+
+    public ApiResponse<BillStatisticsDTO> getCurrentMonthStatistics() {
+        LocalDateTime startOfMonth = LocalDateTime.now()
+                .withDayOfMonth(1)
+                .withHour(0)
+                .withMinute(0)
+                .withSecond(0);
+        LocalDateTime endOfMonth = startOfMonth.plusMonths(1).minusSeconds(1);
+
+        return getStatistics(startOfMonth, endOfMonth);
+    }
+
+    public ApiResponse<BillStatisticsDTO> getCurrentYearStatistics() {
+        LocalDateTime startOfYear = LocalDateTime.now()
+                .withDayOfYear(1)
+                .withHour(0)
+                .withMinute(0)
+                .withSecond(0);
+        LocalDateTime endOfYear = startOfYear.plusYears(1).minusSeconds(1);
+
+        return getStatistics(startOfYear, endOfYear);
+    }
+
+    private ApiResponse<BillStatisticsDTO> createStatisticsResponse(List<Bill> bills) {
+        BillStatisticsDTO statistics = new BillStatisticsDTO();
+
+        List<BillResponseNoDetail> responseList = bills.stream()
+                .map(bill -> {
+                    BillResponseNoDetail response = new BillResponseNoDetail();
+                    response.setBillId(bill.getId());
+                    response.setCustomerName(bill.getCustomerName());
+                    response.setCustomerPhone(bill.getCustomerPhone());
+                    response.setPaymentMethod(bill.getPaymentMethod().name());
+                    response.setBillStatus(bill.getBillStatus().name());
+                    response.setDiningOption(String.valueOf(bill.getDiningOption()));
+                    response.setTotalAmount(bill.getTotalAmount());
+                    return response;
+                })
+                .collect(Collectors.toList());
+
+        Double totalRevenue = bills.stream()
+                .mapToDouble(Bill::getTotalAmount)
+                .sum();
+
+        statistics.setBills(responseList);
+        statistics.setTotalRevenue(totalRevenue);
+
+        return ApiResponse.Q_success(statistics, QuyExeption.SUCCESS);
+    }
+
    @Transactional
 
    public ApiResponse<BillStatusDTO> updateBillStatus(Long billId, BillStatus newStatus) {
