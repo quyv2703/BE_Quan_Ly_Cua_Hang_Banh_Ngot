@@ -12,6 +12,7 @@ public class BillResponseNoDetail {
     private String paymentMethod;
     private String diningOption;
     private String billStatus;
+    private String createdAt;
     private Double totalAmount;
     public BillResponseNoDetail() {}
 }

@@ -22,7 +22,8 @@ public enum QuyExeption {
     NO_HISTORY_FOUND("Q1015","No history found"),
     INVALID_STATUS_TRANSITION("Q1016","Can not change Paid -> Cancel"),
     BILL_STATUS_ALREADY_UPDATED("Q1017","Bill status already update"),
-    INVALID_STATUS("Q1018","invalid status");
+    INVALID_STATUS("Q1018","invalid status"),
+    INTERNAL_SERVER_ERROR("Q1019","Internal sever error" );
     // Thuộc tính của Enum
     private final String code;
     private final String message;
