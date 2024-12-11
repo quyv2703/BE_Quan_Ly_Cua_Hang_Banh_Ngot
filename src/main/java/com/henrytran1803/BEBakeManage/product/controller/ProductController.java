@@ -1,6 +1,8 @@
 package com.henrytran1803.BEBakeManage.product.controller;
 
+import com.henrytran1803.BEBakeManage.common.exception.ProductException;
 import com.henrytran1803.BEBakeManage.common.exception.error.ErrorCode;
+import com.henrytran1803.BEBakeManage.common.exception.error.ProductError;
 import com.henrytran1803.BEBakeManage.common.response.ApiResponse;
 import com.henrytran1803.BEBakeManage.disposed_product.dto.DisposedProductDTO;
 import com.henrytran1803.BEBakeManage.product.dto.*;
@@ -72,16 +74,20 @@ public class ProductController {
     public ResponseEntity<ApiResponse<?>> createProduct(@Valid @RequestBody CreateProductDTO createProductDTO,
                                                         BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
+            String errorMessage = bindingResult.getAllErrors().get(0).getDefaultMessage();
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error(ErrorCode.INVALID_PRODUCT_DATA.getCode(),
-                            bindingResult.getAllErrors().get(0).getDefaultMessage()));
+                    .body(ApiResponse.error(ProductError.CONNECT_ERROR.getCode(), errorMessage));
         }
-
         try {
-            return ResponseEntity.ok(ApiResponse.success(productService.createProduct(createProductDTO)));
-        } catch (Exception e) {
+            CreateProductDTO createdProduct = productService.createProduct(createProductDTO);
+            return ResponseEntity.ok(ApiResponse.apisuccess(
+                    ProductError.POST_SUCCESS.getCode(),
+                    ProductError.POST_SUCCESS.getMessage(),
+                    createdProduct));
+
+        } catch (ProductException e) {
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error(ErrorCode.PRODUCT_CREATION_FAILED.getCode(), e.getMessage()));
+                    .body(ApiResponse.error(e.getError().getCode(), e.getError().getMessage()));
         }
     }
     @PutMapping

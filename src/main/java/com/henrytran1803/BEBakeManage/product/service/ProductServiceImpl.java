@@ -4,7 +4,9 @@ import com.henrytran1803.BEBakeManage.Image.entity.Image;
 import com.henrytran1803.BEBakeManage.Image.repository.ImageRepository;
 import com.henrytran1803.BEBakeManage.category.entity.Category;
 import com.henrytran1803.BEBakeManage.category.repository.CategoryRepository;
+import com.henrytran1803.BEBakeManage.common.exception.ProductException;
 import com.henrytran1803.BEBakeManage.common.exception.error.ErrorCode;
+import com.henrytran1803.BEBakeManage.common.exception.error.ProductError;
 import com.henrytran1803.BEBakeManage.common.response.ApiResponse;
 import com.henrytran1803.BEBakeManage.disposed_product.dto.DisposedProductDTO;
 import com.henrytran1803.BEBakeManage.disposed_product.entity.DisposedProduct;
@@ -70,22 +72,22 @@ public class ProductServiceImpl implements ProductService {
     private final ProductDetailsRepository productDetailsRepository;
     @Override
     @Transactional
-    public Optional<CreateProductDTO> createProduct(CreateProductDTO createProductDTO) {
+    public CreateProductDTO createProduct(CreateProductDTO createProductDTO) {
         try {
             if (productRepository.existsByName(createProductDTO.getName())) {
-                throw new RuntimeException(ErrorCode.DUPLICATE_PRODUCT_NAME.getMessage());
+                throw new ProductException(ProductError.PRODUCT_NAME_EXISTS);
             }
             if (createProductDTO.getCategoryId() != null &&
                     !categoryRepository.existsById(createProductDTO.getCategoryId())) {
-                throw new RuntimeException(ErrorCode.INVALID_CATEGORY.getMessage());
+                throw new ProductException(ProductError.CATEGORY_NOT_EXISTS);
             }
             if (createProductDTO.getRecipeId() == null ||
                     !recipeRepository.existsById(createProductDTO.getRecipeId())) {
-                throw new RuntimeException(ErrorCode.INVALID_RECIPE.getMessage());
+                throw new ProductException(ProductError.RECIPE_NOT_EXISTS);
             }
             Product product = new Product();
             Category category = categoryRepository.findById(createProductDTO.getCategoryId())
-                    .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + createProductDTO.getCategoryId()));
+                    .orElseThrow(() -> new ProductException(ProductError.CATEGORY_NOT_EXISTS));
             product.setCategory(category);
             product.setName(createProductDTO.getName());
             product.setDescription(createProductDTO.getDescription());
@@ -96,7 +98,7 @@ public class ProductServiceImpl implements ProductService {
             product.setHeight(createProductDTO.getHeight());
             product.setDiscountLimit(createProductDTO.getDiscountLimit());
             Recipe recipe = recipeRepository.findById(createProductDTO.getRecipeId())
-                    .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + createProductDTO.getRecipeId()));
+                    .orElseThrow(() -> new ProductException(ProductError.RECIPE_NOT_EXISTS));
 
             product.setRecipe(recipe);
             product.setCurrentPrice(createProductDTO.getPrice());
@@ -119,10 +121,11 @@ public class ProductServiceImpl implements ProductService {
             }
 
             createProductDTO.setCategoryId(savedProduct.getCategory().getId());
-            return Optional.of(createProductDTO);
-
+            return createProductDTO;
+        } catch (ProductException e) {
+            throw e;
         } catch (Exception e) {
-            throw new RuntimeException(ErrorCode.PRODUCT_CREATION_FAILED.getMessage() + ": " + e.getMessage());
+            throw new ProductException(ProductError.CONNECT_ERROR);
         }
     }
 
