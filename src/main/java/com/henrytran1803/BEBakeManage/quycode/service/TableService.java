@@ -40,7 +40,7 @@ public class TableService {
     @Autowired
     private AreaRepository areaRepository;
 
-    private static final String BASE_URL = "http://192.168.2.3:3000";
+    private static final String BASE_URL = "http://localhost:3000";
 
     // Lấy danh sách bàn theo ID khu vực
     public ApiResponse<List<Table>> getTablesByAreaId(Long areaId) {
