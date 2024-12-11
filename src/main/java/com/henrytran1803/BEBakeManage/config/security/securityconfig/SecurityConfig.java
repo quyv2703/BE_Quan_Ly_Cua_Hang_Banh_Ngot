@@ -38,13 +38,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/user/bills").permitAll()  // Rule cụ thể cho API status
                         .requestMatchers(HttpMethod.GET, "/api/user/bills/{billId}").permitAll()
                         .requestMatchers("/api/user/bills/*/status").permitAll()  // Rule cụ thể cho API status
-                        .requestMatchers("/websocket/**", "/ws/**").permitAll()
                         .requestMatchers( "/api/nofications/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers( "/websocket/**", "/ws/**").permitAll()
+                        .requestMatchers("/api/user/bills/*/status").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/categories").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/products/search/active").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products/{id}").permitAll()
+                        .requestMatchers("/api/payment/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/price/{id}/history").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/products/cart").permitAll()
                         .requestMatchers("/api/uploads/**").permitAll()
@@ -56,8 +57,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/user/**").hasRole("USER")
                         .requestMatchers("/api/admin/**", "/api/categories/**", "/api/categories/", "/api/recipes/**","/api/dashboard/**", "/api/products/**", "/api/promotions/**").hasRole("MANAGE")
                         .requestMatchers("/api/disposed/**",
-                                         "/api/user/bills/**",
-                                         "/api/admin/**",
+                                "/api/user/bills/**",
+                                "/api/admin/**",
                                 "/api/dashboard/**",
                                 "/api/discounts/**",
                                 "/api/admin/**",
@@ -81,10 +82,16 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://192.168.1.9:3000", "ws://localhost:3000"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"));
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:3000",
+                "http://127.0.0.1:3000",
+                "ws://localhost:3000"
+                ));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
