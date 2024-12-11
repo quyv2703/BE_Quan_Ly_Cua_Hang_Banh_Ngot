@@ -3,6 +3,7 @@ package com.henrytran1803.BEBakeManage.quycode.controller;
 import com.henrytran1803.BEBakeManage.common.exception.error.QuyExeption;
 import com.henrytran1803.BEBakeManage.common.response.ApiResponse;
 import com.henrytran1803.BEBakeManage.quycode.BillStatus;
+import com.henrytran1803.BEBakeManage.quycode.dto.BillStatisticsDTO;
 import com.henrytran1803.BEBakeManage.quycode.dto.BillStatusHistoryDTO;
 import com.henrytran1803.BEBakeManage.quycode.entity.Bill;
 import com.henrytran1803.BEBakeManage.quycode.request.BillRequest;
@@ -18,10 +19,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -32,8 +36,6 @@ public class BillController {
     @Autowired
     UserRepository userRepository;
 
-
-    // API tìm kiếm hóa đơn với phân trang
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<Page<BillResponseNoDetail>>> searchBills(
             @RequestParam(value = "id", required = false) Long id,
@@ -45,14 +47,12 @@ public class BillController {
                 .body(response);
     }
 
-    // API tạo mới bill
     @PostMapping
     public ResponseEntity<ApiResponse<BillResponse>> createBill(@RequestBody BillRequest billRequest) {
         ApiResponse<BillResponse> response = billService.createBill(billRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(response); // HTTP 201
     }
 
-    // API cập nhật trạng thái bill
     @PutMapping("/{billId}/status")
     public ResponseEntity<ApiResponse<BillStatusDTO>> updateBillStatus(
             @PathVariable Long billId,
@@ -69,29 +69,51 @@ public class BillController {
         }
     }
 
-    // API lấy danh sách bills theo trạng thái
     @GetMapping("/status")
     public ApiResponse<Page<BillResponseNoDetail>> getBillsByStatus(
             @RequestParam BillStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-
-        // Tạo đối tượng Pageable từ các tham số page và size
         Pageable pageable = PageRequest.of(page, size);
-
-        // Gọi service và trả về kết quả phân trang
         return billService.getBillsByStatus(status, pageable);
     }
 
-
-    // API lấy chi tiết bill theo ID
     @GetMapping("/{billId}")
     public ResponseEntity<ApiResponse<BillResponse_View_Cake>> getBillDetails(@PathVariable Long billId) {
         ApiResponse<BillResponse_View_Cake> response = billService.getBillDetailsById(billId);
         if (response.isSuccess()) {
-            return ResponseEntity.ok(response); // HTTP 200 nếu tìm thấy
+            return ResponseEntity.ok(response);
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response); // HTTP 404 nếu không tìm thấy
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
+    }
+    @GetMapping("/today")
+    public ResponseEntity<ApiResponse<BillStatisticsDTO>> getTodayStatistics() {
+        ApiResponse<BillStatisticsDTO> response = billService.getTodayStatistics();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/month")
+    public ResponseEntity<ApiResponse<BillStatisticsDTO>> getCurrentMonthStatistics() {
+        ApiResponse<BillStatisticsDTO> response = billService.getCurrentMonthStatistics();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/year")
+    public ResponseEntity<ApiResponse<BillStatisticsDTO>> getCurrentYearStatistics() {
+        ApiResponse<BillStatisticsDTO> response = billService.getCurrentYearStatistics();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/custom")
+    public ResponseEntity<ApiResponse<BillStatisticsDTO>> getCustomRangeStatistics(
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate toDate
+    ) {
+        LocalDateTime startDateTime = fromDate.atStartOfDay();
+        LocalDateTime endDateTime = toDate.atTime(23, 59, 59);
+
+        ApiResponse<BillStatisticsDTO> response = billService.getStatistics(startDateTime, endDateTime);
+        return ResponseEntity.ok(response);
     }
 }
