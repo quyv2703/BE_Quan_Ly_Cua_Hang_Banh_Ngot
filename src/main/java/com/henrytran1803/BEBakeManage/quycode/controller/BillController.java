@@ -58,9 +58,6 @@ public class BillController {
             @PathVariable Long billId,
             @RequestParam BillStatus newStatus) {  // Đổi thành String
         try {
-
-
-            // Gọi service
             ApiResponse<BillStatusDTO> response = billService.updateBillStatus(billId, newStatus);
 
             return ResponseEntity.status(response.isSuccess() ? HttpStatus.OK : HttpStatus.BAD_REQUEST)

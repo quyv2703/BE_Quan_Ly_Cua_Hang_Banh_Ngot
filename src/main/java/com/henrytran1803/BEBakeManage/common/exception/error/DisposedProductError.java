@@ -6,8 +6,9 @@ public enum DisposedProductError {
     BATCH_NOT_FOUND("BATCH_NOT_FOUND", "Không tìm thấy lô hàng"),
     DISPOSED_FAILED("DISPOSED_FAILED", "Hủy sản phẩm thất bại"),
     DISPOSED_SUCCESS("DISPOSED_SUCCESS", "Hủy sản phẩm thành công"),
-    INVALID_BATCH_STATUS("INVALID_BATCH_STATUS", "Trạng thái lô hàng không hợp lệ để hủy");
-
+    INVALID_BATCH_STATUS("INVALID_BATCH_STATUS", "Trạng thái lô hàng không hợp lệ để hủy"),
+    GET_ALL_FAILED("DP004", "Failed to get all disposed products"),
+    GET_BY_ID_FAILED("DP005", "Failed to get disposed product by id");
     private final String code;
     private final String message;
 

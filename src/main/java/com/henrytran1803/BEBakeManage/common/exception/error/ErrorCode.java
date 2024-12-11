@@ -55,8 +55,9 @@ public enum ErrorCode {
 	EXPORT_INGREDIENT_FETCH_FAIL("EI02", "Export ingredients fetch fail"),
     UNITS_GET_FAIL("UN01", "Get unit fail"),
     UNITS_CREATE_FAIL("UN01", "Create unit fail"),
-    RECIPE_IN_USE("R02"," Recipe in use");
-
+    RECIPE_IN_USE("R02"," Recipe in use"),
+    POST_PRODUCT_SUCCESS("P10", "Create product success"),
+    CONNECT_ERROR("P11", "Lỗi kết nối mạng");
     private final String code;
     private final String message;
 
