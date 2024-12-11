@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProductService {
- Optional<CreateProductDTO> createProduct(CreateProductDTO createProductDTO);
+CreateProductDTO createProduct(CreateProductDTO createProductDTO);
  Optional<UpdateProductDTO> updateProduct(UpdateProductDTO product);
  Void deleteProduct(int idProduct);
  Page<ProductDTO> getAllProducts(Pageable pageable);
