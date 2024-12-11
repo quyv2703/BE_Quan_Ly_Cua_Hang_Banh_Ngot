@@ -128,6 +128,7 @@ public CorsConfigurationSource corsConfigurationSource() {
     configuration.setAllowCredentials(true);
     configuration.setMaxAge(3600L);
 
+
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);
     return source;

@@ -1,7 +1,10 @@
 package com.henrytran1803.BEBakeManage.user.controller;
 
 import com.henrytran1803.BEBakeManage.common.response.ApiResponse;
-import com.henrytran1803.BEBakeManage.user.dto.*;
+import com.henrytran1803.BEBakeManage.user.dto.CreateUserRequest;
+import com.henrytran1803.BEBakeManage.user.dto.UserDTO;
+import com.henrytran1803.BEBakeManage.user.dto.UserRequest;
+import com.henrytran1803.BEBakeManage.user.dto.UserResponseRegisterDTO;
 import com.henrytran1803.BEBakeManage.user.entity.Role;
 import com.henrytran1803.BEBakeManage.user.entity.User;
 import com.henrytran1803.BEBakeManage.user.service.UserService;
@@ -26,6 +29,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    // API sửa thông tin người dùng
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<UserResponseRegisterDTO>> updateUser(
             @PathVariable int id,
@@ -38,6 +42,7 @@ public class UserController {
         }
     }
 
+    // API khóa tài khoản người dùng
     @PatchMapping("/{id}/deactivate")
     public ResponseEntity<ApiResponse<Void>> deactivateUser(@PathVariable int id) {
         ApiResponse<Void> response = userService.deactivateUser(id);
@@ -52,20 +57,35 @@ public class UserController {
     @GetMapping("/active")
     public ResponseEntity<ApiResponse<Page<UserResponseRegisterDTO>>> getActiveUsers(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "all") String isActive) {
-
+            @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        ApiResponse<Page<UserResponseRegisterDTO>> response = userService.getActiveUsers(isActive, pageable);
+        ApiResponse<Page<UserResponseRegisterDTO>> response = userService.getActiveUsers(String.valueOf(true), pageable);
 
-        return ResponseEntity.ok(response);
-    }
-    @GetMapping("")
-    public ResponseEntity<ApiResponse<List<UserBasicDTO>>> getActiveUsers() {
-        ApiResponse<List<UserBasicDTO>> response = userService.getAllUser();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(response.isSuccess() ? HttpStatus.OK : HttpStatus.NO_CONTENT).body(response);
     }
 
+    @GetMapping("/inactive")
+    public ResponseEntity<ApiResponse<Page<UserResponseRegisterDTO>>> getInactiveUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        ApiResponse<Page<UserResponseRegisterDTO>> response = userService.getActiveUsers(String.valueOf(false), pageable);
+
+        return ResponseEntity.status(response.isSuccess() ? HttpStatus.OK : HttpStatus.NO_CONTENT).body(response);
+    }
+
+    // API kích hoạt tài khoản người dùng
+    @PatchMapping("/{id}/activate")
+    public ResponseEntity<ApiResponse<Void>> activateUser(@PathVariable int id) {
+        ApiResponse<Void> response = userService.activateUser(id);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response); // HTTP 200 nếu thành công
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response); // HTTP 400 nếu lỗi
+        }
+    }
+    // Lấy thông tin user theo ID
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<UserResponseRegisterDTO>> getUserById(@PathVariable int id) {
         ApiResponse<UserResponseRegisterDTO> response = userService.findUserById(id);
