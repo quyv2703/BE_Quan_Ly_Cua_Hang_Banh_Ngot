@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -38,6 +39,8 @@ public class TableService {
 
     @Autowired
     private AreaRepository areaRepository;
+
+    private static final String BASE_URL = "http://192.168.2.3:3000";
 
     // Lấy danh sách bàn theo ID khu vực
     public ApiResponse<List<Table>> getTablesByAreaId(Long areaId) {
@@ -58,6 +61,7 @@ public class TableService {
 
         return ApiResponse.Q_success(tables, QuyExeption.SUCCESS);
     }
+
     public ApiResponse<Table> createTable(String name, Long areaId, boolean active) {
         try {
             Optional<Area> areaOptional = areaRepository.findById(areaId);
@@ -73,20 +77,24 @@ public class TableService {
             table.setActive(active);
 
             try {
+                String tempQrPath = null;
+
                 // Tạo một temporary ID cho QR code
                 String tempId = UUID.randomUUID().toString();
-                String tableInfo = String.format("TABLE_ID:%s|URL:http://192.168.1.9:3000/home", tempId);
-                String qrContent = String.format("http://192.168.1.9:3000/home?qrdata=%s",
+                String tableInfo = String.format("TABLE_ID:%s|URL:%s/home", tempId, BASE_URL);
+                String qrContent = String.format("%s/home?qrdata=%s",
+                        BASE_URL,
                         URLEncoder.encode(tableInfo, StandardCharsets.UTF_8));
 
-                // Tạo QR code image
+                // Tạo QR code image tạm
                 ByteArrayOutputStream qrImage = generateQRCodeImage(qrContent);
                 if (qrImage == null) {
                     throw new RuntimeException("Failed to generate QR code image");
                 }
 
-                // Lưu QR code và lấy URL
-                String qrCodeUrl = saveQRCodeLocally(qrImage, name);
+                // Lưu QR code tạm và lấy URL
+                String qrCodeUrl = saveQRCodeLocally(qrImage, name + "_temp");
+                tempQrPath = qrCodeUrl; // Lưu đường dẫn file tạm để xóa sau
                 if (qrCodeUrl == null || qrCodeUrl.isEmpty()) {
                     throw new RuntimeException("Failed to save QR code image");
                 }
@@ -94,17 +102,23 @@ public class TableService {
                 // Set URL trước khi lưu table
                 table.setQrCodeUrl(qrCodeUrl);
 
-                // Bây giờ mới lưu table vào database
+                // Lưu table vào database để có ID thật
                 table = tableRepository.save(table);
 
                 // Tạo QR code mới với ID thật
-                tableInfo = String.format("TABLE_ID:%s|URL:http://192.168.1.9:3000/home", table.getId());
-                qrContent = String.format("http://192.168.1.9:3000/home?qrdata=%s",
+                tableInfo = String.format("TABLE_ID:%s|URL:%s/home", table.getId(), BASE_URL);
+                qrContent = String.format("%s/home?qrdata=%s",
+                        BASE_URL,
                         URLEncoder.encode(tableInfo, StandardCharsets.UTF_8));
 
                 // Tạo và lưu QR code mới
                 qrImage = generateQRCodeImage(qrContent);
                 qrCodeUrl = saveQRCodeLocally(qrImage, name);
+
+                // Xóa file QR tạm nếu tồn tại
+                if (tempQrPath != null) {
+                    deleteQRCodeFile(tempQrPath);
+                }
 
                 // Cập nhật URL mới
                 table.setQrCodeUrl(qrCodeUrl);
@@ -120,7 +134,6 @@ public class TableService {
             return ApiResponse.Q_failure(null, QuyExeption.INTERNAL_SERVER_ERROR);
         }
     }
-
 
 
     // Hàm tạo QR Code dưới dạng hình ảnh
@@ -172,6 +185,22 @@ public class TableService {
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Error saving QR Code: " + e.getMessage());
+        }
+    }
+
+    // Thêm phương thức xóa file QR
+    private void deleteQRCodeFile(String qrCodePath) {
+        try {
+            // Bỏ dấu "/" ở đầu path nếu có
+            if (qrCodePath.startsWith("/")) {
+                qrCodePath = qrCodePath.substring(1);
+            }
+
+            Path path = Paths.get(qrCodePath);
+            Files.deleteIfExists(path);
+        } catch (IOException e) {
+            System.err.println("Error deleting temporary QR code file: " + e.getMessage());
+            // Không throw exception vì đây không phải lỗi nghiêm trọng
         }
     }
 
