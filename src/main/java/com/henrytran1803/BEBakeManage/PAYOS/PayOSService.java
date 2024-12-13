@@ -25,7 +25,7 @@ public class PayOSService {
     private final PayOS payOS;
     private final BillRepository billRepository;
     private final BillService billService;
-    private final String BASE_URL = "http://192.168.2.3:3000";
+    private final String BASE_URL = "http://localhost:3000";
 
     public ApiResponse<CheckoutResponseData> createPaymentLinkFromBill(Long billId) {
         try {

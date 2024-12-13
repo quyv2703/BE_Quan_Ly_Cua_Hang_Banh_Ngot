@@ -262,7 +262,10 @@ public class BillService {
         // Lưu hóa đơn vào cơ sở dữ liệu
         billRepository.save(bill);
 
-        // Chuyển đổi Bill sang DTO
+        notificationService.sendNotification(
+                "Có đơn hàng mới" + bill.getId() ,
+                NotificationMessage.MessageSeverity.WARNING
+        );
         BillResponse billResponse = new BillResponse();
         billResponse.setBillId(bill.getId());
         billResponse.setCustomerName(bill.getCustomerName());
