@@ -77,7 +77,13 @@ public class BillController {
         Pageable pageable = PageRequest.of(page, size);
         return billService.getBillsByStatus(status, pageable);
     }
-
+    @GetMapping("/todaybill")
+    public ApiResponse<Page<BillResponseNoDetail>> getTodayBills(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return billService.getTodayBills(pageable);
+    }
     @GetMapping("/{billId}")
     public ResponseEntity<ApiResponse<BillResponse_View_Cake>> getBillDetails(@PathVariable Long billId) {
         ApiResponse<BillResponse_View_Cake> response = billService.getBillDetailsById(billId);

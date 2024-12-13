@@ -16,6 +16,7 @@ import java.util.List;
 @Repository
 public interface BillRepository extends JpaRepository<Bill, Long> {
     Page<Bill> findByBillStatus(BillStatus status, Pageable pageable);
+    Page<Bill> findByCreatedAtBetween(LocalDateTime start, LocalDateTime end, Pageable pageable);
 
     List<Bill> findByBillStatusAndCreatedAtBetween(
             BillStatus status,

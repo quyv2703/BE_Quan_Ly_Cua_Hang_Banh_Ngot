@@ -64,18 +64,13 @@ public class ExportIngredientServiceImpl implements ExportIngredientService {
             }
         }
         
-        // Lấy ngày hiện tại không lấy giờ
         LocalDateTime currentDate = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
-
-        // Thêm mới hoặc lấy daily_productions theo ngày hiện tại
         DailyProduction dailyProduction = dailyProductionRepository.findByProductionDate(currentDate)
                 .orElseGet(() -> {
                     DailyProduction newDailyProduction = new DailyProduction();
                     newDailyProduction.setProductionDate(currentDate);
                     return dailyProductionRepository.save(newDailyProduction);
                 });
-        
-        // Lưu thông tin xuất nguyên liệu vào bảng export_ingredients
         ExportIngredient exportIngredient = new ExportIngredient();
         exportIngredient.setSender_id(id); //id
         exportIngredient.setTotal_amount(request.getTotal_amount());
@@ -85,8 +80,6 @@ public class ExportIngredientServiceImpl implements ExportIngredientService {
         exportIngredient = exportIngredientRepository.save(exportIngredient);
         
         List<ExportIngredientDetail> details = new ArrayList<>();
-        
-        // Xuất nguyên liệu và sản phẩm
         for (ExportIngredientDetailRequest detailRequest : request.getIngredients()) {
             ExportIngredientDetailId detailId = new ExportIngredientDetailId();
             detailId.setExport_ingredient_id(exportIngredient.getId());  
@@ -95,9 +88,7 @@ public class ExportIngredientServiceImpl implements ExportIngredientService {
             ExportIngredientDetail detail = new ExportIngredientDetail();
             detail.setId(detailId);
             detail.setQuantity(detailRequest.getQuantity());
-            
-            // Giảm số lượng nguyên liệu
-            ingredientRepository.decreaseQuantity(detailRequest.getIngredient_id(), detailRequest.getQuantity());         
+            ingredientRepository.decreaseQuantity(detailRequest.getIngredient_id(), detailRequest.getQuantity());
             
             details.add(detail);
         }
@@ -105,20 +96,15 @@ public class ExportIngredientServiceImpl implements ExportIngredientService {
         exportIngredient.setDetails(details);
         exportIngredientRepository.save(exportIngredient);
         
-        // Xử lý sản phẩm
         for (ExportIngredientProductDetailRequest productRequest : request.getProducts()) {
             ProductBatch productBatch = new ProductBatch();
-
-            // Lấy đối tượng Product từ repository theo product_id
             Product product = productRepository.findById(productRequest.getProduct_id())
                     .orElseThrow(() -> new RuntimeException("Product not found for ID: " + productRequest.getProduct_id()));
-
-            // Lấy đối tượng DailyProduction từ repository theo dailyProduction_id
             DailyProduction dlProduction = dailyProductionRepository.findById(dailyProduction.getId())
                     .orElseThrow(() -> new RuntimeException("DailyProduction not found for ID: " + dailyProduction.getId()));
-
             productBatch.setProduct(product);
             productBatch.setDailyProduction(dlProduction);
+            productBatch.setDailyDiscount(0);
             productBatch.setQuantity(productRequest.getQuantity());
             productBatch.setStatus("ACTIVE");
 

@@ -83,7 +83,34 @@ public class BillService {
         return ApiResponse.success(responsePage);
     }
 
+    public ApiResponse<Page<BillResponseNoDetail>> getTodayBills(Pageable pageable) {
+        LocalDateTime startOfDay = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime endOfDay = LocalDateTime.now().withHour(23).withMinute(59).withSecond(59);
 
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        Page<Bill> billPage = billRepository.findByCreatedAtBetween(startOfDay, endOfDay, sortedPageable);
+
+        Page<BillResponseNoDetail> responsePage = billPage.map(bill -> {
+            BillResponseNoDetail responseNoDetail = new BillResponseNoDetail();
+            responseNoDetail.setBillId(bill.getId());
+            responseNoDetail.setCustomerName(bill.getCustomerName());
+            responseNoDetail.setCustomerPhone(bill.getCustomerPhone());
+            responseNoDetail.setPaymentMethod(bill.getPaymentMethod().name());
+            responseNoDetail.setBillStatus(bill.getBillStatus().name());
+            responseNoDetail.setDiningOption(String.valueOf(bill.getDiningOption()));
+            String formattedDateTime = bill.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
+            responseNoDetail.setCreatedAt(formattedDateTime);
+            responseNoDetail.setTotalAmount(bill.getTotalAmount());
+            return responseNoDetail;
+        });
+
+        return ApiResponse.Q_success(responsePage, QuyExeption.SUCCESS);
+    }
 
     public ApiResponse<Page<BillResponseNoDetail>> getBillsByStatus(BillStatus status, Pageable pageable) {
         // Create a PageRequest with sorting by createdAt in descending order

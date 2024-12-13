@@ -6,6 +6,7 @@ import com.henrytran1803.BEBakeManage.quycode.entity.BillDetail;
 import com.henrytran1803.BEBakeManage.quycode.repository.BillDetailRepository;
 import com.henrytran1803.BEBakeManage.quycode.repository.BillRepository;
 import com.henrytran1803.BEBakeManage.dashboard.dto.DashBoardDTO;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ public class DashboardService {
     private final BillRepository billRepository;
     @Autowired
     private final BillDetailRepository billDetailRepository;
-
+    @Transactional
     public DashBoardDTO getDashboardData() {
         LocalDateTime today = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
         LocalDateTime startOfMonth = today.minusMonths(6); // Get data for last 6 months
