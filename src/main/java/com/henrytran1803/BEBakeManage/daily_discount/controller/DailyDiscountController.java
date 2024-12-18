@@ -41,7 +41,6 @@ public class DailyDiscountController {
                         DailyDiscountError.END_DATE_REQUIRED.getMessage()));
             }
 
-            // Validate skip default flag
             if (createDailyDiscount.getSkipDefaultDiscount() == null) {
                 return ResponseEntity.badRequest().body(ApiResponse.error(
                         DailyDiscountError.SKIP_DEFAULT_REQUIRED.getCode(),

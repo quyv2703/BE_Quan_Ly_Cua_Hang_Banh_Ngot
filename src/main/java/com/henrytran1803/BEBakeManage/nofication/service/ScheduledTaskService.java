@@ -31,11 +31,13 @@ public class ScheduledTaskService {
         this.objectMapper = objectMapper;
     }
 
-    @Scheduled(cron = "0 30 * * * *")
+    @Scheduled(cron = "1 * * * * *")
     public void checkDatabaseTask() {
         try {
             long nearExpiryCount = productBatchService.countByStatus("NEAR_EXPIRY");
             long expiredCount = productBatchService.countByStatus("EXPIRED");
+            System.out.println(nearExpiryCount);
+            System.out.println(expiredCount);
 
             if (nearExpiryCount > 0 || expiredCount > 0) {
                 NotificationMessage notification = new NotificationMessage();

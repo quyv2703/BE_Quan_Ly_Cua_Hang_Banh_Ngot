@@ -1,10 +1,7 @@
 package com.henrytran1803.BEBakeManage.user.controller;
 
 import com.henrytran1803.BEBakeManage.common.response.ApiResponse;
-import com.henrytran1803.BEBakeManage.user.dto.CreateUserRequest;
-import com.henrytran1803.BEBakeManage.user.dto.UserDTO;
-import com.henrytran1803.BEBakeManage.user.dto.UserRequest;
-import com.henrytran1803.BEBakeManage.user.dto.UserResponseRegisterDTO;
+import com.henrytran1803.BEBakeManage.user.dto.*;
 import com.henrytran1803.BEBakeManage.user.entity.Role;
 import com.henrytran1803.BEBakeManage.user.entity.User;
 import com.henrytran1803.BEBakeManage.user.service.UserService;
@@ -97,7 +94,11 @@ public class UserController {
     }
 
 
-
+    @GetMapping("")
+    public ResponseEntity<ApiResponse<List<UserBasicDTO>>> getActiveUsers() {
+        ApiResponse<List<UserBasicDTO>> response = userService.getAllUser();
+        return ResponseEntity.ok(response);
+    }
 
 
 

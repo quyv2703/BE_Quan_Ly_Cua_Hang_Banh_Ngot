@@ -83,7 +83,34 @@ public class BillService {
         return ApiResponse.success(responsePage);
     }
 
+    public ApiResponse<Page<BillResponseNoDetail>> getTodayBills(Pageable pageable) {
+        LocalDateTime startOfDay = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime endOfDay = LocalDateTime.now().withHour(23).withMinute(59).withSecond(59);
 
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        Page<Bill> billPage = billRepository.findByCreatedAtBetween(startOfDay, endOfDay, sortedPageable);
+
+        Page<BillResponseNoDetail> responsePage = billPage.map(bill -> {
+            BillResponseNoDetail responseNoDetail = new BillResponseNoDetail();
+            responseNoDetail.setBillId(bill.getId());
+            responseNoDetail.setCustomerName(bill.getCustomerName());
+            responseNoDetail.setCustomerPhone(bill.getCustomerPhone());
+            responseNoDetail.setPaymentMethod(bill.getPaymentMethod().name());
+            responseNoDetail.setBillStatus(bill.getBillStatus().name());
+            responseNoDetail.setDiningOption(String.valueOf(bill.getDiningOption()));
+            String formattedDateTime = bill.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
+            responseNoDetail.setCreatedAt(formattedDateTime);
+            responseNoDetail.setTotalAmount(bill.getTotalAmount());
+            return responseNoDetail;
+        });
+
+        return ApiResponse.Q_success(responsePage, QuyExeption.SUCCESS);
+    }
 
     public ApiResponse<Page<BillResponseNoDetail>> getBillsByStatus(BillStatus status, Pageable pageable) {
         // Create a PageRequest with sorting by createdAt in descending order
@@ -262,7 +289,10 @@ public class BillService {
         // Lưu hóa đơn vào cơ sở dữ liệu
         billRepository.save(bill);
 
-        // Chuyển đổi Bill sang DTO
+        notificationService.sendNotification(
+                "Có đơn hàng mới" + bill.getId() ,
+                NotificationMessage.MessageSeverity.WARNING
+        );
         BillResponse billResponse = new BillResponse();
         billResponse.setBillId(bill.getId());
         billResponse.setCustomerName(bill.getCustomerName());
@@ -277,7 +307,7 @@ public class BillService {
     }
     public ApiResponse<BillStatisticsDTO> getStatistics(LocalDateTime startDate, LocalDateTime endDate) {
         List<Bill> bills = billRepository.findByBillStatusAndCreatedAtBetween(
-                BillStatus.PAID,
+                BillStatus.COMPLETED,
                 startDate,
                 endDate
         );
@@ -344,23 +374,22 @@ public class BillService {
    @Transactional
 
    public ApiResponse<BillStatusDTO> updateBillStatus(Long billId, BillStatus newStatus) {
-
-
        Optional<Bill> billOptional = billRepository.findById(billId);
        if (billOptional.isEmpty()) {
            return ApiResponse.Q_failure(null, QuyExeption.BILL_NOT_FOUND);
        }
-
        Bill bill = billOptional.get();
        BillStatus oldStatus = bill.getBillStatus();
-
        if (oldStatus == BillStatus.PAID && newStatus == BillStatus.CANCEL) {
-
            notificationService.sendPaymentNotification(Math.toIntExact(billId),"Đã thanh toán không cho huỷ", NotificationMessage.MessageSeverity.ERROR);
            return ApiResponse.Q_failure(null, QuyExeption.INVALID_STATUS_TRANSITION);
        }
+       if (oldStatus == BillStatus.COMPLETED && newStatus == BillStatus.CANCEL) {
 
-       // Kiểm tra nếu trạng thái mới giống trạng thái hiện tại
+           notificationService.sendPaymentNotification(Math.toIntExact(billId),"Đã hoàn thành không cho huỷ", NotificationMessage.MessageSeverity.ERROR);
+           return ApiResponse.Q_failure(null, QuyExeption.INVALID_STATUS_TRANSITION);
+       }
+
        if (oldStatus == newStatus) {
            notificationService.sendNotification(
                    "Hóa đơn #" + billId + " đã ở trạng thái " + newStatus,
@@ -374,7 +403,7 @@ public class BillService {
                notificationService.sendPaymentNotification(Math.toIntExact(billId),"Đơn hàng đã buỷ", NotificationMessage.MessageSeverity.INFO);
                ProductBatch productBatch = detail.getProductBatch();
                productBatch.setQuantity(productBatch.getQuantity() + detail.getQuantity());
-               productBatchRepository.save(productBatch); // Cập nhật lại kho
+               productBatchRepository.save(productBatch);
            }
            notificationService.sendNotification(
                    "Đã hoàn trả số lượng sản phẩm cho hóa đơn #" + billId,
@@ -382,30 +411,19 @@ public class BillService {
            );
        }
 
-       // Cập nhật trạng thái hóa đơn
        bill.setBillStatus(newStatus);
        billRepository.save(bill);
+       if (newStatus == BillStatus.PAID){
+           notificationService.sendPaymentNotification(Math.toIntExact(billId),"Đã thanh toán đơn hàng đang đến với bạn", NotificationMessage.MessageSeverity.INFO);
 
-// <<<<<<< quy
-// =======
-//        BillStatusHistory history = new BillStatusHistory();
-//        history.setBill(bill);
-//        history.setOldStatus(oldStatus);
-//        history.setNewStatus(newStatus);
-//        history.setUpdatedAt(LocalDateTime.now());
+       }else  if (newStatus == BillStatus.COMPLETED){
+           notificationService.sendPaymentNotification(Math.toIntExact(billId),"Đơn hàng đã hoàn thành rồi", NotificationMessage.MessageSeverity.INFO);
 
-//        if (user == null) {
-//            history.setUpdatedBySystem(true);
-//            history.setUpdatedBy(null);
-//        } else {
-//            history.setUpdatedBy(user);
-//            history.setUpdatedBySystem(false);
-//        }
+       }else  if (newStatus == BillStatus.CANCEL){
+           notificationService.sendPaymentNotification(Math.toIntExact(billId),"Đơn hàng đã bị huỷ rồi", NotificationMessage.MessageSeverity.INFO);
 
-//        billStatusHistoryRepository.save(history);
+       }
 
-// >>>>>>> main
-       // Chuẩn bị dữ liệu trả về
        BillStatusDTO response = new BillStatusDTO();
        response.setBillId(bill.getId());
        response.setOldStatus(oldStatus.name());

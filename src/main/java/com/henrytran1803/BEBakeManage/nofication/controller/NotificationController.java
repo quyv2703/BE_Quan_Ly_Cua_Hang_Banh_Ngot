@@ -18,7 +18,7 @@ public class NotificationController {
     @PostMapping("/send/payment")
     public ResponseEntity<?> sendNotificationOrder() {
         try {
-            notificationService.sendPaymentNotification(1,"test", NotificationMessage.MessageSeverity.ERROR);
+            notificationService.sendPaymentNotification(24,"test", NotificationMessage.MessageSeverity.ERROR);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
