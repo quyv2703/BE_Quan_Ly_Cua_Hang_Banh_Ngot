@@ -27,18 +27,3 @@ public class CreateDailyDiscount {
     private Boolean getLastestDate;
 }
 
-//discount
-//:
-//        20
-//endDate
-//:
-//        "2024-12-13T23:59:59"
-//getLastestDate
-//:
-//        false
-//productBatchIds
-//:
-//        [17]
-//skipDefaultDiscount
-//:
-//        false

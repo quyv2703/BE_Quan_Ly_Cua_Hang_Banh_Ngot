@@ -82,7 +82,7 @@ public class DisposedProductServiceImpl implements DisposedProductService {
             dto.setId(dp.getId());
             dto.setDateDisposed(dp.getDateDisposed());
             dto.setNote(dp.getNote());
-            dto.setStaffName(dp.getStaff().getFirstName() +dp.getStaff().getLastName() );
+            dto.setStaffName(dp.getStaff().getFirstName()+" " +dp.getStaff().getLastName() );
 
             List<DisposedProductDetail> details = disposedProductDetailRepository
                     .findByDisposedProductId(dp.getId());
@@ -109,7 +109,7 @@ public class DisposedProductServiceImpl implements DisposedProductService {
         dto.setId(disposedProduct.getId());
         dto.setDateDisposed(disposedProduct.getDateDisposed());
         dto.setNote(disposedProduct.getNote());
-        dto.setStaffName(disposedProduct.getStaff().getFirstName() +disposedProduct.getStaff().getLastName() );
+        dto.setStaffName(disposedProduct.getStaff().getFirstName()+" " +disposedProduct.getStaff().getLastName() );
 
         List<DisposedBatchDTO> batchDTOs = details.stream().map(detail -> {
             DisposedBatchDTO batchDTO = new DisposedBatchDTO();

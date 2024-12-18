@@ -39,6 +39,7 @@ public class SecurityConfig {
                         .requestMatchers( "/api/nofications/**").permitAll()
                         .requestMatchers( "/websocket/**", "/ws/**").permitAll()
                         .requestMatchers("/api/user/bills/*/status").permitAll()
+                        .requestMatchers("/api/user/bills/*").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/categories").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/products/search/active").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products/{id}").permitAll()
