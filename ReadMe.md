@@ -5,7 +5,10 @@
 | 1   |    Trần Vệt Anh    | N20DCCN087  | Quản lý hạn sử dụng bánh |
 | 2   |  Lương Thanh Quý   | N20DCCN087  | Gọi món                  |
 | 2   | Nguyễn Quang nghĩa | N20DCCN087  | Quản lý tồn kho          |
-
+Tự mình làm được
+- Quản lý khu vực, bàn có mã qr
+- CRUD user
+- CRUD bill
 ## Phân tích đồ án
 ### Hướng phân tích theo hướng đối tượng
 
